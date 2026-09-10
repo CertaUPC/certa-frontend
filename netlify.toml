@@ -1,0 +1,32 @@
+# Despliegue del cliente web.
+#
+# La aplicación es de una sola página: el servidor no conoce /executions ni
+# /session, de modo que sin la redirección de abajo actualizar cualquier ruta
+# que no sea la raíz devolvería 404. Eso rompería la sesión del participante,
+# que llega justamente por un enlace con parámetros.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Toda ruta que no sea un archivo real la resuelve la aplicación.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Los archivos con huella en el nombre no cambian nunca; el resto sí.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
