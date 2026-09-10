@@ -1,0 +1,241 @@
+/* Altura fija, sin desplazamiento de página.
+ *
+ * Todo lo que hace falta para decidir una alerta cabe a la vez: el código, el
+ * juicio y los botones. Si hubiera que desplazar para llegar a la respuesta, ese
+ * tiempo entraría en la medición sin ser tiempo de decidir.
+ *
+ * Lo que sí se desplaza es cada columna por dentro, cuando su contenido excede
+ * el alto disponible. La clave para que eso funcione dentro de una rejilla es
+ * `min-block-size: 0` en cada hijo: sin eso, el contenido impone su alto natural
+ * y la página vuelve a crecer.
+ */
+
+.page {
+  block-size: 100dvh;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  max-inline-size: 1400px;
+  margin-inline: auto;
+  padding: 0 18px 18px;
+  overflow: hidden;
+}
+
+/* ── barra de sesión ─────────────────────────────────────────────── */
+.bar {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  padding-block: 13px 11px;
+  border-block-end: 1px solid var(--line);
+  margin-block-end: 14px;
+}
+.wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
+
+.progress { display: flex; align-items: center; gap: 12px; flex: 1; min-inline-size: 230px; }
+.count { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.count b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.rail { flex: 1; max-inline-size: 190px; block-size: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.fill { display: block; block-size: 100%; background: var(--accent); border-radius: 2px; transition: inline-size 0.25s var(--salida); }
+.resolved { font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+
+.controls { display: flex; gap: 7px; margin-inline-start: auto; }
+.chip {
+  display: inline-flex; align-items: center;
+  font-size: 12.5px; background: var(--surface);
+  border: 1px solid var(--line); color: var(--ink-2);
+  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  transition: border-color 0.14s var(--salida), color 0.14s var(--salida);
+}
+.chip:hover { border-color: var(--line-strong); color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+.chipKbd {
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  font-size: 10px; border: 1px solid var(--line); border-radius: 3px;
+  padding: 0 4px; margin-inline-start: 5px; color: var(--ink-3);
+}
+
+.controlNote {
+  background: var(--check-tint); border: 1px solid var(--check);
+  color: var(--ink); border-radius: var(--radius-sm);
+  padding: 9px 13px; font-size: 13px; margin-block-end: 12px;
+  max-inline-size: 92ch;
+}
+
+.saveNote {
+  background: var(--real-tint); border: 1px solid var(--real);
+  color: var(--ink); border-radius: var(--radius-sm);
+  padding: 9px 13px; font-size: 13px; margin-block-end: 12px;
+  max-inline-size: 92ch;
+}
+
+/* ── rejilla de altura contenida ─────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr) 296px;
+  gap: 18px;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+/* ── cola ────────────────────────────────────────────────────────── */
+.queue {
+  display: flex; flex-direction: column; min-block-size: 0;
+  border-inline-end: 1px solid var(--line); padding-inline-end: 16px;
+}
+.queueTitle { flex: none; font-size: 13px; font-weight: 600; margin-block-end: 10px; }
+.queueTitle span {
+  display: block; font-size: 12px; font-weight: 400;
+  color: var(--ink-2); margin-block-start: 2px; line-height: 1.45;
+}
+.list {
+  list-style: none; margin: 0; padding: 0 2px 0 0;
+  flex: 1; min-block-size: 0; overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.item {
+  display: block; inline-size: 100%; text-align: start;
+  background: none; border: 1px solid transparent;
+  border-radius: var(--radius-sm); padding: 9px 10px; margin-block-end: 3px;
+  transition: background 0.14s var(--salida);
+}
+.item:hover { background: var(--sunken); }
+.item[aria-current="true"] { background: var(--surface); border-color: var(--line-strong); }
+.itemTitle { display: block; font-size: 13px; font-weight: 500; line-height: 1.35; }
+.itemMeta {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-size: 11.5px; color: var(--ink-2); margin-block-start: 3px;
+}
+.real { color: var(--real); font-weight: 600; }
+.descartado { color: var(--safe); font-weight: 600; }
+.revisar { color: var(--check); font-weight: 600; }
+.done { display: block; font-size: 11.5px; color: var(--ink-3); margin-block-start: 3px; font-style: italic; }
+
+/* ── centro ──────────────────────────────────────────────────────── */
+.main {
+  display: flex; flex-direction: column; min-block-size: 0;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--lift);
+}
+.head { flex: none; padding: 14px 18px 10px; }
+.title { font-size: 19px; font-weight: 600; letter-spacing: -0.018em; line-height: 1.28; }
+.facts { font-size: 12.5px; color: var(--ink-2); margin-block-start: 4px; }
+.scope { flex: none; font-size: 12.5px; color: var(--ink-2); padding: 0 18px 10px; max-inline-size: 78ch; }
+.scope b { color: var(--ink); font-weight: 500; }
+.fingerprint { flex: none; font-size: 12px; color: var(--ink-2); padding: 9px 18px; max-inline-size: 78ch; }
+
+/* ── panel de juicio: cabecera desplazable, decisión anclada ─────── */
+.judgement {
+  display: flex; flex-direction: column; min-block-size: 0;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--lift); overflow: hidden;
+}
+.judgeScroll { flex: 1; min-block-size: 0; overflow-y: auto; scrollbar-width: thin; }
+
+.verdictBlock { padding: 14px 15px 13px; border-block-end: 1px solid var(--line); }
+.verdictWord { font-size: 21px; font-weight: 700; letter-spacing: -0.028em; line-height: 1.15; margin-block-end: 6px; }
+.verdictBlock[data-tone="real"] .verdictWord { color: var(--real); }
+.verdictBlock[data-tone="descartado"] .verdictWord { color: var(--safe); }
+.verdictBlock[data-tone="revisar"] .verdictWord { color: var(--check); }
+.why { font-size: 13px; color: var(--ink-2); line-height: 1.52; }
+
+.row { padding: 11px 15px; border-block-end: 1px solid var(--line); }
+.rowLabel { display: block; font-size: 11.5px; color: var(--ink-3); margin-block-end: 4px; }
+.rowValue { display: flex; align-items: baseline; gap: 9px; }
+.rowValue b { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.rowValue em { font-style: normal; font-size: 12.5px; color: var(--ink-2); }
+
+.scale { position: relative; display: block; block-size: 20px; margin-block-start: 7px; }
+.axis { position: absolute; inset-inline: 0; inset-block-end: 8px; block-size: 1px; background: var(--line-strong); }
+.tickMajor, .tickMinor { position: absolute; inset-block-end: 8px; inline-size: 1px; background: var(--line-strong); }
+.tickMajor { block-size: 6px; }
+.tickMinor { block-size: 3px; }
+.tickMajor em {
+  position: absolute; inset-block-start: 7px; inset-inline-start: 50%;
+  transform: translateX(-50%); font-style: normal; font-size: 9.5px; color: var(--ink-3);
+}
+.needle { position: absolute; inset-block-end: 8px; inline-size: 2px; block-size: 13px; background: var(--accent); }
+.needle::before {
+  content: ""; position: absolute; inset-block-start: -5px; inset-inline-start: -3.5px;
+  border-inline: 4.5px solid transparent; border-block-start: 6px solid var(--accent);
+}
+
+.checked { display: flex; gap: 9px; font-size: 12.5px; color: var(--ink-2); line-height: 1.48; }
+.tickOk, .tickBad {
+  flex: none; inline-size: 17px; block-size: 17px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 10.5px; font-weight: 700;
+  color: var(--surface); margin-block-start: 1px;
+}
+.tickOk { background: var(--safe); }
+.tickBad { background: var(--check); }
+.plain { font-size: 12.5px; color: var(--ink-2); line-height: 1.48; }
+.plain b { color: var(--ink); font-weight: 600; }
+.blind { padding: 15px; font-size: 13px; color: var(--ink-2); }
+
+/* La decisión no se desplaza nunca: es la única acción de la pantalla. */
+.decide { flex: none; padding: 13px 15px 14px; border-block-start: 1px solid var(--line); background: var(--surface); }
+.question { font-size: 14.5px; font-weight: 600; margin-block-end: 10px; line-height: 1.3; }
+
+.key {
+  display: flex; align-items: center; justify-content: space-between;
+  inline-size: 100%; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  border-radius: var(--radius-sm); padding: 9px 13px; margin-block-end: 6px;
+  transition: background 0.14s var(--salida), border-color 0.14s var(--salida), color 0.14s var(--salida);
+}
+.key:hover { border-color: var(--line-strong); color: var(--ink); }
+.key kbd {
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  font-size: 11px; font-weight: 400; color: var(--ink-3);
+  border: 1px solid var(--line); border-radius: 4px; padding: 1px 7px;
+}
+.key[aria-pressed="true"] { font-weight: 600; }
+.key_real[aria-pressed="true"] { background: var(--real-tint); border-color: var(--real); color: var(--real); }
+.key_falsa[aria-pressed="true"] { background: var(--safe-tint); border-color: var(--safe); color: var(--safe); }
+.key_duda[aria-pressed="true"] { background: var(--check-tint); border-color: var(--check); color: var(--check); }
+.key[aria-pressed="true"] kbd { border-color: currentColor; color: currentColor; }
+
+.confirm {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  inline-size: 100%; font-size: 14px; font-weight: 600;
+  background: var(--accent); color: var(--surface); border: 0;
+  border-radius: var(--radius-sm); padding: 11px; margin-block-start: 3px;
+  transition: filter 0.14s var(--salida);
+}
+.confirm:hover:not(:disabled) { filter: brightness(1.08); }
+.confirm:disabled {
+  background: var(--sunken); color: var(--ink-3);
+  border: 1px dashed var(--line-strong); cursor: default;
+  font-weight: 400; font-size: 13px;
+}
+.confirm kbd {
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  font-size: 11px; font-weight: 400;
+  border: 1px solid currentColor; border-radius: 4px; padding: 1px 7px; opacity: 0.75;
+}
+
+.hint, .undo { font-size: 12px; color: var(--ink-2); margin-block-start: 8px; line-height: 1.5; }
+.inlineKbd {
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  font-size: 10.5px; border: 1px solid var(--line-strong); border-radius: 3px;
+  padding: 0 4px; background: var(--sunken); color: var(--ink);
+}
+.linkish {
+  background: none; border: 0; padding: 0; font: inherit;
+  color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* Por debajo de este ancho la disposición de tres columnas deja de caber en un
+   alto de pantalla, así que se permite el desplazamiento de página. Fuera del
+   escenario de medición, que corre en pantalla de escritorio. */
+@media (max-width: 1120px), (max-height: 620px) {
+  .page { block-size: auto; overflow: visible; padding-block-end: 40px; }
+  .grid { grid-template-columns: 1fr; overflow: visible; }
+  .queue { border-inline-end: 0; border-block-end: 1px solid var(--line); padding: 0 0 14px; }
+  .list, .judgeScroll { overflow: visible; }
+  .main, .judgement { block-size: auto; }
+}
+
+.emptyList {
+  font-size: 12.5px; color: var(--ink-2); line-height: 1.5;
+  padding: 14px 10px; border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm); background: var(--sunken);
+}

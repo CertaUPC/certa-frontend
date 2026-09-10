@@ -1,0 +1,90 @@
+/* Llena el alto que le deja la tarjeta y se desplaza por dentro. El código puede
+   ser largo; la página no crece por eso. */
+.surface {
+  flex: 1;
+  min-block-size: 0;
+  display: flex;
+  background: var(--sunken);
+  border-block: 1px solid var(--line);
+}
+
+.scroll {
+  flex: 1;
+  min-block-size: 0;
+  overflow: auto;
+  padding-block: 10px;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1120px), (max-height: 620px) {
+  .surface { flex: none; }
+  .scroll { overflow-x: auto; overflow-y: visible; }
+}
+
+.pre {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.85;
+  min-width: max-content;
+}
+
+.line {
+  display: block;
+  position: relative;
+  padding-inline: 18px 150px;
+  white-space: pre;
+}
+
+.gutter {
+  display: inline-block;
+  width: 2.2em;
+  margin-right: 1.1em;
+  text-align: right;
+  color: var(--gutter);
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.text {
+  color: var(--syn-plain);
+}
+
+/* La marca de anclaje es un fondo pleno, no una franja lateral: la línea entera
+   fue citada, y teñirla completa dice eso sin inventar un borde decorativo. */
+.marked {
+  background: var(--accent-tint);
+}
+.marked .gutter {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.entra { background: var(--accent-tint); }
+.entra .gutter { color: var(--accent); }
+.entra .role { color: var(--accent); }
+
+.pasa { background: var(--sunken); }
+.pasa .gutter { color: var(--ink-3); }
+.pasa .role { color: var(--ink-3); }
+
+.ocurre { background: var(--real-tint); }
+.ocurre .gutter { color: var(--real); }
+.ocurre .role { color: var(--real); }
+
+/* La etiqueta vive en el margen derecho de la propia línea, alineada con ella,
+   de modo que no haya que buscar a qué se refiere. */
+.role {
+  position: absolute;
+  right: 18px;
+  top: 0;
+  font-family: "Public Sans", system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .line { padding-inline: 14px; }
+  .role { position: static; display: block; padding-left: 3.3em; }
+}

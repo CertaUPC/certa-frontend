@@ -1,0 +1,43 @@
+.wrap { min-block-size: 100dvh; display: grid; place-items: center; padding: 40px 20px; }
+
+.sheet {
+  inline-size: min(560px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--lift);
+  padding: 32px 34px 28px;
+}
+
+.wordmark { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink-2); margin-block-end: 18px; }
+.title { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; }
+.lead { font-size: 15px; color: var(--ink-2); line-height: 1.6; margin-block: 10px 24px; max-inline-size: 56ch; }
+
+.facts {
+  display: flex; gap: 34px; flex-wrap: wrap;
+  margin: 0 0 26px; padding-block-end: 22px;
+  border-block-end: 1px solid var(--line);
+}
+.facts dt { font-size: 12.5px; color: var(--ink-3); margin-block-end: 2px; }
+.facts dd { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+.h2 { font-size: 14px; font-weight: 600; margin-block-end: 12px; }
+.breakdown { margin-block-end: 26px; }
+.ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ul li { display: grid; grid-template-columns: 1fr 110px 28px; gap: 12px; align-items: center; }
+.label { font-size: 14px; color: var(--ink-2); }
+.bar { block-size: 6px; background: var(--sunken); border-radius: 3px; overflow: hidden; }
+.bar span { display: block; block-size: 100%; border-radius: 3px; }
+.bar_real { background: var(--real); }
+.bar_falsa { background: var(--safe); }
+.bar_duda { background: var(--check); }
+.n { text-align: end; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.back {
+  inline-size: 100%; font-size: 15px; font-weight: 600;
+  background: var(--sunken); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 12px;
+}
+.back:hover { background: var(--bg); }
+
+.foot { font-size: 12.5px; color: var(--ink-3); line-height: 1.5; margin-block-start: 14px; max-inline-size: 52ch; }
