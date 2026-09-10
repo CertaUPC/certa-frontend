@@ -1,0 +1,41 @@
+.shell { min-block-size: 100dvh; display: grid; grid-template-rows: auto 1fr; }
+
+.top {
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  padding: 12px 22px;
+  border-block-end: 1px solid var(--line);
+  background: var(--surface);
+  position: sticky; inset-block-start: 0; z-index: var(--z-sticky);
+}
+.wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
+
+.nav { display: flex; gap: 4px; }
+.link {
+  font-size: 14px; color: var(--ink-2); text-decoration: none;
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  transition: background 0.14s var(--salida), color 0.14s var(--salida);
+}
+.link:hover { background: var(--sunken); color: var(--ink); }
+.active { background: var(--accent-tint); color: var(--accent); font-weight: 600; }
+
+.right { display: flex; align-items: center; gap: 9px; margin-inline-start: auto; }
+.fixture {
+  font-size: 11.5px; color: var(--check);
+  border: 1px dashed var(--check); border-radius: 999px; padding: 3px 10px;
+}
+.role { font-size: 12.5px; color: var(--ink-3); }
+.chip {
+  font-size: 12.5px; background: var(--surface);
+  border: 1px solid var(--line); color: var(--ink-2);
+  padding: 6px 12px; border-radius: 999px;
+  transition: border-color 0.14s var(--salida), color 0.14s var(--salida);
+}
+.chip:hover:not(:disabled) { border-color: var(--line-strong); color: var(--ink); }
+.chip:disabled { opacity: 0.45; cursor: default; }
+
+.body { padding: 26px 22px 56px; max-inline-size: 1180px; inline-size: 100%; margin-inline: auto; }
+
+@media (max-width: 640px) {
+  .top { gap: 14px; padding: 10px 16px; }
+  .body { padding: 20px 16px 40px; }
+}

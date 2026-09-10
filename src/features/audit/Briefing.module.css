@@ -1,0 +1,123 @@
+.wrap {
+  min-block-size: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+}
+
+.sheet {
+  inline-size: min(660px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--lift);
+  padding: 34px 38px 30px;
+}
+
+.wordmark {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-2);
+  margin-block-end: 20px;
+}
+
+.title {
+  font-size: clamp(24px, 3.4vw, 31px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  margin-block-end: 14px;
+}
+
+.lead {
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.62;
+  max-inline-size: 62ch;
+  margin-block-end: 28px;
+}
+
+.h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-block-end: 10px;
+}
+
+.steps { margin-block-end: 24px; }
+
+.ol {
+  margin: 0;
+  padding-inline-start: 20px;
+  display: grid;
+  gap: 11px;
+  font-size: 14.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  max-inline-size: 62ch;
+}
+.ol li::marker { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ol b { color: var(--ink); font-weight: 600; }
+
+/* Sin franja lateral: fondo teñido con borde completo, que separa igual y no
+   inventa un acento decorativo. */
+.warn {
+  background: var(--check-tint);
+  border: 1px solid var(--check);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-block-end: 24px;
+}
+.warnTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-block-end: 4px;
+}
+.warnBody {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.58;
+  max-inline-size: 58ch;
+}
+
+.keys { margin-block-end: 28px; }
+.keysBody {
+  font-size: 14.5px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  max-inline-size: 62ch;
+}
+.kbd {
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  font-size: 12px;
+  border: 1px solid var(--line-strong);
+  border-block-end-width: 2px;
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--ink);
+  background: var(--sunken);
+}
+
+.start {
+  inline-size: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--surface);
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  transition: filter 0.15s var(--salida);
+}
+.start:hover { filter: brightness(1.08); }
+
+.foot {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-block-start: 14px;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .sheet { padding: 26px 22px 24px; }
+}

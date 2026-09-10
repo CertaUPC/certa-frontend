@@ -1,0 +1,40 @@
+name: Verificación
+
+# Corre en cada cambio. Un fallo de tipos o de compilación no debe llegar a la
+# rama de integración, porque el despliegue sale de ahí.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificacion:
+    name: Tipos y compilación
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tipos
+        run: npx tsc --noEmit
+
+      - name: Compilar
+        # Con datos de muestra: la compilación no debe depender de que el
+        # servicio esté levantado.
+        env:
+          VITE_USE_FIXTURES: "true"
+        run: npm run build
