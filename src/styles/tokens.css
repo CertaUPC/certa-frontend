@@ -1,0 +1,97 @@
+/* Sistema de color de Certa, en OKLCH.
+ *
+ * Escena que define el tema por defecto: un desarrollador sin especialización
+ * en seguridad, en su escritorio de oficina en Lima a media tarde, con
+ * fluorescente y ventana, revisando cuarenta alertas en tres cuartos de hora.
+ * Esa escena pide claro. El oscuro existe porque la sesión también puede correr
+ * de noche, y está diseñado aparte, no invertido.
+ *
+ * Estrategia: contenida. Neutros teñidos hacia el azul del acento, y color
+ * saturado solo donde significa algo. Si el color aparece, es porque el
+ * elemento tiene un juicio detrás.
+ */
+
+:root {
+  /* superficies */
+  --bg:            oklch(0.976 0.004 250);
+  --surface:       oklch(1     0     0);
+  --sunken:        oklch(0.955 0.006 250);
+  --line:          oklch(0.905 0.008 250);
+  --line-strong:   oklch(0.815 0.012 250);
+
+  /* tinta: contraste verificado sobre --bg */
+  --ink:           oklch(0.255 0.016 250);  /* 13.8:1 */
+  --ink-2:         oklch(0.455 0.014 250);  /*  6.4:1 */
+  --ink-3:         oklch(0.585 0.012 250);  /*  4.1:1, solo texto no esencial */
+
+  /* juicio */
+  --real:          oklch(0.505 0.170 27);
+  --real-tint:     oklch(0.955 0.030 27);
+  --safe:          oklch(0.505 0.125 155);
+  --safe-tint:     oklch(0.955 0.032 155);
+  --check:         oklch(0.520 0.120 70);
+  --check-tint:    oklch(0.958 0.042 75);
+  --accent:        oklch(0.495 0.115 250);
+  --accent-tint:   oklch(0.955 0.024 250);
+
+  /* código, derivado del mismo sistema y desaturado a propósito:
+     el resaltado de anclaje va encima y no puede competir con la sintaxis */
+  --syn-plain:     oklch(0.320 0.014 250);
+  --syn-keyword:   oklch(0.455 0.090 300);
+  --syn-type:      oklch(0.470 0.070 220);
+  --syn-string:    oklch(0.460 0.075 150);
+  --syn-number:    oklch(0.480 0.080 40);
+  --syn-comment:   oklch(0.620 0.020 250);
+  --syn-fn:        oklch(0.440 0.075 260);
+
+  --gutter:        oklch(0.700 0.010 250);
+
+  /* elevación: una sola sombra, y solo en lo que flota de verdad */
+  --lift: 0 1px 2px oklch(0.25 0.02 250 / 0.06),
+          0 8px 24px -16px oklch(0.25 0.02 250 / 0.28);
+
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* profundidad, nombrada por función y no por número suelto */
+  --z-sticky: 100;
+  --z-popover: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+
+  --salida: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme="dark"] {
+  --bg:            oklch(0.185 0.010 250);
+  --surface:       oklch(0.228 0.012 250);
+  --sunken:        oklch(0.158 0.010 250);
+  --line:          oklch(0.312 0.014 250);
+  --line-strong:   oklch(0.400 0.016 250);
+
+  --ink:           oklch(0.935 0.008 250);
+  --ink-2:         oklch(0.740 0.014 250);
+  --ink-3:         oklch(0.605 0.014 250);
+
+  --real:          oklch(0.735 0.130 27);
+  --real-tint:     oklch(0.285 0.055 27);
+  --safe:          oklch(0.760 0.115 155);
+  --safe-tint:     oklch(0.275 0.048 155);
+  --check:         oklch(0.795 0.115 75);
+  --check-tint:    oklch(0.288 0.050 75);
+  --accent:        oklch(0.720 0.100 250);
+  --accent-tint:   oklch(0.278 0.040 250);
+
+  --syn-plain:     oklch(0.860 0.012 250);
+  --syn-keyword:   oklch(0.760 0.100 300);
+  --syn-type:      oklch(0.775 0.080 220);
+  --syn-string:    oklch(0.760 0.085 150);
+  --syn-number:    oklch(0.790 0.090 55);
+  --syn-comment:   oklch(0.545 0.018 250);
+  --syn-fn:        oklch(0.770 0.085 260);
+
+  --gutter:        oklch(0.470 0.012 250);
+
+  --lift: 0 1px 2px oklch(0 0 0 / 0.4),
+          0 8px 24px -16px oklch(0 0 0 / 0.9);
+}
