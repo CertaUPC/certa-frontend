@@ -1,10 +1,17 @@
 ﻿/* Cliente de la API. Con `USE_FIXTURES` devuelve datos de muestra de la misma
  * forma que las respuestas reales: ningún componente sabe de dónde vienen. */
 
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 // Solo con la marca puesta a mano. Si faltara la variable, mostrar datos de
 // muestra como si fueran reales sería peor que fallar la conexión.
 export const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES === "true";
+
+// La dirección del servicio se fija al compilar. En desarrollo cae al servicio
+// local; en el paquete distribuible no hay valor por omisión posible, porque
+// apuntar a localhost desde el navegador de otra persona falla con un error de
+// red que parece una caída del servicio.
+const BASE =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? "http://localhost:8000" : "");
 
 const TOKEN_KEY = "certa.token";
 const ROLE_KEY = "certa.role";
@@ -43,6 +50,13 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!BASE) {
+    throw new ApiError(
+      0,
+      "Esta compilación no tiene configurada la dirección del servicio. " +
+        "Falta VITE_API_URL en el entorno de construcción.",
+    );
+  }
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
     ...init,

@@ -11,6 +11,10 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # Vite fija estas al compilar, no al servir: cambiarlas exige volver a
+  # construir. La dirección apunta al servicio en Render.
+  VITE_API_URL = "https://certa-backend-api.onrender.com"
+  VITE_USE_FIXTURES = "false"
 
 # Toda ruta que no sea un archivo real la resuelve la aplicación.
 [[redirects]]
