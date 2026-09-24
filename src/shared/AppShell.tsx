@@ -7,7 +7,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { USE_FIXTURES, clearSession, getEmail } from "./api";
 import { Mark } from "./Mark";
-import { useTheme } from "./theme";
+import { ThemeToggle } from "./ThemeToggle";
 import s from "./AppShell.module.css";
 
 const NAV = [
@@ -17,7 +17,6 @@ const NAV = [
 
 export function AppShell() {
   const navigate = useNavigate();
-  const { theme, toggle, locked } = useTheme();
   const email = getEmail();
 
   return (
@@ -57,18 +56,7 @@ export function AppShell() {
               {email}
             </span>
           )}
-          <button
-            className={s.chip}
-            onClick={toggle}
-            disabled={locked}
-            title={
-              locked
-                ? "El tema quedó fijado al empezar la sesión: cambiarlo a mitad alteraría la comparación entre las dos condiciones."
-                : undefined
-            }
-          >
-            {theme === "dark" ? "Claro" : "Oscuro"}
-          </button>
+          <ThemeToggle />
           <button
             className={s.chip}
             onClick={() => { clearSession(); navigate("/sign-in"); }}

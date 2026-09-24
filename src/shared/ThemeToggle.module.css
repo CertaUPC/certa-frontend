@@ -1,0 +1,43 @@
+/* Destino de 36 píxeles, por encima de los 24 que la norma pide. */
+.boton,
+.sobreOscuro {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color 0.14s var(--salida), border-color 0.14s var(--salida);
+}
+
+.boton:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.sobreOscuro {
+  border-color: var(--stage-line);
+  background: transparent;
+  color: var(--stage-ink-2);
+}
+
+.sobreOscuro:hover:not(:disabled) {
+  color: var(--stage-ink);
+  border-color: var(--stage-accent);
+}
+
+.boton:focus-visible,
+.sobreOscuro:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.boton:disabled,
+.sobreOscuro:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

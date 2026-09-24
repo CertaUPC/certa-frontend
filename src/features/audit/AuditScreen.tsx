@@ -22,6 +22,7 @@ import {
 import { toFinding } from "./adapter";
 import { FindingFilters, NO_FILTERS, isFiltering, type Filters } from "./FindingFilters";
 import { useTheme } from "../../shared/theme";
+import { ThemeToggle } from "../../shared/ThemeToggle";
 import { api, USE_FIXTURES, type ApiContext } from "../../shared/api";
 import { Empty, Failed, Loading } from "../../shared/States";
 import s from "./AuditScreen.module.css";
@@ -239,7 +240,7 @@ export function Session({
   const [records, setRecords] = useState<Record<string, Record_>>({});
   const [lastId, setLastId] = useState<string | null>(null);
   const [assisted, setAssisted] = useState(fixedCondition ?? true);
-  const { theme, toggle, locked, lock, unlock } = useTheme();
+  const { theme, lock, unlock } = useTheme();
   const [help, setHelp] = useState(false);
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
 
@@ -399,19 +400,7 @@ export function Session({
               {assisted ? "Ver condición de control" : "Volver a la asistida"}
             </button>
           )}
-          <button
-            className={s.chip}
-            onClick={toggle}
-            disabled={locked}
-            title={
-              locked
-                ? "El tema quedó fijado al empezar: cambiarlo a mitad de " +
-                  "sesión alteraría la comparación entre las dos condiciones."
-                : undefined
-            }
-          >
-            {theme === "dark" ? "Claro" : "Oscuro"}
-          </button>
+          <ThemeToggle />
         </div>
       </header>
 

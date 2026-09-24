@@ -60,6 +60,11 @@
   gap: 10px;
 }
 
+/* El conmutador se va al extremo de la línea de marca. */
+.brandFin {
+  margin-inline-start: auto;
+}
+
 .brandMark {
   color: var(--stage-ink);
 }
@@ -73,11 +78,39 @@
 
 .claim {
   margin: 0;
+  min-block-size: 3.4em;
   font-size: clamp(27px, 3.1vw, 40px);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.032em;
   text-wrap: balance;
+  animation: entrar 420ms var(--salida) both;
+}
+
+/* El relevo entre lemas: el nuevo entra, sin que el de antes se arrastre. */
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* En qué punto de los tres va, para que el cambio no parezca un salto. */
+.pasos {
+  display: flex;
+  gap: 6px;
+  margin-block-start: 14px;
+}
+
+.paso,
+.pasoVivo {
+  inline-size: 18px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: var(--stage-line);
+  transition: background 0.3s var(--salida);
+}
+
+.pasoVivo {
+  background: var(--stage-accent);
 }
 
 .colophon {
@@ -177,10 +210,12 @@
 
 .proofNote {
   margin: 16px 0 0;
+  min-block-size: 4.8em;
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--stage-ink-2);
   max-inline-size: 60ch;
+  animation: entrar 420ms var(--salida) both;
 }
 
 .proofNote code {
@@ -247,8 +282,12 @@
   letter-spacing: -0.02em;
 }
 
-.formBrand span {
+.formBrand > span:first-of-type {
   color: var(--ink);
+}
+
+.formBrandFin {
+  margin-inline-start: auto;
 }
 
 .title {
@@ -500,6 +539,11 @@
   .lineMarked::before {
     animation: none;
     transform: scaleX(1);
+  }
+
+  .claim,
+  .proofNote {
+    animation: none;
   }
 
   .pestana,

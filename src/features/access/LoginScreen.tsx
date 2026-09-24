@@ -15,11 +15,18 @@
  * está midiendo.
  */
 
-import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, USE_FIXTURES, api, saveSession, type Role } from "../../shared/api";
 import { useTheme } from "../../shared/theme";
 import { Mark } from "../../shared/Mark";
+import { ThemeToggle } from "../../shared/ThemeToggle";
 import s from "./LoginScreen.module.css";
 
 type Camino = "equipo" | "participante";
@@ -34,15 +41,56 @@ type Modo = "entrar" | "crear";
 const CAMINOS: { id: Camino; rotulo: string; describe: string }[] = [
   {
     id: "equipo",
-    rotulo: "Soy del equipo",
+    rotulo: "Iniciar sesión",
     describe: "Entra con tu correo para ver tus proyectos y sus ejecuciones.",
   },
   {
     id: "participante",
-    rotulo: "Participo en el estudio",
+    rotulo: "Participante del estudio",
     describe: "Escribe el código que te dictó quien dirige la sesión.",
   },
 ];
+
+/* Lo que el panel del equipo va diciendo. Los tres hablan del mismo fragmento
+   y cada uno señala una propiedad distinta de la cadena, de modo que quien se
+   queda mirando la pantalla mientras teclea aprende tres cosas y no una. */
+const LEMAS = [
+  {
+    lema: "Cada veredicto señala líneas, y esas líneas se comprueban contra el archivo.",
+    nota: (
+      <>
+        El modelo dijo que el valor de la petición llega hasta{" "}
+        <code>pb.start()</code>, y citó las líneas 78, 80 y 83. Certa las buscó
+        en el archivo: están, y dicen eso. Cuando no están, el veredicto se
+        marca como no verificable en lugar de presentarse como respaldado.
+      </>
+    ),
+  },
+  {
+    lema: "El contexto alcanza al método al que se delega el dato.",
+    nota: (
+      <>
+        El analizador ve este archivo. Certa recupera del árbol sintáctico la
+        función, sus llamadores y los saneadores que la traza atraviesa, y eso
+        subió la cobertura del modelo del 49 al 95 por ciento.
+      </>
+    ),
+  },
+  {
+    lema: "Ordena sin suprimir. La decisión sigue siendo tuya.",
+    nota: (
+      <>
+        Nada se retira del registro. La herramienta calcula un orden, lo
+        explica y lo deja auditable; qué se atiende primero lo decide el equipo
+        que conoce su producto.
+      </>
+    ),
+  },
+];
+
+/* Cada cuántos milisegundos cambia. Lo bastante largo para leerlo entero sin
+   prisa, y para que no distraiga a quien está escribiendo su contraseña. */
+const CADA = 7000;
 
 /* Un hallazgo real del corpus, recortado a la ventana que se lee de un
    vistazo. El archivo, los números y las líneas citadas son los del análisis
@@ -62,7 +110,7 @@ const FRAGMENTO = {
 
 export function LoginScreen() {
   const navigate = useNavigate();
-  const { theme, toggle } = useTheme();
+  useTheme();
 
   const [camino, setCamino] = useState<Camino>("equipo");
   const [modo, setModo] = useState<Modo>("entrar");
@@ -156,6 +204,9 @@ export function LoginScreen() {
         <div className={s.brand}>
           <Mark size={27} className={s.brandMark} />
           <span className={s.brandName}>Certa</span>
+          <span className={s.brandFin}>
+            <ThemeToggle sobreOscuro />
+          </span>
         </div>
 
         {camino === "equipo" ? <PanelEquipo /> : <PanelParticipante />}
@@ -167,15 +218,22 @@ export function LoginScreen() {
 
       <main className={s.formSide} aria-labelledby="titulo-entrada">
         <form className={s.form} onSubmit={submit} noValidate>
-          {/* Solo cuando el panel no cabe: sin el, la pantalla no dice de
-              quien es. */}
-          <div className={s.formBrand} aria-hidden="true">
+          {/* Solo cuando el panel no cabe: sin él, la pantalla no dice de
+              quién es ni deja cambiar el tema. */}
+          <div className={s.formBrand}>
             <Mark size={22} />
             <span>Certa</span>
+            <span className={s.formBrandFin}>
+              <ThemeToggle />
+            </span>
           </div>
 
           <h1 className={s.title} id="titulo-entrada">
-            {camino === "equipo" && modo === "crear" ? "Crear cuenta" : "Entrar"}
+            {camino === "participante"
+              ? "Entrar a tu sesión"
+              : modo === "crear"
+                ? "Crear cuenta"
+                : "Entrar"}
           </h1>
           {camino === "equipo" && (
             <p className={s.lede}>
@@ -347,9 +405,6 @@ export function LoginScreen() {
                 </button>
               </p>
             )}
-            <button type="button" className={s.linkish} onClick={toggle}>
-              Cambiar a tema {theme === "dark" ? "claro" : "oscuro"}
-            </button>
           </div>
         </form>
       </main>
@@ -359,11 +414,23 @@ export function LoginScreen() {
 
 /* A quien trabaja se le enseña el mecanismo, porque es lo que va a usar. */
 function PanelEquipo() {
+  const [cual, setCual] = useState(0);
+
+  /* Quien pide menos movimiento se queda con el primero, que es el que
+     sostiene el aporte. */
+  useEffect(() => {
+    const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (quieto?.matches) return;
+    const t = setInterval(() => setCual((n) => (n + 1) % LEMAS.length), CADA);
+    return () => clearInterval(t);
+  }, []);
+
+  const actual = LEMAS[cual];
+
   return (
     <div className={s.stageBody}>
-      <h2 className={s.claim}>
-        Cada veredicto señala líneas, y esas líneas se comprueban contra el
-        archivo.
+      <h2 className={s.claim} key={`lema-${cual}`}>
+        {actual.lema}
       </h2>
 
       <figure className={s.proof}>
@@ -385,12 +452,15 @@ function PanelEquipo() {
           ))}
         </pre>
 
-        <p className={s.proofNote}>
-          El modelo dijo que el valor de la petición llega hasta{" "}
-          <code>pb.start()</code>, y citó las líneas 78, 80 y 83. Certa las buscó
-          en el archivo: están, y dicen eso. Cuando no están, el veredicto se
-          marca como no verificable en lugar de presentarse como respaldado.
+        <p className={s.proofNote} key={`nota-${cual}`}>
+          {actual.nota}
         </p>
+
+        <span className={s.pasos} aria-hidden="true">
+          {LEMAS.map((_, i) => (
+            <span key={i} className={i === cual ? s.pasoVivo : s.paso} />
+          ))}
+        </span>
       </figure>
     </div>
   );
