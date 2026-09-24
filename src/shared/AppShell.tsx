@@ -53,6 +53,9 @@ export function AppShell() {
           )}
           {email && (
             <span className={s.quien} title={email}>
+              <span className={s.inicial} aria-hidden="true">
+                {email[0]}
+              </span>
               {email}
             </span>
           )}

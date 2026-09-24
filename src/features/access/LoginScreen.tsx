@@ -349,11 +349,12 @@ export function LoginScreen() {
                   aria-describedby={
                     error ? "fallo-entrada nota-codigo" : "nota-codigo"
                   }
-                  placeholder="P01"
+                  placeholder="P-01"
                 />
                 <span className={s.nota} id="nota-codigo">
-                  No escribas tu nombre ni tu correo. El código es lo único que
-                  se guarda de ti.
+                  Es el que figura en el acta que firmaste, con guion. No
+                  escribas tu nombre ni tu correo: el código es lo único que se
+                  guarda de ti.
                 </span>
               </label>
             )}

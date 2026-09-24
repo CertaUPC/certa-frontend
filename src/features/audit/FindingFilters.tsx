@@ -91,19 +91,36 @@ export function FindingFilters({
           </button>
         )}
 
-        {cwes.map((c) => (
-          <button
-            key={c}
-            className={`${s.chip} mono`}
-            aria-pressed={filters.cwe === c}
-            onClick={() =>
-              onChange({ ...filters, cwe: filters.cwe === c ? null : c })
-            }
-          >
-            {c}
-          </button>
-        ))}
       </div>
+
+      {/* Doce debilidades son doce pastillas, y desplegadas ocupaban mas alto
+          que la propia lista de alertas. Plegadas dicen cuantas hay; se abren
+          cuando alguien quiere filtrar por una. El elegido se lee en el
+          resumen del pliegue, de modo que no hay que abrirlo para saberlo. */}
+      {cwes.length > 0 && (
+        <details className={s.pliegue} open={filters.cwe !== null}>
+          <summary className={s.resumen}>
+            Debilidad
+            <span className={s.cuenta}>
+              {filters.cwe ?? `${cwes.length} tipos`}
+            </span>
+          </summary>
+          <div className={s.chips}>
+            {cwes.map((c) => (
+              <button
+                key={c}
+                className={`${s.chip} mono`}
+                aria-pressed={filters.cwe === c}
+                onClick={() =>
+                  onChange({ ...filters, cwe: filters.cwe === c ? null : c })
+                }
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </details>
+      )}
 
       {filtering && (
         <p className={s.status}>

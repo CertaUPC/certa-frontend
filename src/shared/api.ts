@@ -276,6 +276,7 @@ export const api = {
     request<{
       participant_id: string;
       session_id: string;
+      anonymous_code: string;
       order: string[];
       first_batch: string;
       second_batch: string;

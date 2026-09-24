@@ -1,14 +1,14 @@
-/* Registrar a quien se sienta, y darle su código.
+/* La pantalla de quien dirige la sesión. El participante no la ve nunca.
  *
- * Antes esta pantalla no escribía nada: el formulario añadía una fila a la
- * memoria del navegador y se perdía al recargar, preguntaba los años de
- * experiencia que el modelo ya no guarda, y adivinaba la banda por su cuenta.
- * Quien dirigía la sesión tenía que registrar al participante llamando a la
- * API a mano y emitirle la credencial en otra llamada.
+ * Antes no escribía nada: el formulario añadía una fila a la memoria del
+ * navegador y se perdía al recargar, preguntaba los años de experiencia que el
+ * modelo ya no guarda, y adivinaba la banda por su cuenta. Había que dar de
+ * alta a la persona llamando a la API a mano y habilitarle el acceso en otra
+ * llamada.
  *
- * Ahora los dos pasos del protocolo, el alta y la credencial, son un gesto. El
- * orden de condiciones no se predice aquí: lo asigna el contrabalanceo del
- * servicio y se muestra el que devolvió.
+ * Ahora el alta y la habilitación son un gesto. El orden de condiciones no se
+ * predice aquí: lo asigna el contrabalanceo del servicio y se muestra el que
+ * devolvió.
  */
 
 import { useMemo, useState, type FormEvent } from "react";
@@ -105,12 +105,14 @@ export function ParticipantsScreen() {
         is_pilot: piloto,
       });
 
-      /* La credencial se emite acto seguido. Sin ella el código no abre nada,
+      /* El acceso se habilita acto seguido. Sin eso el código no abre nada,
          y separarlo en dos gestos es cómo se olvida el segundo. */
       const grant = await api.issueParticipationGrant(r.participant_id);
 
       setAlta({
-        codigo: codigo.trim().toUpperCase(),
+        /* El que devolvió el servicio y no el que se tecleó: «P04» se guarda
+           como «P-04», y lo que hay que dictar es lo guardado. */
+        codigo: r.anonymous_code,
         order: r.order,
         first_batch: r.first_batch,
         second_batch: r.second_batch,
@@ -159,15 +161,16 @@ export function ParticipantsScreen() {
               className={s.codigo}
               value={codigo}
               onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-              placeholder="P04"
+              placeholder="P-04"
               maxLength={20}
               autoCapitalize="characters"
               spellCheck={false}
               required
             />
             <small>
-              Es lo único que se guarda de la persona. Ni nombre, ni correo, ni
-              dónde trabaja.
+              El mismo que figura en su acta de consentimiento, con guion. Es lo
+              único que se guarda de la persona: ni nombre, ni correo, ni dónde
+              trabaja.
             </small>
           </label>
 
@@ -264,7 +267,7 @@ export function ParticipantsScreen() {
           </div>
 
           <button className={s.submit} type="submit" disabled={trabajando} aria-busy={trabajando}>
-            {trabajando ? "Registrando…" : "Registrar y emitir su credencial"}
+            {trabajando ? "Registrando…" : "Registrar y habilitar su acceso"}
           </button>
         </form>
 
@@ -371,8 +374,8 @@ function Dictado({ alta }: { alta: Alta }) {
     <div className={s.dictado} role="status">
       <h2 className={s.h2}>Ya puede entrar</h2>
       <p className={s.dictadoLead}>
-        Dile que abra la pantalla de entrada, elija «Participo en el estudio» y
-        escriba este código.
+        Dile que abra la pantalla de entrada, elija «Participante del estudio»
+        y escriba este código.
       </p>
       <p className={s.dictadoCodigo}>{alta.codigo}</p>
       <dl className={s.dictadoDatos}>
@@ -388,7 +391,7 @@ function Dictado({ alta }: { alta: Alta }) {
         </div>
         {vence && (
           <div>
-            <dt>Su credencial vence</dt>
+            <dt>Su acceso vence</dt>
             <dd>a las {vence}</dd>
           </div>
         )}

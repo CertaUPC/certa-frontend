@@ -1,0 +1,216 @@
+/* El carril vive dentro de la columna de la cola, encima de «Por revisar»,
+   y no ocupa alto fijo: si el proyecto tiene una sola ejecución, el bloque de
+   ejecuciones no se pinta y las alertas suben. */
+.carril {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-block-end: 14px;
+  margin-block-end: 14px;
+  border-block-end: 1px solid var(--line);
+}
+
+/* ── el desplegable de proyectos ─────────────────────────────────── */
+.desplegable {
+  position: relative;
+}
+
+.selector {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 8px;
+  inline-size: 100%;
+  text-align: start;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.14s var(--salida);
+}
+
+.selector:hover {
+  border-color: var(--line-strong);
+}
+
+.selector:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.selectorEtiqueta {
+  grid-column: 1;
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+}
+
+.selectorNombre {
+  grid-column: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flecha {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--ink-3);
+  transition: transform 0.16s var(--salida);
+}
+
+.flecha[data-abierto] {
+  transform: rotate(180deg);
+}
+
+.lista {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + 5px);
+  z-index: var(--z-popover);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-block-size: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--lift);
+}
+
+.opcion {
+  inline-size: 100%;
+  text-align: start;
+  padding: 7px 9px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  transition: background 0.12s var(--salida);
+}
+
+.opcion:hover {
+  background: var(--sunken);
+}
+
+.opcion:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.opcion[data-vivo] .opcionNombre {
+  color: var(--accent);
+}
+
+.opcionNombre {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.34;
+}
+
+.opcionDato {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-block-start: 1px;
+}
+
+.vacio {
+  padding: 9px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+/* ── bloques ─────────────────────────────────────────────────────── */
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rotulo {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.corridas,
+.acciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.corrida {
+  display: block;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border-inline-start: 2px solid transparent;
+  text-decoration: none;
+  transition: background 0.12s var(--salida);
+}
+
+.corrida:hover {
+  background: var(--sunken);
+}
+
+.corrida[aria-current="page"] {
+  border-inline-start-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.corridaId {
+  display: block;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.corridaDato {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.accion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Veinticuatro píxeles de alto es el mínimo que la norma pide para un
+     destino, y estos quedan en veintiocho. */
+  min-block-size: 28px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 0.12s var(--salida), color 0.12s var(--salida);
+}
+
+.accion svg {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.accion:hover {
+  background: var(--sunken);
+  color: var(--ink);
+}
+
+.accion:hover svg {
+  color: var(--accent);
+}
+
+.accion:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}

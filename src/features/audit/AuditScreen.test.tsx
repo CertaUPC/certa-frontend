@@ -83,11 +83,13 @@ describe("Condición sin asistente", () => {
   it("sí muestra el hallazgo y su código, que son comunes a las dos condiciones", () => {
     pintar(false);
     empezar();
-    // El título sale dos veces, en la cola y en el encabezado: se pide el
-    // encabezado, que es el que el participante lee para decidir.
+    // El encabezado es la debilidad, y el mensaje de la regla va debajo en
+    // cuerpo de texto. Las dos cosas tienen que estar: la condición de
+    // control oculta el juicio del asistente, no la alerta.
     expect(
-      screen.getByRole("heading", { name: HALLAZGO.title }),
+      screen.getByRole("heading", { name: HALLAZGO.cweName }),
     ).toBeInTheDocument();
+    expect(screen.getAllByText(HALLAZGO.title).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/UserDao\.java/).length).toBeGreaterThan(0);
     expect(screen.getByText(/buscar/)).toBeInTheDocument();
   });
