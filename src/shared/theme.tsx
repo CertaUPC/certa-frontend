@@ -37,15 +37,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
   }, [locked]);
 
+  /* Estables a propósito: el efecto que fija el tema al iniciar la sesión
+     depende de ellas, y una identidad nueva en cada render lo reejecutaría. */
+  const lock = useCallback(() => setLocked(true), []);
+  const unlock = useCallback(() => setLocked(false), []);
+
   const value = useMemo<ThemeValue>(
     () => ({
       theme,
       locked,
       toggle,
-      lock: () => setLocked(true),
-      unlock: () => setLocked(false),
+      lock,
+      unlock,
     }),
-    [theme, locked, toggle],
+    [theme, locked, toggle, lock, unlock],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

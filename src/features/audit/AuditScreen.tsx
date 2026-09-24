@@ -53,6 +53,7 @@ export function AuditScreen() {
   const executionId = params.get("execution");
   const participantId = params.get("participant");
   const condicion = params.get("condition");
+  const lote = params.get("batch");
   const fixedCondition = condicion ? CONDITION[condicion] ?? null : null;
 
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -69,19 +70,32 @@ export function AuditScreen() {
     (async () => {
       try {
         const crudos = await api.findings(executionId);
+        /* El lote se aplica antes de pedir contextos, y no después: son una
+           petición por hallazgo, y sobre la ejecución entera serían miles. */
+        let elegidos = crudos;
+        if (lote) {
+          const { hallazgos } = await api.batchFindings(lote);
+          const orden = new Map(hallazgos.map((id, i) => [id, i]));
+          elegidos = crudos
+            .filter((f) => orden.has(f.id))
+            .sort((a, b) => orden.get(a.id)! - orden.get(b.id)!);
+          if (elegidos.length !== hallazgos.length) {
+            throw new Error("el lote no cuadra con la ejecución");
+          }
+        }
         // El contexto va en una petición por hallazgo, y falta cuando la
         // política de retención ya lo borró.
         const contextos = await Promise.all(
-          crudos.map((f) =>
+          elegidos.map((f) =>
             api.context(f.id).catch((): ApiContext | null => null),
           ),
         );
-        if (vigente) setFindings(crudos.map((f, i) => toFinding(f, contextos[i])));
+        if (vigente) setFindings(elegidos.map((f, i) => toFinding(f, contextos[i])));
       } catch {
         if (vigente) {
           setError(
             "No se pudieron cargar las alertas. Comprueba que el servicio esté " +
-              "levantado y que la ejecución exista.",
+              "levantado, que la ejecución exista y que el lote esté cargado.",
           );
         }
       } finally {
@@ -92,7 +106,7 @@ export function AuditScreen() {
     return () => {
       vigente = false;
     };
-  }, [executionId]);
+  }, [executionId, lote]);
 
   const onAnswer = useCallback(
     (findingId: string, choice: Choice, seconds: number) => {
@@ -144,6 +158,13 @@ export function AuditScreen() {
       findings={findings}
       onAnswer={onAnswer}
       fixedCondition={fixedCondition}
+      onThemeFixed={(tema) => {
+        if (!participantId) return;
+        api.recordTheme(participantId, tema).catch(() => {
+          /* No interrumpe la sesión: el dato es un control del análisis, no
+             parte de la tarea. Si falta, se nota al analizar y se declara. */
+        });
+      }}
       saveError={saveError}
     />
   );
@@ -156,17 +177,41 @@ interface SessionProps {
   /** Fijada por el investigador al preparar la sesión. Sin ella, se puede alternar. */
   fixedCondition?: boolean | null;
   saveError?: string | null;
+  /** Avisa con qué presentación quedó fijada la sesión, una sola vez. */
+  onThemeFixed?: (theme: "light" | "dark") => void;
 }
 
-function Session({ findings, onAnswer, fixedCondition, saveError }: SessionProps) {
+/* Se exporta para poder probar la condición sin asistente. Esa pantalla es el
+   instrumento del experimento: si mostrara el veredicto cuando no debe, la
+   comparación entre condiciones quedaría sin sentido y nada lo delataría. */
+export function Session({
+  findings,
+  onAnswer,
+  fixedCondition,
+  saveError,
+  onThemeFixed,
+}: SessionProps) {
   const [stage, setStage] = useState<Stage>("briefing");
   const [index, setIndex] = useState(0);
   const [records, setRecords] = useState<Record<string, Record_>>({});
   const [lastId, setLastId] = useState<string | null>(null);
   const [assisted, setAssisted] = useState(fixedCondition ?? true);
-  const { theme, toggle } = useTheme();
+  const { theme, toggle, locked, lock, unlock } = useTheme();
   const [help, setHelp] = useState(false);
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+
+  /* Dentro del experimento el tema queda fijado en cuanto empieza la tarea.
+     Fuera de él no se toca: quien usa la herramienta en su trabajo elige
+     cuando quiera, y la fijación es del instrumento, no del producto. */
+  useEffect(() => {
+    if (fixedCondition == null || stage === "briefing") return;
+    lock();
+    /* Se avisa aquí y no en cada render: el tema que interesa registrar es con
+       el que se resolvió la tarea, y a partir de este punto ya no cambia. */
+    onThemeFixed?.(theme);
+    return () => unlock();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fixedCondition, stage, lock, unlock]);
 
   const visible = useMemo(
     () =>
@@ -303,6 +348,13 @@ function Session({ findings, onAnswer, fixedCondition, saveError }: SessionProps
           <button
             className={s.chip}
             onClick={toggle}
+            disabled={locked}
+            title={
+              locked
+                ? "El tema quedó fijado al empezar: cambiarlo a mitad de " +
+                  "sesión alteraría la comparación entre las dos condiciones."
+                : undefined
+            }
           >
             {theme === "dark" ? "Claro" : "Oscuro"}
           </button>
@@ -398,7 +450,11 @@ function Session({ findings, onAnswer, fixedCondition, saveError }: SessionProps
             lang={finding.lang}
             firstLine={finding.firstLine}
             cited={finding.cited}
-            showRoles={assisted}
+            /* Solo se marca lo que el verificador dio por anclado. Marcar las
+               citas de un veredicto que no superó la comprobación presentaría
+               como respaldado lo que el sistema no pudo respaldar, que es
+               precisamente lo que el mecanismo existe para impedir. */
+            showRoles={assisted && finding.anchored}
             theme={theme}
           />
 

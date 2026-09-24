@@ -5,6 +5,7 @@
  * a quien no lo va a tener.
  */
 
+import { useTheme } from "../../shared/theme";
 import s from "./Briefing.module.css";
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export function Briefing({ assisted, total, onStart }: Props) {
+  const { theme, toggle } = useTheme();
+
   return (
     <div className={s.wrap}>
       <div className={s.sheet}>
@@ -72,6 +75,19 @@ export function Briefing({ assisted, total, onStart }: Props) {
             pulsaciones a propósito, para que un golpe involuntario no registre
             una respuesta que no querías. Siempre puedes corregir la anterior.
           </p>
+        </div>
+
+        {/* El tema se elige aquí y no durante la tarea: a partir de Empezar
+            queda fijado, para que las dos condiciones se resuelvan sobre la
+            misma presentación y la diferencia medida no recoja el cambio. */}
+        <div className={s.look}>
+          <span className={s.lookLabel}>Cómo se ve la pantalla</span>
+          <button className={s.lookChip} onClick={toggle}>
+            {theme === "dark" ? "Claro" : "Oscuro"}
+          </button>
+          <span className={s.lookNote}>
+            Elígelo ahora. Al empezar queda fijo hasta el final.
+          </span>
         </div>
 
         <button className={s.start} onClick={onStart} autoFocus>
