@@ -131,6 +131,47 @@ describe("Condición asistida", () => {
   });
 });
 
+describe("Alerta que la cadena no ha analizado", () => {
+  /* Dos tercios de la ejecución del corpus no tienen veredicto todavía, y el
+     adaptador les ponía «revisar», cuyo rótulo decía «Nadie pudo
+     justificarlo». La pantalla afirmaba que el modelo lo intentó y falló
+     cuando nadie le había preguntado nada. */
+  const SIN_ANALIZAR: Finding = {
+    ...HALLAZGO,
+    verdict: "sin_analizar",
+    confidence: null,
+    reason: "",
+    anchored: false,
+    attempts: 0,
+    citedCount: 0,
+    stability: null,
+  };
+
+  function pintarSinAnalizar() {
+    return render(
+      <ThemeProvider>
+        <Session findings={[SIN_ANALIZAR]} fixedCondition />
+      </ThemeProvider>,
+    );
+  }
+
+  it("dice que no se ha analizado, y no que nadie pudo justificarlo", () => {
+    pintarSinAnalizar();
+    empezar();
+    expect(screen.getByText(/Todavía sin analizar/)).toBeInTheDocument();
+    expect(screen.queryByText(/pudo justificarlo/)).toBeNull();
+  });
+
+  it("no afirma que citó líneas inexistentes", () => {
+    pintarSinAnalizar();
+    empezar();
+    expect(
+      screen.queryByText(/líneas que no existían/),
+      "acusa al modelo de algo que no hizo: no se le preguntó",
+    ).toBeNull();
+  });
+});
+
 describe("Fuera del experimento", () => {
   it("permite alternar cuando no hay condición fijada", () => {
     pintar();

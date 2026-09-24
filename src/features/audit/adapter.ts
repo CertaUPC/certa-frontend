@@ -101,7 +101,7 @@ export function toFinding(f: ApiFinding, ctx: ApiContext | null): Finding {
     cweName: f.cwe ? CWE_NAME[f.cwe.toUpperCase()] ?? "" : "",
     severity: SEVERITY[f.severity.toLowerCase()] ?? f.severity,
     fingerprint: f.fingerprint.slice(0, 12),
-    verdict: v ? VERDICT[v.value] ?? "revisar" : "revisar",
+    verdict: v ? VERDICT[v.value] ?? "revisar" : "sin_analizar",
     confidence: v?.confidence ?? null,
     reason: v?.justification ?? "",
     anchored: v?.anchor_verified ?? false,
