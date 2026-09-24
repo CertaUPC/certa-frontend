@@ -3,7 +3,11 @@
 
 import type { CitedLine, Lang } from "./CodeViewer";
 
-export type Verdict = "real" | "descartado" | "revisar";
+/* «revisar» y «sin_analizar» se confundian en uno solo, y son cosas
+   distintas: en el primero la cadena corrio y el modelo no alcanzo a
+   pronunciarse; en el segundo nadie le pregunto nada todavia. Decir lo
+   primero de lo segundo es afirmar algo que no ocurrio. */
+export type Verdict = "real" | "descartado" | "revisar" | "sin_analizar";
 
 export interface Finding {
   id: string;
@@ -149,13 +153,19 @@ export const FINDINGS: Finding[] = [
 export const VERDICT_LABEL: Record<Verdict, string> = {
   real: "Parece real",
   descartado: "Parece falsa alarma",
-  revisar: "Nadie pudo justificarlo",
+  /* Antes decia «Nadie pudo justificarlo», y era falso: estos veredictos
+     traen la traza del dato con sus lineas comprobadas. Lo que el modelo no
+     hace es pronunciarse, casi siempre porque el saneador o el sumidero
+     quedan fuera del contexto que se recupero. */
+  revisar: "No alcanza a determinarlo",
+  sin_analizar: "Todavía sin analizar",
 };
 
 export const VERDICT_SHORT: Record<Verdict, string> = {
   real: "Real",
   descartado: "Descartado",
-  revisar: "Revisar",
+  revisar: "Sin determinar",
+  sin_analizar: "Sin analizar",
 };
 
 export function confidenceWord(c: number): string {

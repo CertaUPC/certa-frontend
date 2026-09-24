@@ -545,7 +545,19 @@ export function Session({
 
         <aside className={s.judgement} aria-label="Juicio del asistente">
           <div className={s.judgeScroll}>
-          {assisted ? (
+          {assisted && finding.verdict === "sin_analizar" ? (
+            /* La cadena no ha pasado por esta alerta. Enseñar aquí la
+               comprobación de anclaje diría que citó líneas inexistentes, y
+               no citó ninguna porque no se le preguntó. */
+            <div className={s.verdictBlock} data-tone="sin_analizar">
+              <p className={s.verdictWord}>{VERDICT_LABEL.sin_analizar}</p>
+              <p className={s.why}>
+                La cadena todavía no ha llegado a esta alerta, así que no hay
+                veredicto ni justificación que enseñarte. Júzgala con el código
+                de al lado.
+              </p>
+            </div>
+          ) : assisted ? (
             <>
               <div className={s.verdictBlock} data-tone={finding.verdict}>
                 <p className={s.verdictWord}>{VERDICT_LABEL[finding.verdict]}</p>

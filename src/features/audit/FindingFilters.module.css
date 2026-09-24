@@ -16,6 +16,7 @@
 .real[aria-pressed="true"] { background: var(--real-tint); border-color: var(--real); color: var(--real); }
 .descartado[aria-pressed="true"] { background: var(--safe-tint); border-color: var(--safe); color: var(--safe); }
 .revisar[aria-pressed="true"] { background: var(--check-tint); border-color: var(--check); color: var(--check); }
+.sin_analizar[aria-pressed="true"] { background: var(--sunken); border-color: var(--line-strong); color: var(--ink); }
 
 .status {
   font-size: 11.5px; color: var(--ink-2); line-height: 1.45;

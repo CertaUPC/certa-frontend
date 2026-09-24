@@ -139,6 +139,7 @@
 .real { color: var(--real); font-weight: 600; }
 .descartado { color: var(--safe); font-weight: 600; }
 .revisar { color: var(--check); font-weight: 600; }
+.sin_analizar { color: var(--ink-3); font-weight: 600; }
 .done { display: block; font-size: 11.5px; color: var(--ink-3); margin-block-start: 3px; font-style: italic; }
 
 /* ── centro ──────────────────────────────────────────────────────── */
@@ -186,6 +187,7 @@
 .verdictBlock[data-tone="real"] .verdictWord { color: var(--real); }
 .verdictBlock[data-tone="descartado"] .verdictWord { color: var(--safe); }
 .verdictBlock[data-tone="revisar"] .verdictWord { color: var(--check); }
+.verdictBlock[data-tone="sin_analizar"] .verdictWord { color: var(--ink-3); }
 .why { font-size: 13px; color: var(--ink-2); line-height: 1.52; }
 
 .row { padding: 11px 15px; border-block-end: 1px solid var(--line); }

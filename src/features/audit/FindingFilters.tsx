@@ -31,7 +31,8 @@ export function isFiltering(f: Filters): boolean {
 const VERDICTS: { value: Verdict; label: string }[] = [
   { value: "real", label: "Parecen reales" },
   { value: "descartado", label: "Descartadas" },
-  { value: "revisar", label: "Sin justificar" },
+  { value: "revisar", label: "Sin determinar" },
+  { value: "sin_analizar", label: "Sin analizar" },
 ];
 
 interface Props {
