@@ -32,6 +32,11 @@ jobs:
       - name: Tipos
         run: npx tsc --noEmit
 
+      - name: Pruebas
+        # Si la pantalla sin asistente dejara ver el veredicto, las dos
+        # condiciones dejarían de ser dos y nada lo delataría.
+        run: npm test
+
       - name: Compilar
         # Con datos de muestra: la compilación no debe depender de que el
         # servicio esté levantado.
