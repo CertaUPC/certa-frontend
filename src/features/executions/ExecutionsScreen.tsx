@@ -42,6 +42,9 @@ export function ExecutionsScreen() {
 
       {data && data.length > 0 && (
         <table className={s.table}>
+          <caption className="solo-lectores">
+            Ejecuciones del analizador, con su avance de validación
+          </caption>
           <thead>
             <tr>
               <th>Proyecto</th>
@@ -49,7 +52,9 @@ export function ExecutionsScreen() {
               <th>Estado</th>
               <th className={s.numeric}>Hallazgos</th>
               <th>Avance</th>
-              <th />
+              <th>
+                <span className="solo-lectores">Acciones</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -61,7 +66,9 @@ export function ExecutionsScreen() {
                   </span>
                   <span className={`${s.sub} mono`}>{e.id.slice(0, 8)}</span>
                 </td>
-                <td className="mono">{e.tool_name} {e.ruleset_version}</td>
+                <td className="mono" translate="no">
+                  {e.tool_name} {e.ruleset_version}
+                </td>
                 <td>
                   <span className={`${s.badge} ${s[e.status]}`}>
                     {STATUS_LABEL[e.status]}
@@ -70,7 +77,14 @@ export function ExecutionsScreen() {
                 </td>
                 <td className={`${s.numeric} mono`}>{e.total_findings}</td>
                 <td className={s.progressCell}>
-                  <span className={s.rail} aria-hidden="true">
+                  <span
+                    className={s.rail}
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={e.total_findings}
+                    aria-valuenow={e.validated_findings}
+                    aria-valuetext={e.progress_text}
+                  >
                     <span
                       className={s.fill}
                       style={{ inlineSize: `${e.progress * 100}%` }}

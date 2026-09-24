@@ -83,3 +83,5 @@
   border-radius: var(--radius-sm); padding: 10px 13px;
   margin-block-end: 16px; max-inline-size: 78ch;
 }
+
+.cuando { font-size: 13px; color: var(--ink-3); }

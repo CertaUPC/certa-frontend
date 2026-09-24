@@ -22,6 +22,12 @@ export function AppShell() {
 
   return (
     <div className={s.shell}>
+      {/* Con tres enlaces y dos acciones en la barra, tabular hasta el contenido
+          son cinco saltos en cada pantalla. */}
+      <a className={s.salto} href="#contenido">
+        Saltar al contenido
+      </a>
+
       <header className={s.top}>
         <span className={s.brand}>
           <Mark size={22} className={s.brandMark} />
@@ -51,7 +57,16 @@ export function AppShell() {
               {email}
             </span>
           )}
-          <button className={s.chip} onClick={toggle} disabled={locked}>
+          <button
+            className={s.chip}
+            onClick={toggle}
+            disabled={locked}
+            title={
+              locked
+                ? "El tema quedó fijado al empezar la sesión: cambiarlo a mitad alteraría la comparación entre las dos condiciones."
+                : undefined
+            }
+          >
             {theme === "dark" ? "Claro" : "Oscuro"}
           </button>
           <button
@@ -63,7 +78,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main className={s.body}>
+      <main className={s.body} id="contenido">
         <Outlet />
       </main>
     </div>

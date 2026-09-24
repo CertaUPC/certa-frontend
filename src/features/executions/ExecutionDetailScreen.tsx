@@ -80,14 +80,22 @@ export function ExecutionDetailScreen() {
             <span className={`${s.badge} ${s[execution.status]}`}>
               {STATUS_LABEL[execution.status]}
             </span>
-            <span className="mono">{execution.tool_name} {execution.ruleset_version}</span>
+            <span className="mono" translate="no">
+              {execution.tool_name} {execution.ruleset_version}
+            </span>
+            <span className={s.cuando}>{cuando(execution.created_at)}</span>
           </p>
         </div>
         <div className={s.headActions}>
           {(pendiente || interrumpida) && (
-            <button className={s.primary} disabled={run.busy} onClick={() => run.run()}>
+            <button
+              className={s.primary}
+              disabled={run.busy}
+              aria-busy={run.busy}
+              onClick={() => run.run()}
+            >
               {run.busy
-                ? "Validando"
+                ? "Validando…"
                 : interrumpida
                   ? "Reanudar donde quedó"
                   : "Validar los pendientes"}
@@ -96,15 +104,18 @@ export function ExecutionDetailScreen() {
           <button
             className={s.secondary}
             disabled={download.busy}
+            aria-busy={download.busy}
             onClick={() => download.run()}
           >
-            {download.busy ? "Preparando" : "Exportar CSV"}
+            {download.busy ? "Preparando…" : "Exportar CSV"}
           </button>
         </div>
       </div>
 
-      {run.error && <p className={s.problem}>{run.error}</p>}
-      {download.error && <p className={s.problem}>{download.error}</p>}
+      <div role="alert" aria-live="assertive">
+        {run.error && <p className={s.problem}>{run.error}</p>}
+        {download.error && <p className={s.problem}>{download.error}</p>}
+      </div>
 
       {execution.failure_reason && (
         <p className={s.notice}>
@@ -115,8 +126,14 @@ export function ExecutionDetailScreen() {
 
       <section className={s.panel}>
         <h2 className={s.h2}>Avance</h2>
-        <p className={s.progressText}>{execution.progress_text}</p>
-        <span className={s.rail} aria-hidden="true">
+        <span
+          className={s.rail}
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={execution.total_findings}
+          aria-valuenow={execution.validated_findings}
+          aria-valuetext={execution.progress_text}
+        >
           <span className={s.fill} style={{ inlineSize: `${execution.progress * 100}%` }} />
         </span>
         <div className={s.counts}>
@@ -176,10 +193,24 @@ export function ExecutionDetailScreen() {
           Abre la interfaz de auditoría para recorrer la lista priorizada,
           comprobar el anclaje y registrar decisiones.
         </p>
-        <Link className={s.primary} to="/review">Abrir la auditoría</Link>
+        <Link className={s.primary} to={`/review?execution=${execution.id}`}>
+          Abrir la auditoría
+        </Link>
       </section>
     </>
   );
+}
+
+/* La fecha se formatea con el locale del navegador y no a mano: quien revise
+   esto desde otro huso no tiene por que leer el nuestro. */
+function cuando(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(d);
 }
 
 function Cell({ kind, n, label }: { kind: string; n: number; label: string }) {

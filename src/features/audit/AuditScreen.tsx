@@ -34,6 +34,10 @@ export interface Record_ {
 }
 
 
+/* Cuantos contextos se piden a la vez. Seis mantiene la conexion ocupada sin
+   que el navegador abra miles de peticiones en paralelo. */
+const A_LA_VEZ = 6;
+
 const CONDITION: Record<string, boolean> = {
   con_asistente: true,
   sin_asistente: false,
@@ -86,14 +90,35 @@ export function AuditScreen() {
             throw new Error("el lote no cuadra con la ejecución");
           }
         }
-        // El contexto va en una petición por hallazgo, y falta cuando la
-        // política de retención ya lo borró.
-        const contextos = await Promise.all(
-          elegidos.map((f) =>
-            api.context(f.id).catch((): ApiContext | null => null),
-          ),
-        );
-        if (vigente) setFindings(elegidos.map((f, i) => toFinding(f, contextos[i])));
+        /* El contexto va en una petición por hallazgo. Fuera del estudio la
+           lista es la ejecución entera, y pedirlas todas de golpe tumbaba el
+           navegador con ERR_INSUFFICIENT_RESOURCES antes de pintar nada.
+
+           Así que primero se pinta la lista sin contexto, que ya deja
+           trabajar, y los contextos entran por tandas detrás. */
+        if (!vigente) return;
+        setFindings(elegidos.map((f) => toFinding(f, null)));
+        setLoading(false);
+
+        for (let i = 0; i < elegidos.length; i += A_LA_VEZ) {
+          if (!vigente) return;
+          const tanda = elegidos.slice(i, i + A_LA_VEZ);
+          const contextos = await Promise.all(
+            tanda.map((f) =>
+              api.context(f.id).catch((): ApiContext | null => null),
+            ),
+          );
+          if (!vigente) return;
+          setFindings((previo) => {
+            if (!previo) return previo;
+            const copia = [...previo];
+            tanda.forEach((f, j) => {
+              const ctx = contextos[j];
+              if (ctx) copia[i + j] = toFinding(f, ctx);
+            });
+            return copia;
+          });
+        }
       } catch {
         if (vigente) {
           setError(
@@ -244,9 +269,18 @@ export function Session({
     [filters, records, assisted],
   );
 
+  /* Ordenadas por su numero y no como texto: alfabeticamente CWE-78 cae
+     detras de CWE-643 y encontrar una en la lista se vuelve un juego. */
   const cwes = useMemo(
-    () => [...new Set(findings.map((f) => f.cwe))].sort(),
-    [],
+    () =>
+      [...new Set(findings.map((f) => f.cwe))].sort((a, b) => {
+        const na = Number(a.replace(/\D/g, ""));
+        const nb = Number(b.replace(/\D/g, ""));
+        return Number.isFinite(na) && Number.isFinite(nb)
+          ? na - nb
+          : a.localeCompare(b);
+      }),
+    [findings],
   );
 
   const shownAt = useRef<number>(Date.now());
@@ -430,7 +464,9 @@ export function Session({
                   >
                     <span className={s.itemTitle}>{f.title}</span>
                     <span className={s.itemMeta}>
-                      <span className="mono">{f.file}:{f.line}</span>
+                      <span className={`${s.itemFile} mono`}>
+                        {f.file}:{f.line}
+                      </span>
                       {assisted && (
                         <span className={s[f.verdict]}>{VERDICT_SHORT[f.verdict]}</span>
                       )}
