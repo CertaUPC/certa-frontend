@@ -40,4 +40,17 @@
 }
 .back:hover { background: var(--bg); }
 
+/* Continuar es lo que toca cuando queda una segunda parte, asi que pesa mas
+   que volver a la lista y se apoya en el orden, no solo en el color. */
+.actions { display: grid; gap: 8px; }
+.next {
+  inline-size: 100%; font-size: 15px; font-weight: 600;
+  background: var(--accent); color: var(--surface);
+  border: 0; border-radius: var(--radius-sm); padding: 13px;
+}
+.next:hover { filter: brightness(1.08); }
+.back:focus-visible, .next:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
 .foot { font-size: 12.5px; color: var(--ink-3); line-height: 1.5; margin-block-start: 14px; max-inline-size: 52ch; }

@@ -5,15 +5,18 @@
  */
 
 import { CHOICE_LABEL, type Choice } from "./shortcuts";
-import { FINDINGS } from "./data";
 import s from "./Summary.module.css";
 
 interface Props {
   records: Record<string, { choice: Choice; seconds: number }>;
+  /** Cuantas alertas traia esta mitad, no cuantas se respondieron. */
+  total: number;
   onReview: () => void;
+  /** Presente solo cuando queda una segunda condicion por recorrer. */
+  onContinue?: () => void;
 }
 
-export function Summary({ records, onReview }: Props) {
+export function Summary({ records, total: esperadas, onReview, onContinue }: Props) {
   const entries = Object.values(records);
   const total = entries.length;
   const seconds = entries.reduce((a, r) => a + r.seconds, 0);
@@ -35,8 +38,8 @@ export function Summary({ records, onReview }: Props) {
         <p className={s.wordmark}>Certa</p>
         <h1 className={s.title}>Terminaste la revisión</h1>
         <p className={s.lead}>
-          Quedaron registradas {total} de {FINDINGS.length} respuestas. Puedes
-          volver y cambiar cualquiera antes de cerrar la sesión.
+          Quedaron registradas {total} de {esperadas} respuestas. Puedes volver
+          y cambiar cualquiera antes de continuar.
         </p>
 
         <dl className={s.facts}>
@@ -68,9 +71,16 @@ export function Summary({ records, onReview }: Props) {
           </ul>
         </div>
 
-        <button className={s.back} onClick={onReview}>
-          Volver a la lista
-        </button>
+        <div className={s.actions}>
+          <button className={s.back} onClick={onReview}>
+            Volver a la lista
+          </button>
+          {onContinue && (
+            <button className={s.next} onClick={onContinue}>
+              Continuar con la segunda parte
+            </button>
+          )}
+        </div>
 
         <p className={s.foot}>
           No se muestra qué acertaste. Saberlo cambiaría cómo decides en la

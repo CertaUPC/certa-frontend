@@ -197,6 +197,7 @@ export const api = {
       order: string[];
       first_batch: string;
       second_batch: string;
+      execution_id: string | null;
     }>("/api/v1/auth/participant", {
       method: "POST",
       body: JSON.stringify({ anonymous_code: anonymousCode }),

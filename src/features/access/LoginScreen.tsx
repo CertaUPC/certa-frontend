@@ -75,11 +75,21 @@ export function LoginScreen() {
 
   async function entrarComoParticipante() {
     const r = await api.participantAccess(codigo);
+    if (!r.execution_id) {
+      throw new ApiError(
+        409,
+        "El estudio no tiene un lote congelado. Avisa a quien dirige la sesión.",
+      );
+    }
     saveSession(r.access_token, "desarrollador");
-    const primera = r.order[0] ?? "con_asistente";
+
+    /* Las dos condiciones van en la dirección, y no en memoria, para que
+       recargar a mitad de sesión no pierda cuál toca después. */
+    const [primera, segunda] = r.order;
     navigate(
-      `/session?participant=${r.participant_id}` +
-        `&condition=${primera}&batch=${r.first_batch}`,
+      `/session?execution=${r.execution_id}&participant=${r.participant_id}` +
+        `&condition=${primera}&batch=${r.first_batch}` +
+        `&next_condition=${segunda}&next_batch=${r.second_batch}`,
     );
   }
 

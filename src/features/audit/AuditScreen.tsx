@@ -1,5 +1,5 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Briefing } from "./Briefing";
 import { CodeViewer } from "./CodeViewer";
 import { ShortcutHelp } from "./ShortcutHelp";
@@ -49,11 +49,14 @@ const VALUE: Record<Choice, "confirmado" | "descartado" | "dudoso"> = {
    enlace que el investigador arma al preparar la sesión, y así el participante
    no elige nada de lo que se está midiendo. */
 export function AuditScreen() {
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const executionId = params.get("execution");
   const participantId = params.get("participant");
   const condicion = params.get("condition");
   const lote = params.get("batch");
+  const siguienteCondicion = params.get("next_condition");
+  const siguienteLote = params.get("next_batch");
   const fixedCondition = condicion ? CONDITION[condicion] ?? null : null;
 
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -166,12 +169,26 @@ export function AuditScreen() {
         });
       }}
       saveError={saveError}
+      /* Cuando el contrabalanceo asigno una segunda condicion, el cierre de
+         la primera lleva a ella. Antes la direccion la armaba a mano quien
+         dirige la sesion, con la condicion y la mitad que tocaban. */
+      onContinue={
+        siguienteCondicion && siguienteLote
+          ? () =>
+              navigate(
+                `/session?execution=${executionId}&participant=${participantId}` +
+                  `&condition=${siguienteCondicion}&batch=${siguienteLote}`,
+              )
+          : undefined
+      }
     />
   );
 }
 
 interface SessionProps {
   findings: Finding[];
+  /** Presente solo cuando queda una segunda condicion por recorrer. */
+  onContinue?: () => void;
   /** Nulo fuera del experimento: entonces la respuesta no se registra. */
   onAnswer?: (findingId: string, choice: Choice, seconds: number) => void;
   /** Fijada por el investigador al preparar la sesión. Sin ella, se puede alternar. */
@@ -190,6 +207,7 @@ export function Session({
   fixedCondition,
   saveError,
   onThemeFixed,
+  onContinue,
 }: SessionProps) {
   const [stage, setStage] = useState<Stage>("briefing");
   const [index, setIndex] = useState(0);
@@ -307,7 +325,9 @@ export function Session({
     return (
       <Summary
         records={records}
+        total={findings.length}
         onReview={() => { setIndex(0); setStage("review"); }}
+        onContinue={onContinue}
       />
     );
   }
