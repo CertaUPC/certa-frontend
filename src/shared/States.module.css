@@ -1,8 +1,18 @@
+/* Centrada en su hueco, siempre. Antes quedaba pegada al borde izquierdo, y
+   en las pantallas que no viven dentro del armazon, como la auditoria, ese
+   borde era el de la ventana: la tarjeta salia tocando el cristal. */
 .state {
   display: grid; gap: 8px; justify-items: start;
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 22px 24px;
-  max-inline-size: 62ch;
+  max-inline-size: 62ch; margin-inline: auto;
+}
+
+/* Para el estado que ocupa la ventana entera y no tiene armazon alrededor. */
+.pantalla {
+  min-block-size: 100dvh;
+  display: grid; align-content: center;
+  padding: 24px 20px;
 }
 
 .text { font-size: 14px; color: var(--ink-2); line-height: 1.55; }
@@ -33,6 +43,7 @@
 .empty {
   background: var(--surface); border: 1px dashed var(--line-strong);
   border-radius: var(--radius); padding: 40px 30px; text-align: center;
+  max-inline-size: 62ch; margin-inline: auto;
 }
 .emptyTitle { font-size: 18px; font-weight: 600; margin-block-end: 8px; }
 .empty p {

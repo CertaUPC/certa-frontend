@@ -48,6 +48,12 @@ export function Empty({
   );
 }
 
+/** Centra el estado en la ventana. Para las pantallas que no viven dentro del
+ *  armazón y por tanto no tienen ni cabecera ni margen propio. */
+export function Pantalla({ children }: { children: ReactNode }) {
+  return <div className={s.pantalla}>{children}</div>;
+}
+
 /** Filas grises con la forma del contenido que viene, en vez de una pantalla vacía. */
 export function Skeleton({ rows = 4 }: { rows?: number }) {
   return (

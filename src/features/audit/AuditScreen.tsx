@@ -33,7 +33,7 @@ import { useTheme } from "../../shared/theme";
 import { ThemeToggle } from "../../shared/ThemeToggle";
 import { Mark } from "../../shared/Mark";
 import { api, USE_FIXTURES, type ApiContext } from "../../shared/api";
-import { Empty, Failed, Loading } from "../../shared/States";
+import { Empty, Failed, Loading, Pantalla } from "../../shared/States";
 import s from "./AuditScreen.module.css";
 
 type Stage = "briefing" | "review" | "summary";
@@ -171,23 +171,39 @@ export function AuditScreen() {
   if (USE_FIXTURES) {
     return <Session findings={FINDINGS} fixedCondition={fixedCondition} />;
   }
+  /* Esta pantalla no vive dentro del armazón, de modo que sus estados no
+     heredan ni cabecera ni margen: se centran ellos. */
   if (!executionId) {
     return (
-      <Empty title="Esta sesión no tiene ejecución asignada">
-        <p>
-          El enlace debe traer la ejecución que toca revisar. Pídeselo a quien
-          prepara la sesión.
-        </p>
-      </Empty>
+      <Pantalla>
+        <Empty title="Esta sesión no tiene ejecución asignada">
+          <p>
+            El enlace debe traer la ejecución que toca revisar. Pídeselo a quien
+            prepara la sesión.
+          </p>
+        </Empty>
+      </Pantalla>
     );
   }
-  if (loading) return <Loading what="las alertas" />;
-  if (error) return <Failed message={error} />;
+  if (loading)
+    return (
+      <Pantalla>
+        <Loading what="las alertas" />
+      </Pantalla>
+    );
+  if (error)
+    return (
+      <Pantalla>
+        <Failed message={error} />
+      </Pantalla>
+    );
   if (!findings || findings.length === 0) {
     return (
-      <Empty title="Esta ejecución no tiene alertas">
-        <p>El archivo se cargó, pero el filtro de alcance no dejó ninguna.</p>
-      </Empty>
+      <Pantalla>
+        <Empty title="Esta ejecución no tiene alertas">
+          <p>El archivo se cargó, pero el filtro de alcance no dejó ninguna.</p>
+        </Empty>
+      </Pantalla>
     );
   }
 
