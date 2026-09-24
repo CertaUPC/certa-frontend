@@ -7,6 +7,8 @@
   background: var(--surface);
   position: sticky; inset-block-start: 0; z-index: var(--z-sticky);
 }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brandMark { color: var(--accent); }
 .wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
 
 .nav { display: flex; gap: 4px; }
@@ -23,7 +25,13 @@
   font-size: 11.5px; color: var(--check);
   border: 1px dashed var(--check); border-radius: 999px; padding: 3px 10px;
 }
-.role { font-size: 12.5px; color: var(--ink-3); }
+/* Quien esta dentro. Se recorta en pantallas estrechas antes que empujar las
+   acciones fuera de la barra. */
+.quien {
+  font-size: 12.5px; color: var(--ink-3);
+  max-inline-size: 22ch; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
 .chip {
   font-size: 12.5px; background: var(--surface);
   border: 1px solid var(--line); color: var(--ink-2);

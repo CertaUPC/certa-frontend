@@ -60,6 +60,17 @@
   --z-toast: 400;
 
   --salida: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* El panel de la entrada. Es la unica superficie oscura del tema claro, y
+     lo es porque lleva codigo: un listado se lee en oscuro. Azul teñido del
+     mismo acento, no un negro con una pizca de color. */
+  --stage:         oklch(0.255 0.030 252);
+  --stage-code:    oklch(0.215 0.026 252);
+  --stage-line:    oklch(0.355 0.026 252);
+  --stage-ink:     oklch(0.965 0.006 250);
+  --stage-ink-2:   oklch(0.775 0.016 250);
+  --stage-accent:  oklch(0.775 0.110 250);
+  --stage-mark:    oklch(0.330 0.048 252);
 }
 
 :root[data-theme="dark"] {
@@ -94,4 +105,14 @@
 
   --lift: 0 1px 2px oklch(0 0 0 / 0.4),
           0 8px 24px -16px oklch(0 0 0 / 0.9);
+
+  /* En oscuro el panel baja, no sube: tiene que seguir separandose de la
+     pagina, que ya es oscura. */
+  --stage:         oklch(0.142 0.014 252);
+  --stage-code:    oklch(0.112 0.012 252);
+  --stage-line:    oklch(0.282 0.018 252);
+  --stage-ink:     oklch(0.940 0.008 250);
+  --stage-ink-2:   oklch(0.735 0.016 250);
+  --stage-accent:  oklch(0.740 0.105 250);
+  --stage-mark:    oklch(0.235 0.036 252);
 }

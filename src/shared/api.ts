@@ -36,6 +36,29 @@ export function saveSession(token: string, role: Role): void {
     sessionStorage.setItem(ROLE_KEY, role);
   } catch { /* sesión privada: se opera igual, sin recordar */ }
 }
+/* El correo de quien entro, sacado del propio token.
+ *
+ * Se lee sin verificar la firma, y da igual: sirve para escribirlo en la barra,
+ * no para conceder nada. Quien manipule su token local se enganara a si mismo;
+ * el servicio comprueba la firma en cada peticion.
+ *
+ * Reemplaza al rol global que la barra mostraba antes. Ese rango dejo de
+ * gobernar nada cuando el permiso paso a venir de la pertenencia al proyecto,
+ * y anunciar «Investigador» describia una jerarquia que ya no existe. */
+export function getEmail(): string | null {
+  const token = getToken();
+  if (!token || token === "muestra") return null;
+  try {
+    const carga = token.split(".")[1];
+    if (!carga) return null;
+    const json = atob(carga.replace(/-/g, "+").replace(/_/g, "/"));
+    const datos = JSON.parse(json) as { email?: string };
+    return datos.email ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function clearSession(): void {
   try {
     sessionStorage.removeItem(TOKEN_KEY);
@@ -111,9 +134,10 @@ export interface Participant {
   participant_id: string;
   anonymous_code: string;
   experience_band: string;
+  is_pilot: boolean;
   order: string[];
-  first_batch: string;
-  second_batch: string;
+  first_batch: string | null;
+  second_batch: string | null;
 }
 
 export interface Project {
@@ -185,6 +209,15 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  /* El alta no reparte roles: crea siempre el de menor privilegio. Quien se
+     registra puede crear su proyecto y decidir sobre sus hallazgos, que es
+     para lo que existe la herramienta. */
+  register: (email: string, password: string) =>
+    request<{ id: string; email: string; role: Role }>("/api/v1/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
   /* La entrada del participante a su sesión, con el código que quien dirige
      el estudio le dicta. No lleva contraseña: el consentimiento promete que
      no se recoge nada que le identifique, y darle una cuenta lo incumpliría.
@@ -227,10 +260,41 @@ export const api = {
 
   listParticipants: () => request<Participant[]>("/api/v1/experiment/participants"),
 
-  registerParticipant: (code: string, years: number) =>
-    request<Participant>("/api/v1/experiment/participants", {
+  /* La ficha del anexo B entera. `consented` no tiene valor por omisión a
+     propósito: sin consentimiento no se registra nada, y esa decisión la toma
+     la pantalla, no el cliente. */
+  registerParticipant: (ficha: {
+    anonymous_code: string;
+    experience_band: string;
+    has_security_role: boolean;
+    main_language: string | null;
+    alert_frequency: string | null;
+    security_training: string | null;
+    consented: boolean;
+    is_pilot: boolean;
+  }) =>
+    request<{
+      participant_id: string;
+      session_id: string;
+      order: string[];
+      first_batch: string;
+      second_batch: string;
+      is_pilot: boolean;
+    }>("/api/v1/experiment/participants", {
       method: "POST",
-      body: JSON.stringify({ anonymous_code: code, years_of_experience: years, consented: true }),
+      body: JSON.stringify(ficha),
+    }),
+
+  /* Emite la credencial de participación. El token en claro sale una sola vez
+     y no hace falta guardarlo: lo canjea el servicio cuando la persona escribe
+     su código. Lo que importa es que exista y esté vigente. */
+  issueParticipationGrant: (participantId: string) =>
+    request<{ id: string; expires_at: string | null }>("/api/v1/auth/grants", {
+      method: "POST",
+      body: JSON.stringify({
+        subject_kind: "participation",
+        subject_id: participantId,
+      }),
     }),
 
   projects: () => request<Project[]>("/api/v1/projects"),

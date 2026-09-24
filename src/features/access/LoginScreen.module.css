@@ -1,59 +1,268 @@
-/* La pantalla de entrada. Los destinos cumplen los 24 píxeles de la norma y
-   los botones principales llegan a 44. */
+/* La pantalla de entrada, partida en dos.
+ *
+ * Toda la fuerza está en el panel izquierdo; el formulario se mantiene callado
+ * a propósito. Los destinos cumplen los 24 píxeles de la norma y los botones
+ * principales llegan a 44.
+ */
 
-.wrap {
+.split {
   min-block-size: 100dvh;
   display: grid;
-  place-items: center;
-  padding: 40px 20px;
+  grid-template-columns: minmax(0, 1fr) 516px;
+  background: var(--bg);
 }
 
-.card {
-  inline-size: min(420px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line);
+/* ── El panel, que es lo que se mira primero ──────────────────────── */
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 44px clamp(40px, 5vw, 72px);
+  background: var(--stage);
+  color: var(--stage-ink);
+}
+
+/* Una retícula tenue, del paso del interlineado del código. Encuadra el
+   fragmento sin dibujarle un marco alrededor. */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--stage-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--stage-line) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0.22;
+  mask-image: radial-gradient(120% 90% at 22% 16%, #000 0%, transparent 72%);
+  pointer-events: none;
+}
+
+.stage > * {
+  position: relative;
+}
+
+/* Los tres bloques comparten columna, y la columna se centra cuando el panel
+   da de si. Alineados a la izquierda dentro de ella: el codigo lo exige. */
+.brand,
+.stageBody,
+.colophon {
+  inline-size: min(64ch, 100%);
+  margin-inline: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandMark {
+  color: var(--stage-ink);
+}
+
+.brandName {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+
+.claim {
+  margin: 0;
+  font-size: clamp(27px, 3.1vw, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.032em;
+  text-wrap: balance;
+}
+
+.colophon {
+  margin-block: 0;
+  font-size: 12px;
+  color: var(--stage-ink-2);
+  opacity: 0.75;
+}
+
+/* ── El hallazgo, con sus líneas citadas ──────────────────────────── */
+
+.proof {
+  margin: 32px 0 0;
+}
+
+.proofHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-block-end: 9px;
+  font-family: "Cascadia Code", ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  color: var(--stage-ink-2);
+}
+
+.proofFile {
+  color: var(--stage-ink);
+}
+
+.proofMethod {
+  opacity: 0.75;
+}
+
+.code {
+  margin: 0;
+  inline-size: 100%;
+  padding-block: 12px;
+  overflow-x: auto;
   border-radius: var(--radius);
-  box-shadow: var(--lift);
-  padding: 30px 32px 26px;
+  background: var(--stage-code);
+  box-shadow: inset 0 0 0 1px var(--stage-line);
+  font-family: "Cascadia Code", ui-monospace, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.95;
+  color: var(--stage-ink-2);
+  scrollbar-width: thin;
+}
+
+.line,
+.lineMarked {
+  display: block;
+  padding-inline: 16px;
+  white-space: pre;
+  min-inline-size: max-content;
+}
+
+/* La marca de anclaje es la misma que usa el lector de código: fondo pleno de
+   la línea entera, no una franja lateral. Se citó la línea, no su margen. */
+.lineMarked {
+  position: relative;
+  isolation: isolate;
+  color: var(--stage-ink);
+}
+
+.lineMarked::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--stage-mark);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: anclar 420ms var(--salida) both;
+  animation-delay: inherit;
+}
+
+/* El único movimiento que la pantalla hace sola: las tres líneas citadas se
+   marcan una tras otra al cargar, que es el acto que el producto ejecuta. */
+@keyframes anclar {
+  to { transform: scaleX(1); }
+}
+
+.gutter {
+  display: inline-block;
+  inline-size: 2.4em;
+  margin-inline-end: 1.2em;
+  text-align: end;
+  user-select: none;
+  color: color-mix(in oklab, var(--stage-ink-2) 68%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+.lineMarked .gutter {
+  color: var(--stage-accent);
+  font-weight: 600;
+}
+
+.proofNote {
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--stage-ink-2);
+  max-inline-size: 60ch;
+}
+
+.proofNote code {
+  font-family: "Cascadia Code", ui-monospace, Consolas, monospace;
+  font-size: 0.92em;
+  color: var(--stage-ink);
+}
+
+/* ── Lo que el participante necesita antes de empezar ─────────────── */
+
+.terms {
+  margin: 32px 0 0;
+  display: grid;
+  gap: 1px;
+  background: var(--stage-line);
+  border-block: 1px solid var(--stage-line);
+}
+
+.terms > div {
+  display: grid;
+  grid-template-columns: 15ch minmax(0, 1fr);
+  gap: 18px;
+  padding-block: 15px;
+  background: var(--stage);
+}
+
+.terms dt {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--stage-ink);
+}
+
+.terms dd {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--stage-ink-2);
+}
+
+/* ── El formulario ────────────────────────────────────────────────── */
+
+.formSide {
+  display: grid;
+  align-content: center;
+  padding: 48px clamp(24px, 4vw, 56px);
+  background: var(--surface);
+  border-inline-start: 1px solid var(--line);
+}
+
+.form {
+  inline-size: min(380px, 100%);
+  margin-inline: auto;
   display: grid;
   gap: 14px;
 }
 
-/* ── Marca */
-.marca {
-  display: flex;
+.formBrand {
+  display: none;
   align-items: center;
-  gap: 9px;
-}
-
-.sello {
-  display: grid;
-  place-items: center;
-  inline-size: 34px;
-  block-size: 34px;
-  border-radius: 9px;
-  background: var(--accent-tint);
+  gap: 8px;
   color: var(--accent);
-}
-
-.wordmark {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.formBrand span {
   color: var(--ink);
 }
 
 .title {
-  font-size: 27px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.032em;
+  line-height: 1.1;
 }
 
-.lead {
-  font-size: 14px;
-  color: var(--ink-2);
-  line-height: 1.55;
+.lede {
+  margin: -6px 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
 }
 
 /* ── Los dos caminos. La pestaña viva se distingue por fondo, color y
@@ -65,7 +274,7 @@
   padding: 4px;
   background: var(--sunken);
   border-radius: var(--radius-sm);
-  margin-block-start: 4px;
+  margin-block-start: 2px;
 }
 
 .pestana,
@@ -107,6 +316,7 @@
 }
 
 .ayuda {
+  margin: 0;
   font-size: 13px;
   color: var(--ink-2);
   line-height: 1.5;
@@ -178,6 +388,7 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  margin: 0;
   font-size: 13.5px;
   color: var(--real);
   background: var(--real-tint);
@@ -193,12 +404,14 @@
 }
 
 .trabajando {
+  margin: 0;
   font-size: 13px;
   color: var(--ink-2);
 }
 
 /* ── Acciones */
 .submit {
+  font: inherit;
   font-size: 15px;
   font-weight: 600;
   min-block-size: 44px;
@@ -227,11 +440,16 @@
 }
 
 .foot {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
   margin-block-start: 4px;
+}
+
+.switch {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
 }
 
 .linkish {
@@ -253,8 +471,37 @@
   border-radius: 3px;
 }
 
-/* Quien pide menos movimiento no lo recibe. */
+/* ── Cuando no cabe la partición ──────────────────────────────────── */
+
+/* Por debajo de esto el fragmento saldría comprimido y dejaría de leerse, que
+   es lo único que tenía que hacer. Se retira y queda el formulario. */
+@media (max-width: 1000px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .stage {
+    display: none;
+  }
+
+  .formSide {
+    border-inline-start: 0;
+    background: var(--bg);
+    padding-block: 40px;
+  }
+
+  .formBrand {
+    display: flex;
+  }
+}
+
+/* Quien pide menos movimiento no lo recibe: las líneas ya están marcadas. */
 @media (prefers-reduced-motion: reduce) {
+  .lineMarked::before {
+    animation: none;
+    transform: scaleX(1);
+  }
+
   .pestana,
   .pestanaViva,
   .submit {

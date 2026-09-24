@@ -7,15 +7,29 @@
  * devuelve su propia credencial, acotada a su participación. No se le pide
  * contraseña: el consentimiento promete que no se recoge nada que le
  * identifique.
+ *
+ * El panel de la izquierda cambia con el camino elegido, y no es adorno. A
+ * quien viene del equipo le enseña lo que la herramienta hace, con un hallazgo
+ * del corpus y sus líneas citadas. A quien viene a participar NO se le enseña
+ * código: ver una alerta ya resuelta antes de empezar sesgaría la tarea que se
+ * está midiendo.
  */
 
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, USE_FIXTURES, api, saveSession, type Role } from "../../shared/api";
 import { useTheme } from "../../shared/theme";
+import { Mark } from "../../shared/Mark";
 import s from "./LoginScreen.module.css";
 
 type Camino = "equipo" | "participante";
+
+/* Dentro del camino del equipo, entrar o darse de alta. El alta existe
+   porque el producto se registra solo: quien descarga el trabajador crea su
+   cuenta, se emite sus credenciales y analiza su repositorio sin pedirle
+   permiso a nadie. Hasta ahora esa puerta estaba en el servicio pero no en
+   la pantalla, de modo que la unica via era llamar a la API a mano. */
+type Modo = "entrar" | "crear";
 
 const CAMINOS: { id: Camino; rotulo: string; describe: string }[] = [
   {
@@ -30,11 +44,28 @@ const CAMINOS: { id: Camino; rotulo: string; describe: string }[] = [
   },
 ];
 
+/* Un hallazgo real del corpus, recortado a la ventana que se lee de un
+   vistazo. El archivo, los números y las líneas citadas son los del análisis
+   que está cargado en el despliegue. */
+const FRAGMENTO = {
+  archivo: "BenchmarkTest00897.java",
+  metodo: "doPost",
+  lineas: [
+    { n: 78, texto: '    String[] args = {a1, a2, "echo " + bar};', citada: true },
+    { n: 79, texto: "" },
+    { n: 80, texto: "    ProcessBuilder pb = new ProcessBuilder(args);", citada: true },
+    { n: 81, texto: "" },
+    { n: 82, texto: "    try {" },
+    { n: 83, texto: "        Process p = pb.start();", citada: true },
+  ],
+};
+
 export function LoginScreen() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
   const [camino, setCamino] = useState<Camino>("equipo");
+  const [modo, setModo] = useState<Modo>("entrar");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [codigo, setCodigo] = useState("");
@@ -48,6 +79,7 @@ export function LoginScreen() {
 
   function cambiarCamino(siguiente: Camino) {
     setCamino(siguiente);
+    setModo("entrar");
     setError(null);
   }
 
@@ -67,6 +99,9 @@ export function LoginScreen() {
       // recorrer las dos vistas. Nunca ocurre contra un servicio real.
       saveSession("muestra", role);
     } else {
+      // Crear la cuenta y entrar son un solo gesto: nadie se registra para
+      // quedarse fuera.
+      if (modo === "crear") await api.register(email, password);
       const r = await api.login(email, password);
       saveSession(r.access_token, r.role);
     }
@@ -116,162 +151,281 @@ export function LoginScreen() {
   const invalido = error ? true : undefined;
 
   return (
-    <main className={s.wrap} aria-labelledby="titulo-entrada">
-      <form className={s.card} onSubmit={submit} noValidate>
-        <div className={s.marca}>
-          <span className={s.sello} aria-hidden="true">
-            <svg viewBox="0 0 32 32" width="22" height="22" fill="currentColor">
-              <rect x="11" y="8.5" width="13" height="2.6" rx="1.3" opacity="0.42" />
-              <rect x="9.6" y="14.6" width="14.4" height="2.8" rx="1.4" />
-              <rect x="11" y="20.9" width="9" height="2.6" rx="1.3" opacity="0.42" />
-              <path d="M4.6 13.4 8.4 16l-3.8 2.6z" />
-            </svg>
-          </span>
-          <p className={s.wordmark}>Certa</p>
+    <div className={s.split}>
+      <aside className={s.stage}>
+        <div className={s.brand}>
+          <Mark size={27} className={s.brandMark} />
+          <span className={s.brandName}>Certa</span>
         </div>
 
-        <h1 className={s.title} id="titulo-entrada">
-          Entrar
-        </h1>
-        <p className={s.lead}>
-          Validación de hallazgos de análisis estático de seguridad.
+        {camino === "equipo" ? <PanelEquipo /> : <PanelParticipante />}
+
+        <p className={s.colophon}>
+          Universidad Peruana de Ciencias Aplicadas, Ingeniería de Software
         </p>
+      </aside>
 
-        <div className={s.pestanas} role="tablist" aria-label="Cómo quieres entrar">
-          {CAMINOS.map((c, i) => (
-            <button
-              key={c.id}
-              ref={(el) => {
-                pestanasRef.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`pestana-${c.id}`}
-              aria-selected={camino === c.id}
-              aria-controls={`panel-${c.id}`}
-              tabIndex={camino === c.id ? 0 : -1}
-              className={camino === c.id ? s.pestanaViva : s.pestana}
-              onClick={() => cambiarCamino(c.id)}
-              onKeyDown={(e) => porTeclado(e, i)}
-            >
-              {c.rotulo}
-            </button>
-          ))}
-        </div>
+      <main className={s.formSide} aria-labelledby="titulo-entrada">
+        <form className={s.form} onSubmit={submit} noValidate>
+          {/* Solo cuando el panel no cabe: sin el, la pantalla no dice de
+              quien es. */}
+          <div className={s.formBrand} aria-hidden="true">
+            <Mark size={22} />
+            <span>Certa</span>
+          </div>
 
-        <div
-          role="tabpanel"
-          id={`panel-${camino}`}
-          aria-labelledby={`pestana-${camino}`}
-          className={s.panel}
-        >
-          <p className={s.ayuda}>
-            {CAMINOS.find((c) => c.id === camino)!.describe}
-          </p>
-
-          {camino === "equipo" ? (
-            <>
-              <label className={s.field}>
-                <span>Correo</span>
-                <input
-                  ref={correoRef}
-                  type="email"
-                  autoComplete="username"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required={!USE_FIXTURES}
-                  aria-invalid={invalido}
-                  aria-describedby={error ? "fallo-entrada" : undefined}
-                  placeholder="u202211399@upc.edu.pe"
-                />
-              </label>
-
-              <label className={s.field}>
-                <span>Contraseña</span>
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required={!USE_FIXTURES}
-                  aria-invalid={invalido}
-                  aria-describedby={error ? "fallo-entrada" : undefined}
-                />
-              </label>
-
-              {USE_FIXTURES && (
-                <label className={s.field}>
-                  <span>Rol, mientras no hay servicio conectado</span>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as Role)}
-                  >
-                    <option value="investigador">Investigador</option>
-                    <option value="lider_tecnico">Líder técnico</option>
-                    <option value="desarrollador">Desarrollador</option>
-                  </select>
-                </label>
-              )}
-            </>
-          ) : (
-            <label className={s.field}>
-              <span>Código de participante</span>
-              <input
-                ref={codigoRef}
-                className={s.codigo}
-                type="text"
-                inputMode="text"
-                autoComplete="off"
-                autoCapitalize="characters"
-                spellCheck={false}
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                required
-                aria-invalid={invalido}
-                aria-describedby={
-                  error ? "fallo-entrada nota-codigo" : "nota-codigo"
-                }
-                placeholder="P01"
-              />
-              <span className={s.nota} id="nota-codigo">
-                No escribas tu nombre ni tu correo. El código es lo único que
-                se guarda de ti.
-              </span>
-            </label>
-          )}
-        </div>
-
-        {/* Lo que el sistema dice en voz alta: el fallo y el trabajo en curso. */}
-        <div className={s.aviso} role="alert" aria-live="assertive">
-          {error && (
-            <p className={s.error} id="fallo-entrada">
-              <svg
-                viewBox="0 0 20 20"
-                width="16"
-                height="16"
-                aria-hidden="true"
-                className={s.iconoError}
-              >
-                <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.6" fill="none" />
-                <path d="M10 6v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <circle cx="10" cy="14" r="1" fill="currentColor" />
-              </svg>
-              {error}
+          <h1 className={s.title} id="titulo-entrada">
+            {camino === "equipo" && modo === "crear" ? "Crear cuenta" : "Entrar"}
+          </h1>
+          {camino === "equipo" && (
+            <p className={s.lede}>
+              La sesión sigue abierta ocho horas en este navegador.
             </p>
           )}
-          {busy && <p className={s.trabajando}>Comprobando…</p>}
-        </div>
 
-        <button className={s.submit} type="submit" disabled={busy} aria-busy={busy}>
-          {camino === "equipo" ? "Entrar" : "Empezar la sesión"}
-        </button>
+          <div className={s.pestanas} role="tablist" aria-label="Cómo quieres entrar">
+            {CAMINOS.map((c, i) => (
+              <button
+                key={c.id}
+                ref={(el) => {
+                  pestanasRef.current[i] = el;
+                }}
+                type="button"
+                role="tab"
+                id={`pestana-${c.id}`}
+                aria-selected={camino === c.id}
+                aria-controls={`panel-${c.id}`}
+                tabIndex={camino === c.id ? 0 : -1}
+                className={camino === c.id ? s.pestanaViva : s.pestana}
+                onClick={() => cambiarCamino(c.id)}
+                onKeyDown={(e) => porTeclado(e, i)}
+              >
+                {c.rotulo}
+              </button>
+            ))}
+          </div>
 
-        <div className={s.foot}>
-          <button type="button" className={s.linkish} onClick={toggle}>
-            Cambiar a tema {theme === "dark" ? "claro" : "oscuro"}
+          <div
+            role="tabpanel"
+            id={`panel-${camino}`}
+            aria-labelledby={`pestana-${camino}`}
+            className={s.panel}
+          >
+            <p className={s.ayuda}>
+              {camino === "equipo" && modo === "crear"
+                ? "Con tu cuenta registras un proyecto, lanzas el análisis desde tu máquina y decides sobre lo que salga."
+                : CAMINOS.find((c) => c.id === camino)!.describe}
+            </p>
+
+            {camino === "equipo" ? (
+              <>
+                <label className={s.field}>
+                  <span>Correo</span>
+                  <input
+                    ref={correoRef}
+                    type="email"
+                    autoComplete="username"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required={!USE_FIXTURES}
+                    aria-invalid={invalido}
+                    aria-describedby={error ? "fallo-entrada" : undefined}
+                    placeholder="nombre@upc.edu.pe"
+                  />
+                </label>
+
+                <label className={s.field}>
+                  <span>Contraseña</span>
+                  <input
+                    type="password"
+                    autoComplete={
+                      modo === "crear" ? "new-password" : "current-password"
+                    }
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required={!USE_FIXTURES}
+                    minLength={modo === "crear" ? 8 : undefined}
+                    aria-invalid={invalido}
+                    aria-describedby={
+                      [error && "fallo-entrada", modo === "crear" && "minimo"]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
+                  />
+                  {modo === "crear" && (
+                    <span className={s.nota} id="minimo">
+                      Ocho caracteres como mínimo.
+                    </span>
+                  )}
+                </label>
+
+                {USE_FIXTURES && (
+                  <label className={s.field}>
+                    <span>Rol, mientras no hay servicio conectado</span>
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value as Role)}
+                    >
+                      <option value="investigador">Investigador</option>
+                      <option value="lider_tecnico">Líder técnico</option>
+                      <option value="desarrollador">Desarrollador</option>
+                    </select>
+                  </label>
+                )}
+              </>
+            ) : (
+              <label className={s.field}>
+                <span>Código de participante</span>
+                <input
+                  ref={codigoRef}
+                  className={s.codigo}
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                  required
+                  aria-invalid={invalido}
+                  aria-describedby={
+                    error ? "fallo-entrada nota-codigo" : "nota-codigo"
+                  }
+                  placeholder="P01"
+                />
+                <span className={s.nota} id="nota-codigo">
+                  No escribas tu nombre ni tu correo. El código es lo único que
+                  se guarda de ti.
+                </span>
+              </label>
+            )}
+          </div>
+
+          {/* Lo que el sistema dice en voz alta: el fallo y el trabajo en curso. */}
+          <div className={s.aviso} role="alert" aria-live="assertive">
+            {error && (
+              <p className={s.error} id="fallo-entrada">
+                <svg
+                  viewBox="0 0 20 20"
+                  width="16"
+                  height="16"
+                  aria-hidden="true"
+                  className={s.iconoError}
+                >
+                  <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.6" fill="none" />
+                  <path d="M10 6v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <circle cx="10" cy="14" r="1" fill="currentColor" />
+                </svg>
+                {error}
+              </p>
+            )}
+            {busy && <p className={s.trabajando}>Comprobando…</p>}
+          </div>
+
+          <button className={s.submit} type="submit" disabled={busy} aria-busy={busy}>
+            {camino === "participante"
+              ? "Empezar la sesión"
+              : modo === "crear"
+                ? "Crear cuenta y entrar"
+                : "Entrar"}
           </button>
+
+          <div className={s.foot}>
+            {camino === "equipo" && (
+              <p className={s.switch}>
+                {modo === "entrar" ? "¿Primera vez aquí?" : "¿Ya tienes cuenta?"}{" "}
+                <button
+                  type="button"
+                  className={s.linkish}
+                  onClick={() => {
+                    setModo(modo === "entrar" ? "crear" : "entrar");
+                    setError(null);
+                    correoRef.current?.focus();
+                  }}
+                >
+                  {modo === "entrar" ? "Crear una cuenta" : "Entrar con la tuya"}
+                </button>
+              </p>
+            )}
+            <button type="button" className={s.linkish} onClick={toggle}>
+              Cambiar a tema {theme === "dark" ? "claro" : "oscuro"}
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
+}
+
+/* A quien trabaja se le enseña el mecanismo, porque es lo que va a usar. */
+function PanelEquipo() {
+  return (
+    <div className={s.stageBody}>
+      <h2 className={s.claim}>
+        Cada veredicto señala líneas, y esas líneas se comprueban contra el
+        archivo.
+      </h2>
+
+      <figure className={s.proof}>
+        <figcaption className={s.proofHead}>
+          <span className={s.proofFile}>{FRAGMENTO.archivo}</span>
+          <span className={s.proofMethod}>{FRAGMENTO.metodo}</span>
+        </figcaption>
+
+        <pre className={s.code} aria-hidden="true">
+          {FRAGMENTO.lineas.map((l, i) => (
+            <span
+              key={l.n}
+              className={l.citada ? s.lineMarked : s.line}
+              style={l.citada ? { animationDelay: `${200 + i * 110}ms` } : undefined}
+            >
+              <span className={s.gutter}>{l.n}</span>
+              {l.texto}
+            </span>
+          ))}
+        </pre>
+
+        <p className={s.proofNote}>
+          El modelo dijo que el valor de la petición llega hasta{" "}
+          <code>pb.start()</code>, y citó las líneas 78, 80 y 83. Certa las buscó
+          en el archivo: están, y dicen eso. Cuando no están, el veredicto se
+          marca como no verificable en lugar de presentarse como respaldado.
+        </p>
+      </figure>
+    </div>
+  );
+}
+
+/* A quien viene a participar no se le enseña ni una alerta. Lo que necesita
+   antes de empezar son las condiciones que aceptó al consentir. */
+function PanelParticipante() {
+  return (
+    <div className={s.stageBody}>
+      <h2 className={s.claim}>
+        Vas a revisar alertas de seguridad. No hay nada que preparar ni
+        respuestas que memorizar.
+      </h2>
+
+      <dl className={s.terms}>
+        <div>
+          <dt>Cuánto dura</dt>
+          <dd>Cerca de una hora, en dos partes, con un descanso entre ellas.</dd>
         </div>
-      </form>
-    </main>
+        <div>
+          <dt>Qué se guarda</dt>
+          <dd>
+            El código que te dictaron y lo que respondas. Ni tu nombre, ni tu
+            correo, ni dónde trabajas.
+          </dd>
+        </div>
+        <div>
+          <dt>Si quieres parar</dt>
+          <dd>
+            Puedes dejarlo cuando quieras, sin explicar por qué, y lo que
+            llevabas se retira.
+          </dd>
+        </div>
+      </dl>
+    </div>
   );
 }

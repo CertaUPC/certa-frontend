@@ -114,11 +114,15 @@ export const METRICS: Record<string, Metrics> = {
   },
 };
 
+/* Las bandas son las del anexo B, que son cuatro. Las de antes, «inicial»,
+   «intermedio» y «senior», las derivaba el modelo de un entero de años que ya
+   no se pregunta. */
 export const PARTICIPANTS: Participant[] = [
   {
     participant_id: "u1",
     anonymous_code: "P01",
-    experience_band: "intermedio",
+    experience_band: "de_1_a_3",
+    is_pilot: false,
     order: ["con_asistente", "sin_asistente"],
     first_batch: "A",
     second_batch: "B",
@@ -126,15 +130,17 @@ export const PARTICIPANTS: Participant[] = [
   {
     participant_id: "u2",
     anonymous_code: "P02",
-    experience_band: "senior",
+    experience_band: "mas_de_7",
+    is_pilot: false,
     order: ["sin_asistente", "con_asistente"],
-    first_batch: "A",
-    second_batch: "B",
+    first_batch: "B",
+    second_batch: "A",
   },
   {
     participant_id: "u3",
-    anonymous_code: "P03",
-    experience_band: "inicial",
+    anonymous_code: "ENS01",
+    experience_band: "menos_de_1",
+    is_pilot: true,
     order: ["con_asistente", "sin_asistente"],
     first_batch: "A",
     second_batch: "B",

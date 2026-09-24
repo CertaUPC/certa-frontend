@@ -5,7 +5,8 @@
  */
 
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { USE_FIXTURES, clearSession, getRole, ROLE_LABEL } from "./api";
+import { USE_FIXTURES, clearSession, getEmail } from "./api";
+import { Mark } from "./Mark";
 import { useTheme } from "./theme";
 import s from "./AppShell.module.css";
 
@@ -17,12 +18,15 @@ const NAV = [
 export function AppShell() {
   const navigate = useNavigate();
   const { theme, toggle, locked } = useTheme();
-  const role = getRole();
+  const email = getEmail();
 
   return (
     <div className={s.shell}>
       <header className={s.top}>
-        <span className={s.wordmark}>Certa</span>
+        <span className={s.brand}>
+          <Mark size={22} className={s.brandMark} />
+          <span className={s.wordmark}>Certa</span>
+        </span>
 
         <nav className={s.nav}>
           {NAV.map((n) => (
@@ -42,7 +46,11 @@ export function AppShell() {
               datos de muestra
             </span>
           )}
-          {role && <span className={s.role}>{ROLE_LABEL[role]}</span>}
+          {email && (
+            <span className={s.quien} title={email}>
+              {email}
+            </span>
+          )}
           <button className={s.chip} onClick={toggle} disabled={locked}>
             {theme === "dark" ? "Claro" : "Oscuro"}
           </button>
