@@ -1,0 +1,231 @@
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-block-end: 22px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.lead {
+  font-size: 14.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  max-inline-size: 64ch;
+  margin-block-start: 6px;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 26px;
+  align-items: start;
+}
+
+/* ── la lista ───────────────────────────────────────────────────── */
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.ficha {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.fichaTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.fichaQue {
+  min-inline-size: 0;
+}
+
+.nombre {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.publico {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.ruta {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-block-start: 3px;
+  overflow-wrap: anywhere;
+}
+
+.fichaDatos {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+}
+
+.dato {
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.dato b {
+  color: var(--ink);
+}
+
+.lenguaje {
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 8px;
+}
+
+.fichaAcciones {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-block-start: 12px;
+  padding-block-start: 11px;
+  border-block-start: 1px solid var(--line);
+}
+
+.enlace {
+  min-block-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.enlace:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.enlace:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ── el formulario ──────────────────────────────────────────────── */
+.nuevo {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  position: sticky;
+  inset-block-start: 78px;
+}
+
+.h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.campo {
+  display: grid;
+  gap: 5px;
+}
+
+.campo > span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.campo input,
+.campo select {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.campo input:focus-visible,
+.campo select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.campo small {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+
+.error {
+  font-size: 13px;
+  color: var(--real);
+  line-height: 1.5;
+}
+
+.ok {
+  font-size: 13px;
+  color: var(--safe);
+  line-height: 1.5;
+}
+
+.submit {
+  font-size: 14.5px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--surface);
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 11px;
+  transition: filter 0.15s var(--salida);
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+}
+
+@media (max-width: 900px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+  .nuevo {
+    position: static;
+  }
+}

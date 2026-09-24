@@ -85,3 +85,33 @@
 }
 
 .cuando { font-size: 13px; color: var(--ink-3); }
+
+/* Confirmación en la propia línea, sin diálogo: soltar el contexto no tiene
+   vuelta atrás y un clic de más no puede bastar. */
+.confirmar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.peligro {
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--real-tint);
+  color: var(--real);
+  border: 1px solid var(--real);
+  border-radius: var(--radius-sm);
+  padding: 7px 13px;
+  cursor: pointer;
+}
+
+.peligro:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.peligro:disabled {
+  opacity: 0.6;
+}
