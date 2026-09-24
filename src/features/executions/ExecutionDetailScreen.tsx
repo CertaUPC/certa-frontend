@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api, getToken } from "../../shared/api";
 import { EXECUTIONS, METRICS, STATUS_LABEL } from "../../shared/fixtures";
@@ -47,6 +48,19 @@ export function ExecutionDetailScreen() {
     a.click();
     URL.revokeObjectURL(url);
     return true;
+  });
+
+  /* Soltar el código conservado es irreversible: sin él, la pantalla de
+     auditoría deja de poder enseñar el fragmento que explica el veredicto. De
+     ahí la confirmación en dos pasos, en la propia línea y sin diálogo. */
+  const [confirmando, setConfirmando] = useState(false);
+  const [soltados, setSoltados] = useState<number | null>(null);
+  const purge = useAction(async () => {
+    const r = await api.purge(id);
+    setConfirmando(false);
+    setSoltados(r.purged);
+    exec.reload();
+    return r;
   });
 
   if (exec.loading) return <Loading what="la ejecución" />;
@@ -109,12 +123,51 @@ export function ExecutionDetailScreen() {
           >
             {download.busy ? "Preparando…" : "Exportar CSV"}
           </button>
+          <Link className={s.secondary} to={`/executions/${id}/compare`}>
+            Comparar con otra
+          </Link>
+          {confirmando ? (
+            <span className={s.confirmar}>
+              ¿Soltar el código conservado?
+              <button
+                className={s.peligro}
+                disabled={purge.busy}
+                aria-busy={purge.busy}
+                onClick={() => purge.run()}
+              >
+                {purge.busy ? "Soltando…" : "Sí, soltarlo"}
+              </button>
+              <button
+                className={s.secondary}
+                onClick={() => setConfirmando(false)}
+              >
+                No
+              </button>
+            </span>
+          ) : (
+            <button
+              className={s.secondary}
+              onClick={() => setConfirmando(true)}
+            >
+              Soltar el contexto
+            </button>
+          )}
         </div>
       </div>
 
       <div role="alert" aria-live="assertive">
         {run.error && <p className={s.problem}>{run.error}</p>}
         {download.error && <p className={s.problem}>{download.error}</p>}
+        {purge.error && <p className={s.problem}>{purge.error}</p>}
+      </div>
+      <div role="status" aria-live="polite">
+        {soltados !== null && (
+          <p className={s.notice}>
+            Se soltaron <b className="mono">{soltados}</b> fragmentos.
+            Los veredictos y sus justificaciones siguen ahí; lo que ya no se
+            puede es enseñar el código que los sostiene.
+          </p>
+        )}
       </div>
 
       {execution.failure_reason && (

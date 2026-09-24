@@ -150,6 +150,44 @@ export interface Project {
   created_at: string;
 }
 
+export interface Member {
+  user_id: string;
+  email: string;
+  role: "administrador" | "miembro";
+  invited_by: string | null;
+}
+
+/** Un hallazgo, con lo justo para ponerlo en una fila de comparación. */
+export interface ChangedFinding {
+  id: string;
+  fingerprint: string;
+  rule_id: string;
+  cwe: string | null;
+  severity: string;
+  file_path: string;
+  start_line: number;
+}
+
+export interface Comparison {
+  execution_id: string;
+  against: string;
+  project_id: string;
+  nuevos: ChangedFinding[];
+  resueltos: ChangedFinding[];
+  siguen: ChangedFinding[];
+}
+
+/** Una decisión registrada sobre un hallazgo, con su rectificación si la hubo. */
+export interface ApiAudit {
+  id: string;
+  finding_id: string;
+  value: string;
+  seconds: number | null;
+  is_current: boolean;
+  comment: string | null;
+  created_at: string;
+}
+
 export interface ApiVerdict {
   model: string;
   model_version: string;
@@ -309,6 +347,42 @@ export const api = {
         language,
       }),
     }),
+
+  members: (projectId: string) =>
+    request<Member[]>(`/api/v1/projects/${projectId}/members`),
+
+  /* Por correo y no por identificador: nadie conoce de memoria el de un
+     compañero, y el servicio lo resuelve. */
+  inviteMember: (projectId: string, email: string) =>
+    request<Member>(
+      `/api/v1/projects/${projectId}/members?email=${encodeURIComponent(email)}`,
+      { method: "POST" },
+    ),
+
+  removeMember: (projectId: string, userId: string) =>
+    request<void>(`/api/v1/projects/${projectId}/members/${userId}`, {
+      method: "DELETE",
+    }),
+
+  /* Reanudar una corrida que se cortó, y soltar el código que se conservó
+     para explicarla. Las dos son cosa del administrador del proyecto. */
+  resume: (executionId: string) =>
+    request<Execution>(`/api/v1/executions/${executionId}/resume`, {
+      method: "POST",
+    }),
+
+  purge: (executionId: string) =>
+    request<{ purged: number }>(`/api/v1/executions/${executionId}/purge`, {
+      method: "POST",
+    }),
+
+  compare: (executionId: string, against: string) =>
+    request<Comparison>(
+      `/api/v1/executions/${executionId}/compare?against=${against}`,
+    ),
+
+  audits: (findingId: string) =>
+    request<ApiAudit[]>(`/api/v1/executions/findings/${findingId}/audits`),
 
   findings: (executionId: string) =>
     request<ApiFinding[]>(`/api/v1/executions/${executionId}/findings`),

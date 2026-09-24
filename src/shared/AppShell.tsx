@@ -11,6 +11,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import s from "./AppShell.module.css";
 
 const NAV = [
+  { to: "/projects", label: "Proyectos" },
   { to: "/executions", label: "Ejecuciones" },
   { to: "/participants", label: "Participantes" },
 ];

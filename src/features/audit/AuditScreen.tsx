@@ -9,6 +9,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Briefing } from "./Briefing";
 import { CodeViewer } from "./CodeViewer";
+import { FindingHistory } from "./FindingHistory";
 import { ProjectRail } from "./ProjectRail";
 import { ShortcutHelp } from "./ShortcutHelp";
 import { Summary } from "./Summary";
@@ -634,6 +635,11 @@ export function Session({
               juicio del asistente.
             </p>
           )}
+
+          {/* Solo fuera de la sesión medida: enseñarle a alguien lo que otros
+              decidieron sobre la misma alerta contamina justo lo que se está
+              midiendo. El carril marca ese mismo caso. */}
+          {carril && <FindingHistory findingId={finding.id} />}
           </div>
 
           <div className={s.decide}>
