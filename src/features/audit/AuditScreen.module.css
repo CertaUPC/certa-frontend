@@ -22,18 +22,30 @@
 
 /* ── barra de sesión ─────────────────────────────────────────────── */
 .bar {
-  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
   padding-block: 13px 11px;
   border-block-end: 1px solid var(--line);
   margin-block-end: 14px;
 }
+.brand { display: flex; align-items: center; gap: 8px; flex: none; }
+.brandMark { color: var(--accent); }
 .wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
 
 .progress { display: flex; align-items: center; gap: 12px; flex: 1; min-inline-size: 230px; }
 .count { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
 .count b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-.rail { flex: 1; max-inline-size: 190px; block-size: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
-.fill { display: block; block-size: 100%; background: var(--accent); border-radius: 2px; transition: inline-size 0.25s var(--salida); }
+/* Seis pixeles y no cuatro: a cuatro, con dos mil alertas, la primera docena
+   respondida no movia nada visible y parecia que no guardaba. */
+.rail {
+  flex: 1; max-inline-size: 240px; block-size: 6px;
+  background: var(--sunken); border: 1px solid var(--line);
+  border-radius: 999px; overflow: hidden;
+}
+.fill {
+  display: block; block-size: 100%; min-inline-size: 2px;
+  background: var(--accent); border-radius: 999px;
+  transition: inline-size 0.25s var(--salida);
+}
 .resolved { font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
 
 .controls { display: flex; gap: 7px; margin-inline-start: auto; }
@@ -69,7 +81,7 @@
 /* ── rejilla de altura contenida ─────────────────────────────────── */
 .grid {
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr) 296px;
+  grid-template-columns: 276px minmax(0, 1fr) 296px;
   gap: 18px;
   min-block-size: 0;
   overflow: hidden;
@@ -79,6 +91,7 @@
 .queue {
   display: flex; flex-direction: column; min-block-size: 0;
   border-inline-end: 1px solid var(--line); padding-inline-end: 16px;
+  overflow: hidden;
 }
 .queueTitle { flex: none; font-size: 13px; font-weight: 600; margin-block-end: 10px; }
 .queueTitle span {
@@ -134,9 +147,28 @@
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); overflow: hidden; box-shadow: var(--lift);
 }
-.head { flex: none; padding: 14px 18px 10px; }
-.title { font-size: 19px; font-weight: 600; letter-spacing: -0.018em; line-height: 1.28; }
-.facts { font-size: 12.5px; color: var(--ink-2); margin-block-start: 4px; }
+.head { flex: none; padding: 13px 18px 10px; }
+/* La ficha de la alerta, antes del titular: que debilidad, con que gravedad
+   y en que archivo. Va arriba porque es lo que se compara entre alertas. */
+.tipo {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 5px 9px;
+  font-size: 12px; color: var(--ink-3); margin-block-end: 5px;
+}
+.cwe {
+  color: var(--ink-2); font-weight: 600;
+  background: var(--sunken); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 6px;
+}
+.sev[data-nivel="alta"] { color: var(--real); font-weight: 600; }
+.sev[data-nivel="media"] { color: var(--check); font-weight: 600; }
+.donde { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.24; }
+/* El mensaje del analizador, tal cual lo emite, en cuerpo de texto. */
+.mensaje {
+  font-size: 13px; color: var(--ink-2); line-height: 1.5;
+  margin-block-start: 5px; max-inline-size: 84ch;
+}
 .scope { flex: none; font-size: 12.5px; color: var(--ink-2); padding: 0 18px 10px; max-inline-size: 78ch; }
 .scope b { color: var(--ink); font-weight: 500; }
 .fingerprint { flex: none; font-size: 12px; color: var(--ink-2); padding: 9px 18px; max-inline-size: 78ch; }

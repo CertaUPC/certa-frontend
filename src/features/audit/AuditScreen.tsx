@@ -1,7 +1,15 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Briefing } from "./Briefing";
 import { CodeViewer } from "./CodeViewer";
+import { ProjectRail } from "./ProjectRail";
 import { ShortcutHelp } from "./ShortcutHelp";
 import { Summary } from "./Summary";
 import { warmUp } from "./highlight";
@@ -23,6 +31,7 @@ import { toFinding } from "./adapter";
 import { FindingFilters, NO_FILTERS, isFiltering, type Filters } from "./FindingFilters";
 import { useTheme } from "../../shared/theme";
 import { ThemeToggle } from "../../shared/ThemeToggle";
+import { Mark } from "../../shared/Mark";
 import { api, USE_FIXTURES, type ApiContext } from "../../shared/api";
 import { Empty, Failed, Loading } from "../../shared/States";
 import s from "./AuditScreen.module.css";
@@ -187,6 +196,10 @@ export function AuditScreen() {
       findings={findings}
       onAnswer={onAnswer}
       fixedCondition={fixedCondition}
+      /* Solo fuera de la sesión medida. Dentro, un desplegable con otros
+         proyectos sería una salida del instrumento, y el tiempo de mirarlo
+         entraría en la medición sin ser tiempo de decidir. */
+      carril={participantId ? undefined : <ProjectRail executionId={executionId} />}
       onThemeFixed={(tema) => {
         if (!participantId) return;
         api.recordTheme(participantId, tema).catch(() => {
@@ -222,6 +235,9 @@ interface SessionProps {
   saveError?: string | null;
   /** Avisa con qué presentación quedó fijada la sesión, una sola vez. */
   onThemeFixed?: (theme: "light" | "dark") => void;
+  /** Navegación del proyecto. Ausente durante una sesión medida: quien
+      participa ve la tarea y ninguna salida hacia otra pantalla. */
+  carril?: ReactNode;
 }
 
 /* Se exporta para poder probar la condición sin asistente. Esa pantalla es el
@@ -234,6 +250,7 @@ export function Session({
   saveError,
   onThemeFixed,
   onContinue,
+  carril,
 }: SessionProps) {
   const [stage, setStage] = useState<Stage>("briefing");
   const [index, setIndex] = useState(0);
@@ -372,7 +389,10 @@ export function Session({
   return (
     <div className={s.page}>
       <header className={s.bar}>
-        <span className={s.wordmark}>Certa</span>
+        <span className={s.brand}>
+          <Mark size={20} className={s.brandMark} />
+          <span className={s.wordmark}>Certa</span>
+        </span>
 
         <div className={s.progress}>
           <span className={s.count}>
@@ -420,6 +440,8 @@ export function Session({
 
       <div className={s.grid}>
         <nav className={s.queue} aria-label="Alertas por revisar">
+          {carril}
+
           <h2 className={s.queueTitle}>
             Por revisar
             <span>Ordenadas por lo que más urge. No se quita ninguna.</span>
@@ -473,12 +495,23 @@ export function Session({
         </nav>
 
         <main className={s.main}>
+          {/* El mensaje de la regla es un párrafo entero y ocupaba el
+              encabezado a diecinueve puntos: siete líneas antes de llegar al
+              código. El titular pasa a ser la debilidad, que es lo que hay
+              que juzgar, y el mensaje baja a cuerpo de texto. No se oculta
+              nada: cambia el tamaño, no la información. */}
           <div className={s.head}>
-            <h1 className={s.title}>{finding.title}</h1>
-            <p className={s.facts}>
-              <span className="mono">{finding.cwe}</span> {finding.cweName}, severidad{" "}
-              {finding.severity}, en <span className="mono">{finding.file}</span>
+            <p className={s.tipo}>
+              <span className={`${s.cwe} mono`}>{finding.cwe}</span>
+              <span className={s.sev} data-nivel={finding.severity}>
+                severidad {finding.severity}
+              </span>
+              <span className={`${s.donde} mono`}>
+                {finding.file}:{finding.line}
+              </span>
             </p>
+            <h1 className={s.title}>{finding.cweName || finding.title}</h1>
+            {finding.cweName && <p className={s.mensaje}>{finding.title}</p>}
           </div>
 
           <p className={s.scope}>
