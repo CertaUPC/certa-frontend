@@ -185,6 +185,23 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  /* La entrada del participante a su sesión, con el código que quien dirige
+     el estudio le dicta. No lleva contraseña: el consentimiento promete que
+     no se recoge nada que le identifique, y darle una cuenta lo incumpliría.
+     Lo que controla el acceso es que su credencial de participación esté
+     emitida y dentro de su ventana. */
+  participantAccess: (anonymousCode: string) =>
+    request<{
+      access_token: string;
+      participant_id: string;
+      order: string[];
+      first_batch: string;
+      second_batch: string;
+    }>("/api/v1/auth/participant", {
+      method: "POST",
+      body: JSON.stringify({ anonymous_code: anonymousCode }),
+    }),
+
   executions: () => request<Execution[]>("/api/v1/executions"),
 
   execution: (id: string) => request<Execution>(`/api/v1/executions/${id}`),
@@ -232,6 +249,24 @@ export const api = {
 
   context: (findingId: string) =>
     request<ApiContext>(`/api/v1/executions/findings/${findingId}/context`),
+
+  /* El lote congelado de la sesión. Sin esto la pantalla serviría la ejecución
+     entera y el participante vería el corpus en vez de los doce que le tocan. */
+  /* Con qué presentación resolvió la tarea. Se envía una sola vez, al fijarse
+     el tema, para que el análisis pueda descartarlo como factor. */
+  recordTheme: (participantId: string, theme: "light" | "dark") =>
+    request<{ participant_id: string; theme: string }>(
+      "/api/v1/experiment/sessions/theme",
+      {
+        method: "POST",
+        body: JSON.stringify({ participant_id: participantId, theme }),
+      },
+    ),
+
+  batchFindings: (batch: string) =>
+    request<{ lote: string; hallazgos: string[] }>(
+      `/api/v1/experiment/batches/${batch}`,
+    ),
 
   decide: (body: {
     finding_id: string;
