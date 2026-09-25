@@ -39,9 +39,14 @@ export function CodeViewer({ code, lang, firstLine, cited, showRoles, theme }: P
 
   useEffect(() => {
     let vivo = true;
-    highlightLines(code, lang, theme).then((l) => {
-      if (vivo) setLines(l);
-    });
+    highlightLines(code, lang, theme)
+      .then((l) => {
+        if (vivo) setLines(l);
+      })
+      .catch(() => {
+        /* Sin color el visor sigue sirviendo: se queda con las líneas en
+           crudo, que es con lo que arranca. */
+      });
     return () => {
       vivo = false;
     };

@@ -274,7 +274,15 @@ export const api = {
       body: JSON.stringify({ anonymous_code: anonymousCode }),
     }),
 
-  executions: () => request<Execution[]>("/api/v1/executions"),
+  /* El servicio filtra por proyecto desde el principio y el cliente no se lo
+     pedía nunca, de modo que el enlace «ver sus ejecuciones» llevaba a la
+     lista entera. */
+  executions: (projectId?: string) =>
+    request<Execution[]>(
+      projectId
+        ? `/api/v1/executions?project_id=${projectId}`
+        : "/api/v1/executions",
+    ),
 
   execution: (id: string) => request<Execution>(`/api/v1/executions/${id}`),
 
