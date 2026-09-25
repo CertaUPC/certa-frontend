@@ -153,7 +153,10 @@ export function LoginScreen() {
       const r = await api.login(email, password);
       saveSession(r.access_token, r.role);
     }
-    navigate("/executions");
+    /* Se entra por proyectos y no por ejecuciones: sin proyecto no hay nada
+       que cargar, y quien entra por primera vez llegaba a una lista vacía sin
+       saber que lo primero era crear uno. */
+    navigate("/projects");
   }
 
   async function entrarComoParticipante() {

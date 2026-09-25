@@ -43,6 +43,8 @@ export const EXECUTIONS: Execution[] = [
     failure_reason: null,
     claimed_by: "certa-worker",
     started_at: "2026-09-09T14:22:00Z",
+    last_attempt_note: null,
+    last_attempt_at: null,
     created_at: "2026-09-09T14:20:00Z",
   },
   {
@@ -60,6 +62,8 @@ export const EXECUTIONS: Execution[] = [
     failure_reason: null,
     claimed_by: "certa-worker",
     started_at: "2026-09-10T09:06:00Z",
+    last_attempt_note: null,
+    last_attempt_at: null,
     created_at: "2026-09-10T09:05:00Z",
   },
   {
@@ -78,6 +82,8 @@ export const EXECUTIONS: Execution[] = [
       "Se alcanzó el límite de 30 consultas. Lo validado se conserva y el resto queda pendiente.",
     claimed_by: null,
     started_at: "2026-09-08T16:41:00Z",
+    last_attempt_note: null,
+    last_attempt_at: null,
     created_at: "2026-09-08T16:40:00Z",
   },
   {
@@ -95,6 +101,15 @@ export const EXECUTIONS: Execution[] = [
     failure_reason: null,
     claimed_by: null,
     started_at: null,
+    // La corrida que rebota: el trabajador la toma, no encuentra el código y
+    // la devuelve. Sin la nota se vería igual que una recién cargada.
+    last_attempt_note:
+      "El único hallazgo que se intentó se quedó sin contexto recuperable, y " +
+      "ninguno se validó. El repositorio no parece estar donde este trabajador " +
+      "lo busca, así que la ejecución vuelve a la cola sin consumirse. No se " +
+      "pudo recuperar el contexto: No existe el repositorio en /repos/portal. " +
+      "Se buscaba src/main/java/Login.java dentro de él.",
+    last_attempt_at: "2026-09-10T11:53:20Z",
     created_at: "2026-09-10T11:52:00Z",
   },
 ];
@@ -128,7 +143,7 @@ export const METRICS: Record<string, Metrics> = {
 export const PARTICIPANTS: Participant[] = [
   {
     participant_id: "u1",
-    anonymous_code: "P01",
+    anonymous_code: "P-01",
     experience_band: "de_1_a_3",
     is_pilot: false,
     order: ["con_asistente", "sin_asistente"],
@@ -137,7 +152,7 @@ export const PARTICIPANTS: Participant[] = [
   },
   {
     participant_id: "u2",
-    anonymous_code: "P02",
+    anonymous_code: "P-02",
     experience_band: "mas_de_7",
     is_pilot: false,
     order: ["sin_asistente", "con_asistente"],
@@ -146,7 +161,7 @@ export const PARTICIPANTS: Participant[] = [
   },
   {
     participant_id: "u3",
-    anonymous_code: "ENS01",
+    anonymous_code: "ENS-01",
     experience_band: "menos_de_1",
     is_pilot: true,
     order: ["con_asistente", "sin_asistente"],

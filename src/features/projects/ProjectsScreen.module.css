@@ -1,10 +1,18 @@
+/* ── la cabecera y su única acción con peso ─────────────────────── */
 .head {
+  /* Al ancho de las fichas: el botón suelto en la esquina de una ventana de
+     1440 queda tan lejos del título que deja de leerse con él. */
+  max-inline-size: 860px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
-  margin-block-end: 22px;
+  margin-block-end: 20px;
+}
+
+.headQue {
+  min-inline-size: 0;
 }
 
 .title {
@@ -17,15 +25,45 @@
   font-size: 14.5px;
   color: var(--ink-2);
   line-height: 1.6;
-  max-inline-size: 64ch;
-  margin-block-start: 6px;
+  max-inline-size: 56ch;
+  margin-block-start: 5px;
 }
 
-.cols {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 26px;
-  align-items: start;
+/* La acción principal de la pantalla. Es la única pieza llena de color, y por
+   eso se ve antes que cualquier otra cosa de la cabecera. */
+.primario {
+  flex: none;
+  min-block-size: 40px;
+  font-size: 14.5px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--surface);
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  transition: filter 0.15s var(--salida);
+}
+
+.primario:hover {
+  filter: brightness(1.08);
+}
+
+/* Con el formulario abierto, el botón deja de ser la acción: lo es el envío
+   de abajo. Se apaga para que no compitan dos llamadas al mismo tiempo. */
+.cerrar {
+  flex: none;
+  min-block-size: 40px;
+  font-size: 14px;
+  background: none;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+}
+
+.cerrar:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
 }
 
 /* ── la lista ───────────────────────────────────────────────────── */
@@ -35,6 +73,7 @@
   padding: 0;
   display: grid;
   gap: 12px;
+  max-inline-size: 860px;
 }
 
 .ficha {
@@ -57,22 +96,9 @@
 }
 
 .nombre {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
   font-size: 16.5px;
   font-weight: 600;
   letter-spacing: -0.015em;
-}
-
-.publico {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-tint);
-  border-radius: 999px;
-  padding: 2px 9px;
 }
 
 .ruta {
@@ -80,6 +106,25 @@
   color: var(--ink-3);
   margin-block-start: 3px;
   overflow-wrap: anywhere;
+}
+
+/* El término y lo que significa, en la misma línea. */
+.publico {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-block-start: 7px;
+}
+
+.publicoMarca {
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border-radius: 999px;
+  padding: 2px 9px;
 }
 
 .fichaDatos {
@@ -105,17 +150,41 @@
   padding: 1px 8px;
 }
 
+/* ── lo que se puede hacer sobre un proyecto ────────────────────── */
 .fichaAcciones {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 14px;
   flex-wrap: wrap;
-  margin-block-start: 12px;
-  padding-block-start: 11px;
+  margin-block-start: 13px;
+  padding-block-start: 12px;
   border-block-start: 1px solid var(--line);
 }
 
+/* Lo que se hace con un proyecto casi siempre: ir a sus ejecuciones. Lleva
+   marco para separarse del enlace de al lado sin robarle peso al botón de
+   crear, que es la acción de la pantalla entera. */
+.accion {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 32px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--sunken);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 14px;
+  text-decoration: none;
+}
+
+.accion:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .enlace {
-  min-block-size: 24px;
+  min-block-size: 32px;
   display: inline-flex;
   align-items: center;
   background: none;
@@ -123,42 +192,65 @@
   padding: 0;
   font: inherit;
   font-size: 13px;
-  color: var(--accent);
-  text-decoration: none;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
   cursor: pointer;
 }
 
 .enlace:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--accent);
+  text-decoration-color: currentColor;
 }
 
-.enlace:focus-visible {
+.enlace:focus-visible,
+.accion:focus-visible,
+.primario:focus-visible,
+.cerrar:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 3px;
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
-/* ── el formulario ──────────────────────────────────────────────── */
+/* ── el formulario, plegado hasta que se pide ───────────────────── */
 .nuevo {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 18px 20px;
+  margin-block-end: 18px;
   display: grid;
   gap: 14px;
-  position: sticky;
-  inset-block-start: 78px;
+  justify-items: start;
+  max-inline-size: 860px;
 }
 
 .h2 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
+}
+
+.nuevoPie {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-block-start: 3px;
+}
+
+/* En una fila mientras quepan: tres campos cortos apilados alargan el panel
+   sin necesidad y empujan el botón fuera de la vista. */
+.campos {
+  inline-size: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px 16px;
+  align-items: start;
 }
 
 .campo {
   display: grid;
   gap: 5px;
+  align-content: start;
 }
 
 .campo > span {
@@ -175,6 +267,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
+  min-block-size: 38px;
 }
 
 .campo input:focus-visible,
@@ -203,13 +296,14 @@
 }
 
 .submit {
+  min-block-size: 42px;
   font-size: 14.5px;
   font-weight: 600;
   background: var(--accent);
   color: var(--surface);
   border: 0;
   border-radius: var(--radius-sm);
-  padding: 11px;
+  padding: 11px 20px;
   transition: filter 0.15s var(--salida);
 }
 
@@ -217,15 +311,19 @@
   filter: brightness(1.08);
 }
 
+.submit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .submit:disabled {
   opacity: 0.6;
 }
 
-@media (max-width: 900px) {
-  .cols {
-    grid-template-columns: 1fr;
-  }
-  .nuevo {
-    position: static;
+@media (max-width: 560px) {
+  .primario,
+  .cerrar {
+    inline-size: 100%;
+    justify-content: center;
   }
 }

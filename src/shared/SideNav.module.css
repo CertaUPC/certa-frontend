@@ -369,8 +369,11 @@
     display: block;
   }
   /* Plegada quedan la marca y el proyecto, que es lo que se consulta de un
-     vistazo. El resto sale al pulsar el botón. */
+     vistazo. El resto sale al pulsar el botón. En una pantalla de teléfono,
+     una cabecera de cuatro filas se come media pantalla antes de empezar. */
   .barra:not([data-menu]) .bloque,
+  .barra:not([data-menu]) > .acciones,
+  .barra:not([data-menu]) .muestra,
   .barra:not([data-menu]) .pie {
     display: none;
   }

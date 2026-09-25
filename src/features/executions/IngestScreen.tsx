@@ -1,5 +1,9 @@
 /* El proyecto va antes que el archivo porque es lo que agrupa las ejecuciones.
- * Si no existe se crea aquí mismo, para no tener que salir a mitad de camino. */
+ * Si no existe se crea aquí mismo, para no tener que salir a mitad de camino.
+ *
+ * Son dos pasos obligatorios y uno opcional. El opcional va plegado: abierto
+ * ocupa media pantalla y empuja el botón de cargar fuera de la vista, de modo
+ * que la pantalla parece pedir cinco decisiones cuando pide dos. */
 
 import { useState, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -111,13 +115,15 @@ export function IngestScreen() {
 
       <h1 className={s.title}>Cargar un archivo SARIF</h1>
       <p className={s.lead}>
-        Certa no detecta vulnerabilidades: consume las que produjo otro
-        analizador. Cualquier herramienta que emita SARIF 2.1.0 sirve.
+        Certa no busca fallas: trabaja con las que ya encontró tu analizador.
+        SARIF es el archivo donde ese analizador deja sus alertas.
       </p>
 
       <div className={s.form}>
         <section className={s.block}>
-          <h2 className={s.h2}>Proyecto</h2>
+          <h2 className={s.h2}>
+            <span className={s.step}>1</span> Proyecto
+          </h2>
           <select
             className={s.input}
             value={projectId}
@@ -154,16 +160,17 @@ export function IngestScreen() {
                 />
               </label>
               <p className={s.note}>
-                La ruta identifica al proyecto. Volver a cargarla devuelve el
-                proyecto que ya existe en lugar de duplicarlo, de modo que todas
-                las corridas de un mismo código queden juntas.
+                La ruta identifica al proyecto. Si repites una, se reusa el
+                proyecto que ya existe en vez de duplicarlo.
               </p>
             </>
           )}
         </section>
 
         <section className={s.block}>
-          <h2 className={s.h2}>Archivo</h2>
+          <h2 className={s.h2}>
+            <span className={s.step}>2</span> Archivo
+          </h2>
           <label className={file ? `${s.drop} ${s.filled}` : s.drop}>
             <input type="file" accept=".sarif,.json,application/json" onChange={pick} />
             {file ? (
@@ -181,12 +188,15 @@ export function IngestScreen() {
           {error && <p className={s.error}>{error}</p>}
         </section>
 
-        <section className={s.block}>
-          <h2 className={s.h2}>Alcance</h2>
+        <details className={s.optional}>
+          <summary className={s.optionalTitle}>
+            Acotar qué se procesa
+            <span className={s.optionalTag}>opcional</span>
+          </summary>
+
           <p className={s.note}>
-            Acotar antes de procesar evita gastar presupuesto en familias de
-            hallazgos que hoy no vas a atender. Si no eliges nada, se procesa
-            todo.
+            Dejar fuera lo que hoy no vas a atender ahorra tiempo y consultas al
+            modelo.
           </p>
 
           <label className={s.field}>
@@ -202,7 +212,9 @@ export function IngestScreen() {
             </select>
           </label>
 
-          <span className={s.fieldLabel}>Categorías</span>
+          <span className={s.fieldLabel}>
+            Categorías <span className={s.gloss}>tipos de falla, por su número CWE</span>
+          </span>
           <div className={s.chips}>
             {COMMON_CWES.map((c) => (
               <button
@@ -216,18 +228,21 @@ export function IngestScreen() {
               </button>
             ))}
           </div>
-
-          <p className={s.summary}>
-            {sinFiltro
-              ? "Se procesarán todos los hallazgos del archivo."
-              : `Se procesarán solo los que cumplan: ${[
-                  cwes.length ? cwes.join(", ") : null,
-                  severity ? `severidad ${SEVERITIES.find((x) => x.value === severity)?.label.toLowerCase()}` : null,
-                ].filter(Boolean).join("; ")}.`}
-          </p>
-        </section>
+        </details>
 
         {enviar.error && <p className={s.error}>{enviar.error}</p>}
+
+        {/* Lo que va a pasar al pulsar, dicho antes de pulsar y fuera del
+            bloque plegable: si estuviera dentro, plegarlo escondería el único
+            sitio donde se lee que el filtro sigue puesto. */}
+        <p className={s.summary}>
+          {sinFiltro
+            ? "Se procesarán todos los hallazgos del archivo."
+            : `Se procesarán solo los que cumplan: ${[
+                cwes.length ? cwes.join(", ") : null,
+                severity ? `severidad ${SEVERITIES.find((x) => x.value === severity)?.label.toLowerCase()}` : null,
+              ].filter(Boolean).join("; ")}.`}
+        </p>
 
         <div className={s.actions}>
           <button className={s.primary} disabled={!listo} onClick={cargar}>
@@ -235,6 +250,14 @@ export function IngestScreen() {
           </button>
           <Link className={s.secondary} to="/executions">Cancelar</Link>
         </div>
+
+        {!listo && !enviar.busy && (
+          <p className={s.missing}>
+            {!proyectoListo
+              ? "Elige el proyecto para continuar."
+              : "Falta el archivo SARIF."}
+          </p>
+        )}
       </div>
     </>
   );

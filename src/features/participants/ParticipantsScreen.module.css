@@ -1,13 +1,17 @@
 .title { font-size: 27px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.18; }
-.lead { font-size: 14.5px; color: var(--ink-2); line-height: 1.6; max-inline-size: 74ch; margin-block: 7px 26px; }
+.lead { font-size: 14.5px; color: var(--ink-2); line-height: 1.6; max-inline-size: 58ch; margin-block: 7px 22px; }
 
 .cols { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 26px; align-items: start; }
 
 .form {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 20px 22px; display: grid; gap: 15px;
+  border-radius: var(--radius); padding: 20px 22px; display: grid; gap: 10px;
 }
-.h2 { font-size: 15px; font-weight: 600; }
+.h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+/* Casilla de una sola línea con ayuda al lado: ahí el centro alinea mejor que
+   el borde de arriba, que deja el icono flotando. */
+.checkInline { align-items: center; }
 
 .field { display: grid; gap: 5px; }
 .field span { font-size: 13px; color: var(--ink-2); }
@@ -32,7 +36,11 @@
 }
 
 .check { display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
-.check input { margin-block-start: 2px; accent-color: var(--accent); inline-size: 15px; block-size: 15px; flex: none; }
+.check input { margin-block-start: 2px; accent-color: var(--accent); inline-size: 17px; block-size: 17px; flex: none; }
+/* La etiqueta es el destino real de la casilla, así que es ella la que tiene
+   que medir lo que hay que acertar con el dedo. */
+.check > span { display: block; min-block-size: 24px; }
+.checkInline label { display: inline-flex; align-items: center; min-block-size: 24px; cursor: pointer; }
 
 .assign {
   font-size: 13px; color: var(--ink-2); line-height: 1.5;

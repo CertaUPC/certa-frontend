@@ -19,7 +19,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { api, type Project } from "./api";
+import { USE_FIXTURES, api, type Project } from "./api";
+import { PROJECTS } from "./fixtures";
 
 const CLAVE = "certa.proyecto";
 
@@ -54,6 +55,14 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const [vuelta, setVuelta] = useState(0);
 
   useEffect(() => {
+    /* Con datos de muestra no hay servicio al que preguntar. La barra los pide
+       fuera de `useApi`, de modo que sin esta salida la versión de muestra se
+       quedaba sin proyectos y con la consola llena de conexiones rechazadas. */
+    if (USE_FIXTURES) {
+      setProyectos(PROJECTS);
+      setCargando(false);
+      return;
+    }
     let vigente = true;
     api
       .projects()

@@ -112,6 +112,7 @@ export function Team({ projectId, yo }: Props) {
                 onClick={() => retirar(m)}
               >
                 Retirar
+                <span className="solo-lectores"> a {m.email || m.user_id}</span>
               </button>
             )}
           </li>
@@ -120,8 +121,8 @@ export function Team({ projectId, yo }: Props) {
 
       {administro ? (
         <form className={s.invitar} onSubmit={invitar}>
-          <label className="solo-lectores" htmlFor={`correo-${projectId}`}>
-            Correo de a quién invitar
+          <label className={s.rotulo} htmlFor={`correo-${projectId}`}>
+            Invitar a alguien por su correo
           </label>
           <input
             id={`correo-${projectId}`}
@@ -136,9 +137,7 @@ export function Team({ projectId, yo }: Props) {
           </button>
         </form>
       ) : (
-        <p className={s.nota}>
-          Invitar y retirar es cosa del administrador del proyecto.
-        </p>
+        <p className={s.nota}>Solo su administrador invita o retira.</p>
       )}
 
       <div role="alert" aria-live="assertive">
