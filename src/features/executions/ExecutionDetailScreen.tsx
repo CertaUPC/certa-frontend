@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api, getToken } from "../../shared/api";
 import { EXECUTIONS, METRICS, STATUS_LABEL } from "../../shared/fixtures";
+import { toFinding } from "../audit/adapter";
+import { FINDINGS, VERDICT_SHORT } from "../audit/data";
 import { Hint } from "../../shared/Hint";
 import { cuando, titulo } from "../../shared/executions";
 import { useProyecto } from "../../shared/project";
@@ -17,6 +19,15 @@ export function ExecutionDetailScreen() {
     EXECUTIONS.find((e) => e.id === id) ?? EXECUTIONS[0],
     [id],
   );
+  /* Las de más arriba en la lista priorizada. La pantalla terminaba en los
+     números y no enseñaba ni una alerta, que es lo que la persona vino a
+     mirar; y con el ancho que sobraba, caben. */
+  const alertas = useApi(
+    async () => (await api.findings(id)).map((h) => toFinding(h, null)),
+    FINDINGS,
+    [id],
+  );
+
   const metrics = useApi(
     () => api.metrics(id),
     METRICS[id] ?? METRICS["7f3a2b10"],
@@ -148,6 +159,21 @@ export function ExecutionDetailScreen() {
     );
   }
 
+  /* La cinta se arma con lo que ya está juzgado. Los indeterminados no entran
+     en la matriz, así que se cuentan por diferencia: si no, la cinta no
+     sumaría el total y nadie sabría dónde fueron a parar. */
+  const conf = metrics.data?.confusion;
+  const reales = conf
+    ? conf.verdaderos_positivos + conf.falsos_positivos
+    : 0;
+  const descartadas = conf
+    ? conf.falsos_negativos + conf.verdaderos_negativos
+    : 0;
+  const indeterminadas = Math.max(
+    0,
+    execution.validated_findings - reales - descartadas,
+  );
+
   const pendiente = execution.status === "pendiente";
   const interrumpida = execution.status === "fallida";
   const enProceso = execution.status === "en_proceso";
@@ -196,14 +222,16 @@ export function ExecutionDetailScreen() {
           )}
           {terminada && (
             <Link className={s.primary} to={`/review?execution=${id}`}>
-              Revisar las {execution.validated_findings} alertas
+              Revisar las {execution.total_findings} alertas
             </Link>
           )}
           {/* Mientras corre también se puede revisar lo que ya tiene veredicto:
               esperar a que termine para empezar a mirar no aporta nada. */}
+          {/* La revisión abre la lista entera, no solo lo ya juzgado: decir
+              «las 727 juzgadas» y aterrizar en 2166 era mentir en el botón. */}
           {!terminada && execution.validated_findings > 0 && (
             <Link className={s.secondary} to={`/review?execution=${id}`}>
-              Revisar las {execution.validated_findings} alertas ya juzgadas
+              Revisar las {execution.total_findings} alertas
             </Link>
           )}
 
@@ -367,77 +395,85 @@ export function ExecutionDetailScreen() {
         </p>
       )}
 
-      {/* Terminada, la barra al 100 % y los tres números ocupan un panel
-          entero para decir lo que la línea de arriba ya dice. */}
-      {!terminada && (
-      <section className={s.panel}>
-        <h2 className={s.h2}>Avance</h2>
-        <span
-          className={s.rail}
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={execution.total_findings}
-          aria-valuenow={execution.validated_findings}
-          aria-valuetext={execution.progress_text}
-        >
-          <span className={s.fill} style={{ inlineSize: `${execution.progress * 100}%` }} />
-        </span>
-        <div className={s.counts}>
-          <span><b className="mono">{execution.total_findings}</b> hallazgos</span>
-          <span><b className="mono">{execution.validated_findings}</b> validados</span>
-          <span><b className="mono">{execution.pending_findings}</b> pendientes</span>
-        </div>
-      </section>
-      )}
+      {/* La corrida a la izquierda y el marcador a la derecha. Apilados, el
+          ancho sobrante quedaba vacío y había que desplazarse para ver algo
+          que cabe de sobra al costado. */}
+      <div className={s.lienzo}>
+        <section className={s.corrida}>
+          <h2 className={s.h2}>
+            Cómo quedaron las{" "}
+            <b className="mono">{execution.total_findings}</b> alertas
+          </h2>
 
-      {/* Un panel entero para anunciar que todavía no hay nada empuja fuera de
-          la pantalla lo que sí importa cuando la corrida aún no arrancó. */}
-      {execution.validated_findings > 0 && (
-      <section className={s.panel}>
-        <h2 className={s.h2}>Resultados</h2>
+          <Cinta
+            reales={reales}
+            descartadas={descartadas}
+            indeterminadas={indeterminadas}
+            enCola={execution.pending_findings}
+            total={execution.total_findings}
+          />
 
-        {metrics.loading && <Loading what="las métricas" />}
-        {metrics.error && (
-          <p className={s.note}>
-            Todavía no hay veredictos suficientes para medir. Los resultados
-            aparecen cuando la corrida avance.
-          </p>
-        )}
+          <ul className={s.cuentas}>
+            <Cuenta tipo="real" n={reales} rotulo="marcadas como reales" />
+            <Cuenta tipo="descartada" n={descartadas} rotulo="descartadas" />
+            <Cuenta
+              tipo="indeterminada"
+              n={indeterminadas}
+              rotulo="sin poder determinar"
+            />
+            <Cuenta
+              tipo="cola"
+              n={execution.pending_findings}
+              rotulo="todavía en cola"
+            />
+          </ul>
+
+          {metrics.loading && <Loading what="las métricas" />}
+
+          {metrics.data && !metrics.error && (
+            <>
+              <h3 className={s.h3}>
+                Frente a las respuestas que ya se conocen
+                <Hint termino="la comparación contra verdad conocida">
+                  Este proyecto es un conjunto de referencia: de cada alerta ya
+                  se sabe si era real. Por eso se puede contar en qué acertó y
+                  en qué no. En un repositorio tuyo esta parte no aparece,
+                  porque no hay con qué comparar.
+                </Hint>
+              </h3>
+              <div className={s.matrix}>
+                <Cell
+                  kind="tp"
+                  n={metrics.data.confusion.verdaderos_positivos}
+                  label="Acertó que era real"
+                  ayuda="Certa la marcó como vulnerabilidad real, y sí lo era. Es el acierto que buscas."
+                />
+                <Cell
+                  kind="fp"
+                  n={metrics.data.confusion.falsos_positivos}
+                  label="Dijo real y no lo era"
+                  ayuda="Certa la marcó como vulnerabilidad real y resultó falsa alarma. Este error te hace perder el tiempo revisando algo que no era."
+                />
+                <Cell
+                  kind="fn"
+                  n={metrics.data.confusion.falsos_negativos}
+                  label="Descartó algo real"
+                  ayuda="Certa la descartó y sí era una vulnerabilidad real. Es el error caro: pasa de largo sin que nadie la mire."
+                />
+                <Cell
+                  kind="tn"
+                  n={metrics.data.confusion.verdaderos_negativos}
+                  label="Acertó que era falsa alarma"
+                  ayuda="Certa la descartó y efectivamente no era explotable. Es el trabajo de revisión que te ahorra."
+                />
+              </div>
+            </>
+          )}
+        </section>
 
         {metrics.data && !metrics.error && (
-          <>
-            <p className={s.note}>
-              Se muestra la matriz completa y no solo la exactitud: un modelo
-              que llamara real a todo tendría exactitud aceptable y utilidad
-              nula, y solo la matriz lo deja ver.
-            </p>
-
-            <div className={s.matrix}>
-              <Cell
-                kind="tp"
-                n={metrics.data.confusion.verdaderos_positivos}
-                label="Acertó que era real"
-                ayuda="Certa la marcó como vulnerabilidad real, y sí lo era. Es el acierto que buscas."
-              />
-              <Cell
-                kind="fp"
-                n={metrics.data.confusion.falsos_positivos}
-                label="Dijo real y no lo era"
-                ayuda="Certa la marcó como vulnerabilidad real y resultó falsa alarma. Este error te hace perder el tiempo revisando algo que no era."
-              />
-              <Cell
-                kind="fn"
-                n={metrics.data.confusion.falsos_negativos}
-                label="Descartó algo real"
-                ayuda="Certa la descartó y sí era una vulnerabilidad real. Es el error caro: pasa de largo sin que nadie la mire."
-              />
-              <Cell
-                kind="tn"
-                n={metrics.data.confusion.verdaderos_negativos}
-                label="Acertó que era falsa alarma"
-                ayuda="Certa la descartó y efectivamente no era explotable. Es el trabajo de revisión que te ahorra."
-              />
-            </div>
+          <aside className={s.marcador}>
+            <h2 className={s.h2}>Qué tan bien juzgó</h2>
 
             <dl className={s.scores}>
               <Score
@@ -469,15 +505,42 @@ export function ExecutionDetailScreen() {
               />
             </dl>
 
-            {/* El rótulo «corrida válida» delante ya no hace falta: la frase
-                lo dice, y el punto de color lo marca. */}
             <p className={metrics.data.run_is_valid ? s.valid : s.invalid}>
               {metrics.data.run_quality_reason}
             </p>
             <p className={s.budget}>{metrics.data.budget}</p>
-          </>
+          </aside>
         )}
-      </section>
+      </div>
+
+      {alertas.data && alertas.data.length > 0 && (
+        <section className={s.porEmpezar}>
+          <div className={s.porEmpezarTop}>
+            <h2 className={s.h2}>Por dónde empezar</h2>
+            <Link className={s.verTodas} to={`/review?execution=${id}`}>
+              Revisar las {execution.total_findings} alertas
+            </Link>
+          </div>
+          <ul className={s.alertas}>
+            {alertas.data.slice(0, 3).map((a) => (
+              <li key={a.id} className={s.alerta}>
+                <span className={s.alertaQue}>{a.title}</span>
+                <span className={s.alertaDonde}>
+                  <span className="mono">
+                    {a.file}:{a.line}
+                  </span>{" "}
+                  {a.cweName}
+                </span>
+                <span className={s.alertaSeveridad} data-nivel={a.severity}>
+                  severidad {a.severity}
+                </span>
+                <span className={s.alertaVeredicto} data-valor={a.verdict}>
+                  {VERDICT_SHORT[a.verdict]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
     </>
@@ -499,6 +562,67 @@ function desde(iso: string): string {
   return `hace ${dias} ${dias === 1 ? "día" : "días"}`;
 }
 
+/* La corrida entera en una franja: cada tramo es la parte que le toca a cada
+   desenlace, y lo que sigue en cola va rayado porque todavía no es nada. Es el
+   único elemento con peso visual de la pantalla, y no es adorno: es el
+   resultado de la corrida dibujado a escala. */
+function Cinta({
+  reales, descartadas, indeterminadas, enCola, total,
+}: {
+  reales: number;
+  descartadas: number;
+  indeterminadas: number;
+  enCola: number;
+  total: number;
+}) {
+  const tramos = [
+    { tipo: "real", n: reales },
+    { tipo: "descartada", n: descartadas },
+    { tipo: "indeterminada", n: indeterminadas },
+    { tipo: "cola", n: enCola },
+  ].filter((t) => t.n > 0);
+
+  const dicho = tramos
+    .map((t) => `${t.n} ${ROTULO[t.tipo]}`)
+    .join(", ");
+
+  return (
+    <div
+      className={s.cinta}
+      role="img"
+      aria-label={total ? `De ${total} alertas: ${dicho}.` : "Sin alertas"}
+    >
+      {tramos.map((t) => (
+        <span
+          key={t.tipo}
+          className={s.tramo}
+          data-tipo={t.tipo}
+          style={{ flexGrow: t.n }}
+        />
+      ))}
+    </div>
+  );
+}
+
+const ROTULO: Record<string, string> = {
+  real: "marcadas como reales",
+  descartada: "descartadas",
+  indeterminada: "sin poder determinar",
+  cola: "todavía en cola",
+};
+
+function Cuenta({
+  tipo, n, rotulo,
+}: { tipo: string; n: number; rotulo: string }) {
+  return (
+    <li className={s.cuenta}>
+      <span className={s.cuentaMarca} data-tipo={tipo} aria-hidden="true" />
+      <span className={`${s.cuentaN} mono`}>{n}</span>
+      <span className={s.cuentaR}>{rotulo}</span>
+    </li>
+  );
+}
+
 function Cell({
   kind, n, label, ayuda,
 }: { kind: string; n: number; label: string; ayuda: string }) {
@@ -515,18 +639,25 @@ function Cell({
 function Score({
   label, value, threshold, ayuda,
 }: { label: string; value: number; threshold?: number; ayuda: string }) {
-  const cumple = threshold === undefined ? null : value >= threshold;
+  const falla = threshold !== undefined && value < threshold;
   return (
-    <div className={s.score}>
-      <dt>
+    <div className={s.score} data-falla={falla || undefined}>
+      <dt className={s.scoreQue}>
         {label} <Hint termino={label}>{ayuda}</Hint>
       </dt>
-      <dd className="mono">{value.toFixed(3)}</dd>
-      {threshold !== undefined && (
-        <span className={cumple ? s.meets : s.misses}>
-          umbral {threshold.toFixed(2)}
-        </span>
-      )}
+      <dd className={`${s.scoreN} mono`}>{value.toFixed(3)}</dd>
+      {/* La barra va de 0 a 1 y lleva marcado el umbral declarado, de modo
+          que la cifra se lee contra algo y no sola. */}
+      <span className={s.scoreBarra}>
+        <span className={s.scoreRelleno} style={{ inlineSize: `${value * 100}%` }} />
+        {threshold !== undefined && (
+          <span
+            className={s.scoreUmbral}
+            style={{ insetInlineStart: `${threshold * 100}%` }}
+            title={`umbral declarado ${threshold.toFixed(2)}`}
+          />
+        )}
+      </span>
     </div>
   );
 }

@@ -11,7 +11,9 @@
  * no puede quedarse comprobando que cada participante bajó hasta el final.
  */
 
+import { Link } from "react-router-dom";
 import { useTheme } from "../../shared/theme";
+import { ThemeToggle } from "../../shared/ThemeToggle";
 import { Mark } from "../../shared/Mark";
 import s from "./Briefing.module.css";
 
@@ -21,9 +23,12 @@ interface Props {
   onStart: () => void;
   /** Sesión del estudio, con su condición fijada de antemano. */
   medida: boolean;
+  /** A dónde vuelve quien llegó aquí desde la aplicación, si no es una
+      sesión medida. Dentro del estudio no hay salida a propósito. */
+  volverA?: string;
 }
 
-export function Briefing({ assisted, total, onStart, medida }: Props) {
+export function Briefing({ assisted, total, onStart, medida, volverA }: Props) {
   const { theme, toggle } = useTheme();
 
   return (
@@ -34,16 +39,32 @@ export function Briefing({ assisted, total, onStart, medida }: Props) {
             <Mark size={19} className={s.brandMark} />
             <span className={s.wordmark}>Certa</span>
           </span>
+          {/* La salida estaba en la cabecera de la revisión, que aparece
+              recién al empezar: quien llegaba aquí no tenía por dónde volver
+              hasta meterse en la tarea. */}
+          {volverA && (
+            <Link className={s.volver} to={volverA}>
+              <span aria-hidden="true">←</span> Volver a la ejecución
+            </Link>
+          )}
+
           <span className={s.look}>
             {/* El tema queda fijado solo dentro del experimento, para que la
                 presentación no cambie a mitad de la tarea medida. Fuera de él
                 no se fija nada, así que anunciarlo era decir algo falso. */}
-            {medida && (
-              <span className={s.lookLabel}>Cómo se ve la pantalla</span>
+            {medida ? (
+              <>
+                <span className={s.lookLabel}>Cómo se ve la pantalla</span>
+                <button type="button" className={s.lookChip} onClick={toggle}>
+                  {theme === "dark" ? "Claro" : "Oscuro"}
+                </button>
+              </>
+            ) : (
+              /* Fuera del estudio, el mismo control que en toda la
+                 aplicación: un icono, no una palabra distinta en cada
+                 pantalla. */
+              <ThemeToggle />
             )}
-            <button type="button" className={s.lookChip} onClick={toggle}>
-              {theme === "dark" ? "Claro" : "Oscuro"}
-            </button>
             {medida && (
               <span className={s.lookNote}>
                 Al empezar queda fijo hasta el final.

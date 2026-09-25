@@ -135,8 +135,11 @@ export function ExecutionsScreen() {
                 )}
                 <td>
                   <span className={s.project}>{titulo(e)}</span>
+                  {/* Sin el punto medio de por medio: unir datos sueltos con
+                      «A · B» es un tic que no aporta nada. */}
                   <span className={s.sub}>
-                    {cuando(e.created_at)} · <span className="mono">{corto(e)}</span>
+                    {cuando(e.created_at)}
+                    <span className={`${s.sub} mono`}>{corto(e)}</span>
                   </span>
                 </td>
                 <td className="mono" translate="no">

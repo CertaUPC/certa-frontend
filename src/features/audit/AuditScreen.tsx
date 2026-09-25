@@ -292,10 +292,17 @@ export function Session({
   const [records, setRecords] = useState<Record<string, Record_>>({});
   const [lastId, setLastId] = useState<string | null>(null);
   const [assisted, setAssisted] = useState(fixedCondition ?? true);
-  const { theme, lock, unlock } = useTheme();
+  const { theme, lock, unlock, medir } = useTheme();
   const [help, setHelp] = useState(false);
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [notaCerrada, setNotaCerrada] = useState(false);
+
+  /* La preferencia guardada es del producto, no del instrumento. Al entrar a
+     una sesión medida se vuelve al tema de partida, para que lo que eligió un
+     participante no sea lo que encuentra el siguiente. */
+  useEffect(() => {
+    if (fixedCondition != null) medir();
+  }, [fixedCondition, medir]);
 
   /* Dentro del experimento el tema queda fijado en cuanto empieza la tarea.
      Fuera de él no se toca: quien usa la herramienta en su trabajo elige
@@ -403,6 +410,7 @@ export function Session({
     return (
       <Briefing
         medida={fixedCondition != null}
+        volverA={volverA}
         assisted={assisted}
         total={findings.length}
         onStart={() => setStage("review")}

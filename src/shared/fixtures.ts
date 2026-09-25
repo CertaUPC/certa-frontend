@@ -136,7 +136,7 @@ export const METRICS: Record<string, Metrics> = {
     anchor_rate_first_try: 0.9024,
     run_is_valid: true,
     run_quality_reason:
-      "Distribución admisible, la clase mayoritaria cubre el 53.7 %",
+      "Estos números se pueden leer: el modelo no contestó siempre lo mismo. Su respuesta más repetida, «explotable», salió en el 53.7 % de las alertas.",
     budget: "41 de 3000 consultas empleadas (US$ 0.68). 9 evitadas: 6 por huella repetida y 3 por filtro determinista.",
   },
 };
