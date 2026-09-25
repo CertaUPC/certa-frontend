@@ -64,6 +64,52 @@
 .empty h2 { font-size: 19px; font-weight: 600; margin-block-end: 8px; }
 .empty p { font-size: 14.5px; color: var(--ink-2); line-height: 1.6; max-inline-size: 52ch; margin-inline: auto; margin-block-end: 20px; }
 
+/* ── marcar dos para comparar ─────────────────────────────────────── */
+.comparar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--sunken);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-block-end: 14px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.quitar {
+  margin-inline-start: auto;
+  min-block-size: 26px;
+  font-size: 13px;
+  background: none;
+  border: 0;
+  color: var(--ink-3);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.quitar:hover {
+  color: var(--ink);
+}
+
+.marcaCol {
+  inline-size: 1%;
+  white-space: nowrap;
+}
+
+.marca {
+  inline-size: 17px;
+  block-size: 17px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.table tr[data-marcada] {
+  background: var(--accent-tint);
+}
+
 @media (max-width: 820px) {
   .table, .table thead, .table tbody, .table tr, .table td { display: block; }
   .table thead { display: none; }

@@ -19,9 +19,11 @@ interface Props {
   assisted: boolean;
   total: number;
   onStart: () => void;
+  /** Sesión del estudio, con su condición fijada de antemano. */
+  medida: boolean;
 }
 
-export function Briefing({ assisted, total, onStart }: Props) {
+export function Briefing({ assisted, total, onStart, medida }: Props) {
   const { theme, toggle } = useTheme();
 
   return (
@@ -33,13 +35,20 @@ export function Briefing({ assisted, total, onStart }: Props) {
             <span className={s.wordmark}>Certa</span>
           </span>
           <span className={s.look}>
-            <span className={s.lookLabel}>Cómo se ve la pantalla</span>
+            {/* El tema queda fijado solo dentro del experimento, para que la
+                presentación no cambie a mitad de la tarea medida. Fuera de él
+                no se fija nada, así que anunciarlo era decir algo falso. */}
+            {medida && (
+              <span className={s.lookLabel}>Cómo se ve la pantalla</span>
+            )}
             <button type="button" className={s.lookChip} onClick={toggle}>
               {theme === "dark" ? "Claro" : "Oscuro"}
             </button>
-            <span className={s.lookNote}>
-              Al empezar queda fijo hasta el final.
-            </span>
+            {medida && (
+              <span className={s.lookNote}>
+                Al empezar queda fijo hasta el final.
+              </span>
+            )}
           </span>
         </header>
 

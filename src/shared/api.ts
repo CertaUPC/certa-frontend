@@ -111,6 +111,10 @@ export interface Execution {
   tool_name: string;
   ruleset_version: string;
   status: ExecutionStatus;
+  /* El nombre que le puso quien la cargó. Ocho caracteres de un UUID no le
+     dicen nada a nadie: sin esto, encontrar una corrida entre varias es
+     cuestión de abrirlas una por una. */
+  label?: string | null;
   total_findings: number;
   validated_findings: number;
   pending_findings: number;
@@ -298,10 +302,16 @@ export const api = {
     projectId: string,
     sarif: unknown,
     scope?: { cwes: string[]; min_severity: string | null },
+    label?: string,
   ) =>
     request<IngestReport>("/api/v1/executions", {
       method: "POST",
-      body: JSON.stringify({ project_id: projectId, sarif, scope }),
+      body: JSON.stringify({
+        project_id: projectId,
+        sarif,
+        scope,
+        label: label?.trim() || null,
+      }),
     }),
 
   run: (id: string) =>

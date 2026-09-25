@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../shared/api";
+import { corto, cuando, titulo } from "../../shared/executions";
 import { useProyecto } from "../../shared/project";
 import { EXECUTIONS, STATUS_LABEL } from "../../shared/fixtures";
 import { Empty, Failed, Loading } from "../../shared/States";
@@ -20,6 +21,22 @@ export function ExecutionsScreen() {
     if (pedido && pedido !== actual?.id) elegir(pedido);
   }, [pedido, actual?.id, elegir]);
 
+  /* Comparar se elige aquí, que es donde están las dos corridas a la vista.
+     Estaba en la pantalla de una sola, así que había que abrir una, pedir
+     comparar y recién entonces buscar la otra en un desplegable. */
+  const [elegidas, setElegidas] = useState<string[]>([]);
+  function alternar(id: string) {
+    setElegidas((v) =>
+      v.includes(id)
+        ? v.filter((x) => x !== id)
+        : // Con dos ya marcadas, la tercera desplaza a la más vieja en vez de
+          // no hacer nada, que dejaba al usuario sin saber por qué no pasaba.
+          v.length === 2
+          ? [v[1], id]
+          : [...v, id],
+    );
+  }
+
   const { data, loading, error, reload } = useApi(
     () => api.executions(actual?.id),
     // Los de muestra se filtran igual que los de verdad: si no, el título
@@ -36,9 +53,8 @@ export function ExecutionsScreen() {
             Ejecuciones{actual ? ` de ${actual.name}` : ""}
           </h1>
           <p className={s.lead}>
-            Cada ejecución es una corrida del analizador sobre un proyecto. La
-            versión del conjunto de reglas se registra porque sin ella comparar
-            dos corridas no tendría sentido.
+            Cada ejecución es una pasada del analizador sobre el proyecto.
+            Marca dos para ver qué cambió entre ellas.
           </p>
         </div>
         <Link className={s.primary} to="/executions/new">
@@ -62,6 +78,29 @@ export function ExecutionsScreen() {
         </Empty>
       )}
 
+      {/* La barra aparece recién con las dos marcadas, y mientras tanto dice
+          qué falta. Un botón apagado sin explicación no enseña nada. */}
+      {data && data.length > 1 && elegidas.length > 0 && (
+        <div className={s.comparar}>
+          {elegidas.length === 2 ? (
+            <>
+              <span>Dos ejecuciones marcadas.</span>
+              <Link
+                className={s.primary}
+                to={`/executions/${elegidas[0]}/compare?against=${elegidas[1]}`}
+              >
+                Ver qué cambió entre las dos
+              </Link>
+            </>
+          ) : (
+            <span>Marca una segunda ejecución para compararlas.</span>
+          )}
+          <button className={s.quitar} onClick={() => setElegidas([])}>
+            Quitar la marca
+          </button>
+        </div>
+      )}
+
       {data && data.length > 0 && (
         <table className={s.table}>
           <caption className="solo-lectores">
@@ -69,7 +108,8 @@ export function ExecutionsScreen() {
           </caption>
           <thead>
             <tr>
-              <th>Proyecto</th>
+              {data.length > 1 && <th className={s.marcaCol}>Comparar</th>}
+              <th>Ejecución</th>
               <th>Reglas</th>
               <th>Estado</th>
               <th className={s.numeric}>Hallazgos</th>
@@ -81,12 +121,23 @@ export function ExecutionsScreen() {
           </thead>
           <tbody>
             {data.map((e) => (
-              <tr key={e.id}>
+              <tr key={e.id} data-marcada={elegidas.includes(e.id) || undefined}>
+                {data.length > 1 && (
+                  <td className={s.marcaCol}>
+                    <input
+                      type="checkbox"
+                      className={s.marca}
+                      checked={elegidas.includes(e.id)}
+                      onChange={() => alternar(e.id)}
+                      aria-label={`Comparar ${titulo(e)}`}
+                    />
+                  </td>
+                )}
                 <td>
-                  <span className={s.project}>
-                    {e.project_name || "Proyecto sin nombre"}
+                  <span className={s.project}>{titulo(e)}</span>
+                  <span className={s.sub}>
+                    {cuando(e.created_at)} · <span className="mono">{corto(e)}</span>
                   </span>
-                  <span className={`${s.sub} mono`}>{e.id.slice(0, 8)}</span>
                 </td>
                 <td className="mono" translate="no">
                   {e.tool_name} {e.ruleset_version}

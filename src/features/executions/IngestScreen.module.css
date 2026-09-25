@@ -49,6 +49,40 @@
 .fileName { font-size: 14.5px; font-weight: 600; word-break: break-all; }
 .fileSize { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
+/* El campo para cualquier otro CWE, pegado a los atajos. */
+.otroCwe {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  margin-block-start: 10px;
+}
+
+.otroCwe .field {
+  flex: 1 1 200px;
+  max-inline-size: 280px;
+}
+
+.agregar {
+  min-block-size: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--sunken);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.agregar:hover:not(:disabled) {
+  border-color: var(--line-strong);
+}
+
+.agregar:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .cweChip {
   font-size: 12.5px; background: var(--sunken); color: var(--ink-2);

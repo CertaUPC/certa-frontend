@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { api, getToken } from "../../shared/api";
 import { EXECUTIONS, METRICS, STATUS_LABEL } from "../../shared/fixtures";
 import { Hint } from "../../shared/Hint";
+import { cuando, titulo } from "../../shared/executions";
 import { useProyecto } from "../../shared/project";
 import { Failed, Loading } from "../../shared/States";
 import { useAction, useApi } from "../../shared/useApi";
@@ -161,13 +162,18 @@ export function ExecutionDetailScreen() {
 
       <div className={s.head}>
         <div>
-          <h1 className={s.title}>{execution.project_name || "Proyecto sin nombre"}</h1>
+          {/* El título es la corrida, no el proyecto: el proyecto ya lo dice
+              la barra, y dos corridas del mismo se llamaban igual. */}
+          <h1 className={s.title}>{titulo(execution)}</h1>
           <p className={s.facts}>
             <span className={`${s.badge} ${s[execution.status]}`}>
               {STATUS_LABEL[execution.status]}
             </span>
             <span className="mono" translate="no">
               {execution.tool_name} {execution.ruleset_version}
+            </span>
+            <span className={s.cuando}>
+              {execution.project_name || "Proyecto sin nombre"}
             </span>
             <span className={s.cuando}>{cuando(execution.created_at)}</span>
             <span className={s.cuando}>{execution.progress_text}</span>
@@ -190,14 +196,14 @@ export function ExecutionDetailScreen() {
           )}
           {terminada && (
             <Link className={s.primary} to={`/review?execution=${id}`}>
-              Revisar los hallazgos
+              Revisar las {execution.validated_findings} alertas
             </Link>
           )}
           {/* Mientras corre también se puede revisar lo que ya tiene veredicto:
               esperar a que termine para empezar a mirar no aporta nada. */}
           {!terminada && execution.validated_findings > 0 && (
             <Link className={s.secondary} to={`/review?execution=${id}`}>
-              Revisar lo validado
+              Revisar las {execution.validated_findings} alertas ya juzgadas
             </Link>
           )}
 
@@ -236,23 +242,8 @@ export function ExecutionDetailScreen() {
                     }}
                   >
                     {download.busy ? "Preparando…" : "Exportar a CSV"}
-                    <span className={s.masDato}>
-                      Un renglón por hallazgo, sin datos de personas
-                    </span>
+                    <span className={s.masDato}>Un renglón por alerta</span>
                   </button>
-                </li>
-                <li role="none">
-                  <Link
-                    role="menuitem"
-                    className={s.masOpcion}
-                    to={`/executions/${id}/compare`}
-                    onClick={() => setMenu(false)}
-                  >
-                    Comparar con otra corrida
-                    <span className={s.masDato}>
-                      Qué alertas son nuevas, cuáles se resolvieron
-                    </span>
-                  </Link>
                 </li>
                 <li role="none">
                   <button
@@ -264,9 +255,10 @@ export function ExecutionDetailScreen() {
                       setConfirmando(true);
                     }}
                   >
-                    Soltar el código conservado
+                    Borrar el código guardado
                     <span className={s.masDato}>
-                      Libera espacio y ya no se puede enseñar el fragmento
+                      Los veredictos se quedan; se pierde el fragmento que los
+                      sostiene
                     </span>
                   </button>
                 </li>
@@ -279,9 +271,11 @@ export function ExecutionDetailScreen() {
       {confirmando && (
         <div className={s.confirmarFila}>
           <span className={s.confirmarTexto}>
-            <b>¿Soltar el código conservado?</b> Los veredictos y sus
-            justificaciones se quedan. Lo que se pierde es poder enseñar el
-            fragmento que los sostiene, y eso no se deshace.
+            <b>¿Borrar el código guardado de esta ejecución?</b> Certa copia
+            el pedazo de código que el modelo miró para justificar cada
+            veredicto. Los veredictos y sus justificaciones se quedan; lo que
+            se pierde es poder abrir esa copia y ver de qué hablaban. No se
+            deshace.
           </span>
           <button
             className={s.peligro}
@@ -289,7 +283,7 @@ export function ExecutionDetailScreen() {
             aria-busy={purge.busy}
             onClick={() => purge.run()}
           >
-            {purge.busy ? "Soltando…" : "Sí, soltarlo"}
+            {purge.busy ? "Borrando…" : "Sí, borrarlo"}
           </button>
           <button className={s.secondary} onClick={() => setConfirmando(false)}>
             No
@@ -306,9 +300,8 @@ export function ExecutionDetailScreen() {
       <div role="status" aria-live="polite">
         {soltados !== null && (
           <p className={s.notice}>
-            Se soltaron <b className="mono">{soltados}</b> fragmentos.
-            Los veredictos y sus justificaciones siguen ahí; lo que ya no se
-            puede es enseñar el código que los sostiene.
+            Se borraron <b className="mono">{soltados}</b> copias de código.
+            Los veredictos y sus justificaciones siguen ahí.
           </p>
         )}
       </div>
@@ -424,25 +417,25 @@ export function ExecutionDetailScreen() {
                 kind="tp"
                 n={metrics.data.confusion.verdaderos_positivos}
                 label="Acertó que era real"
-                ayuda="La alerta era una vulnerabilidad de verdad y el modelo la subió de prioridad. Es el acierto que buscas."
+                ayuda="Certa la marcó como vulnerabilidad real, y sí lo era. Es el acierto que buscas."
               />
               <Cell
                 kind="fp"
                 n={metrics.data.confusion.falsos_positivos}
                 label="Dijo real y no lo era"
-                ayuda="La subió de prioridad y resultó falsa alarma. Este error te hace perder tiempo revisando algo que no era."
+                ayuda="Certa la marcó como vulnerabilidad real y resultó falsa alarma. Este error te hace perder el tiempo revisando algo que no era."
               />
               <Cell
                 kind="fn"
                 n={metrics.data.confusion.falsos_negativos}
                 label="Descartó algo real"
-                ayuda="La bajó de prioridad y sí era explotable. Es el error caro: una vulnerabilidad que pasa sin que nadie la mire."
+                ayuda="Certa la descartó y sí era una vulnerabilidad real. Es el error caro: pasa de largo sin que nadie la mire."
               />
               <Cell
                 kind="tn"
                 n={metrics.data.confusion.verdaderos_negativos}
                 label="Acertó que era falsa alarma"
-                ayuda="La descartó y efectivamente no era explotable. Es el trabajo de revisión que te ahorra."
+                ayuda="Certa la descartó y efectivamente no era explotable. Es el trabajo de revisión que te ahorra."
               />
             </div>
 
@@ -451,33 +444,34 @@ export function ExecutionDetailScreen() {
                 label="F1"
                 value={metrics.data.confusion.f1}
                 threshold={0.75}
-                ayuda="Resume en un solo número la precisión y la exhaustividad. Sube solo si las dos suben, así que no se puede quedar bien en una descuidando la otra. Va de 0 a 1."
+                ayuda="Junta la precisión y la exhaustividad en un solo número, de 0 a 1. Sube solo si suben las dos, así que no se puede quedar bien en una descuidando la otra."
               />
               <Score
                 label="Exactitud"
                 value={metrics.data.confusion.exactitud}
-                ayuda="De todas las alertas que juzgó, en cuántas acertó. Engaña cuando una clase domina: si casi todas son falsas alarmas, descartarlas todas ya da exactitud alta y utilidad nula."
+                ayuda="De todas las alertas que Certa juzgó, en qué parte acertó. Engaña cuando casi todas son falsas alarmas: descartarlas todas ya daría exactitud alta sin servir de nada."
               />
               <Score
                 label="Precisión"
                 value={metrics.data.confusion.precision}
-                ayuda="De las que subió de prioridad, cuántas eran de verdad. Si baja, la lista de arriba se llena de falsas alarmas y deja de valer la pena leerla."
+                ayuda="De las alertas que Certa marcó como vulnerabilidad real, qué parte lo era de verdad. Si baja, arriba de la lista se te acumulan falsas alarmas."
               />
               <Score
                 label="Exhaustividad"
                 value={metrics.data.confusion.exhaustividad}
-                ayuda="De las que eran de verdad, cuántas alcanzó a subir. Si baja, quedan vulnerabilidades reales enterradas al fondo de la lista."
+                ayuda="De las alertas que sí eran vulnerabilidades reales, qué parte alcanzó a marcar Certa. Si baja, quedan vulnerabilidades de verdad enterradas al fondo de la lista."
               />
               <Score
                 label="Anclaje a la primera"
                 value={metrics.data.anchor_rate_first_try}
                 threshold={0.85}
-                ayuda="Cuántos veredictos citaron, al primer intento, líneas que existen en el código. Un veredicto que cita líneas inventadas no se puede comprobar, por más convincente que suene."
+                ayuda="Qué parte de los veredictos citó, al primer intento, líneas que existen de verdad en el archivo. Si cita líneas que no existen, no hay cómo comprobar lo que dice, por convincente que suene."
               />
             </dl>
 
+            {/* El rótulo «corrida válida» delante ya no hace falta: la frase
+                lo dice, y el punto de color lo marca. */}
             <p className={metrics.data.run_is_valid ? s.valid : s.invalid}>
-              {metrics.data.run_is_valid ? "Corrida válida. " : "Corrida rechazada. "}
               {metrics.data.run_quality_reason}
             </p>
             <p className={s.budget}>{metrics.data.budget}</p>
@@ -503,16 +497,6 @@ function desde(iso: string): string {
   if (horas < 24) return `hace ${horas} ${horas === 1 ? "hora" : "horas"}`;
   const dias = Math.round(horas / 24);
   return `hace ${dias} ${dias === 1 ? "día" : "días"}`;
-}
-
-function cuando(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(d);
 }
 
 function Cell({
