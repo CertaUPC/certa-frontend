@@ -3,7 +3,20 @@
 .crumb a:hover { color: var(--accent); text-decoration: underline; }
 .crumb span[aria-hidden] { margin-inline: 5px; }
 
-.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; flex-wrap: wrap; margin-block-end: 20px; }
+/* Rejilla y no flex con salto: con la línea de datos algo larga, los botones
+   se iban a un renglón propio y ese renglón costaba sesenta píxeles de alto
+   en una pantalla que ya no sobraba. */
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px 22px;
+  margin-block-end: 16px;
+}
+
+@media (max-width: 720px) {
+  .head { grid-template-columns: minmax(0, 1fr); }
+}
 .title { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.18; }
 .facts { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin-block-start: 7px; }
 .headActions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -41,6 +54,15 @@
   border-radius: var(--radius); padding: 16px 20px; margin-block-end: 14px;
 }
 .h2 { font-size: 16px; font-weight: 600; margin-block-end: 10px; }
+.h3 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-block: 18px 9px;
+}
 .note { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; max-inline-size: 76ch; margin-block-end: 12px; }
 
 .progressText { font-size: 14px; color: var(--ink-2); margin-block-end: 9px; }
@@ -61,12 +83,171 @@
 .cell[data-kind="fp"] .cellN, .cell[data-kind="fn"] .cellN { color: var(--real); }
 .cellL { display: block; font-size: 12.5px; color: var(--ink-2); margin-block-start: 3px; line-height: 1.35; }
 
-.scores { display: flex; flex-wrap: wrap; gap: 24px; margin: 16px 0 14px; }
-.score dt { font-size: 12.5px; color: var(--ink-3); margin-block-end: 2px; }
-.score dd { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.meets, .misses { display: block; font-size: 11px; margin-block-start: 2px; }
-.meets { color: var(--safe); }
-.misses { color: var(--check); }
+/* ── el lienzo: la corrida a un lado, el marcador al otro ─────────── */
+.lienzo {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  margin-block-end: 16px;
+}
+
+/* La columna del marcador es angosta y de ancho fijo: son cinco cifras
+   cortas, y estirarlas con la ventana solo aleja el rótulo del número. */
+@media (min-width: 1080px) {
+  .lienzo {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 22px;
+  }
+}
+
+.corrida {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px 18px;
+}
+
+/* El marcador no es otra tarjeta igual: se separa con un filete, no con un
+   marco. Tres recuadros idénticos era lo que hacía que la pantalla pareciera
+   armada con un molde. */
+.marcador {
+  padding-block-start: 2px;
+}
+
+@media (min-width: 1080px) {
+  .marcador {
+    border-inline-start: 1px solid var(--line);
+    padding-inline-start: 22px;
+  }
+}
+
+/* ── la cinta de la corrida ───────────────────────────────────────── */
+.cinta {
+  display: flex;
+  gap: 2px;
+  block-size: 30px;
+  margin-block: 12px 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.tramo {
+  min-inline-size: 3px;
+}
+
+.tramo[data-tipo="real"] { background: var(--real); }
+.tramo[data-tipo="descartada"] { background: var(--safe); }
+.tramo[data-tipo="indeterminada"] { background: var(--check); }
+
+/* Lo que sigue en cola va rayado y no en color plano: todavía no es un
+   resultado, y pintarlo como los demás lo haría parecer uno. */
+.tramo[data-tipo="cola"] {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--sunken) 0 5px,
+    transparent 5px 10px
+  );
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.cuentas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+  gap: 0 18px;
+}
+
+.cuenta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0 7px;
+  padding-block: 9px 8px;
+  border-block-end: 1px solid var(--line);
+}
+
+.cuentaMarca {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 2px;
+  align-self: center;
+}
+
+.cuentaMarca[data-tipo="real"] { background: var(--real); }
+.cuentaMarca[data-tipo="descartada"] { background: var(--safe); }
+.cuentaMarca[data-tipo="indeterminada"] { background: var(--check); }
+.cuentaMarca[data-tipo="cola"] { background: var(--line-strong); }
+
+.cuentaN {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cuentaR {
+  grid-column: 2;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+
+/* ── el marcador ──────────────────────────────────────────────────── */
+.scores { margin: 10px 0 14px; }
+
+.score {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 5px 10px;
+  padding-block: 9px;
+  border-block-start: 1px solid var(--line);
+}
+
+.score:first-child { border-block-start: 0; }
+
+.scoreQue {
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.scoreN {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La barra sitúa la cifra entre cero y uno, y marca dónde está el umbral
+   declarado. Sin eso, 0.842 no dice si está bien o mal. */
+.scoreBarra {
+  grid-column: 1 / -1;
+  position: relative;
+  display: block;
+  block-size: 3px;
+  background: var(--sunken);
+  border-radius: 2px;
+}
+
+.scoreRelleno {
+  display: block;
+  block-size: 100%;
+  border-radius: 2px;
+  background: var(--ink-3);
+}
+
+.score[data-falla] .scoreRelleno { background: var(--check); }
+.score[data-falla] .scoreN { color: var(--check); }
+
+.scoreUmbral {
+  position: absolute;
+  inset-block: -3px;
+  inline-size: 1px;
+  background: var(--ink-2);
+}
 
 /* El veredicto de la corrida era otro recuadro de color entero. Basta un
    punto al principio: lo que hay que leer es la frase. */
@@ -252,4 +433,93 @@
 
 .peligro:disabled {
   opacity: 0.6;
+}
+
+/* ── por dónde empezar ────────────────────────────────────────────── */
+.porEmpezar {
+  margin-block-end: 8px;
+}
+
+.porEmpezarTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.verTodas {
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.verTodas:hover { text-decoration: underline; }
+
+.alertas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Filas con filete, no tarjetas: es una lista de registros, y el marco por
+   cada uno solo agrega ruido. */
+.alerta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 2px 14px;
+  padding-block: 9px;
+  border-block-start: 1px solid var(--line);
+}
+
+.alertaQue {
+  grid-column: 1;
+  font-size: 13.5px;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.alertaDonde {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.alertaSeveridad {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.alertaVeredicto {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  min-inline-size: 104px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.alertaVeredicto[data-valor="real"] { color: var(--real); }
+.alertaVeredicto[data-valor="descartado"] { color: var(--safe); }
+.alertaVeredicto[data-valor="revisar"] { color: var(--check); }
+.alertaVeredicto[data-valor="sin_analizar"] { color: var(--ink-3); }
+
+@media (max-width: 560px) {
+  .alerta {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .alertaSeveridad {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .alertaVeredicto {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
 }
