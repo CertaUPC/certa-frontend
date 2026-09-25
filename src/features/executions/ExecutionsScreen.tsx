@@ -1,18 +1,38 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../shared/api";
+import { useProyecto } from "../../shared/project";
 import { EXECUTIONS, STATUS_LABEL } from "../../shared/fixtures";
 import { Empty, Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
 import s from "./ExecutionsScreen.module.css";
 
 export function ExecutionsScreen() {
-  const { data, loading, error, reload } = useApi(() => api.executions(), EXECUTIONS);
+  /* Las del proyecto que la barra tiene elegido. Antes se listaban todas, de
+     modo que elegir proyecto en la barra no cambiaba nada aquí. */
+  const { actual, elegir } = useProyecto();
+
+  /* Quien llega desde la ficha de un proyecto trae el suyo en la dirección.
+     Adoptarlo deja la barra y la lista mirando lo mismo. */
+  const [consulta] = useSearchParams();
+  const pedido = consulta.get("project");
+  useEffect(() => {
+    if (pedido && pedido !== actual?.id) elegir(pedido);
+  }, [pedido, actual?.id, elegir]);
+
+  const { data, loading, error, reload } = useApi(
+    () => api.executions(actual?.id),
+    EXECUTIONS,
+    [actual?.id],
+  );
 
   return (
     <>
       <div className={s.head}>
         <div>
-          <h1 className={s.title}>Ejecuciones</h1>
+          <h1 className={s.title}>
+            Ejecuciones{actual ? ` de ${actual.name}` : ""}
+          </h1>
           <p className={s.lead}>
             Cada ejecución es una corrida del analizador sobre un proyecto. La
             versión del conjunto de reglas se registra porque sin ella comparar

@@ -1,0 +1,386 @@
+/* Columna fija a la izquierda. Se desplaza por dentro cuando su contenido
+   pasa del alto de la ventana, y el pie queda abajo del todo. */
+.barra {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  block-size: 100dvh;
+  position: sticky;
+  inset-block-start: 0;
+  padding: 16px 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  background: var(--surface);
+  border-inline-end: 1px solid var(--line);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.figura {
+  color: var(--accent);
+}
+
+.nombre {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.tema {
+  margin-inline-start: auto;
+}
+
+/* Solo aparece cuando la columna se ha vuelto cabecera. */
+.menu {
+  display: none;
+  min-block-size: 28px;
+  font-size: 12.5px;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  padding: 4px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.menu:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.muestra {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--check);
+  border: 1px dashed var(--check);
+  border-radius: 999px;
+  padding: 3px 10px;
+  text-align: center;
+}
+
+/* ── el desplegable de proyectos ─────────────────────────────────── */
+.desplegable {
+  position: relative;
+  flex: none;
+}
+
+.selector {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 8px;
+  inline-size: 100%;
+  text-align: start;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--sunken);
+  cursor: pointer;
+  transition: border-color 0.14s var(--salida);
+}
+
+.selector:hover:not(:disabled) {
+  border-color: var(--line-strong);
+}
+
+.selector:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.selector:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.selectorRotulo {
+  grid-column: 1;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.selectorNombre {
+  grid-column: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flecha {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--ink-3);
+  transition: transform 0.16s var(--salida);
+}
+
+.flecha[data-abierto] {
+  transform: rotate(180deg);
+}
+
+.lista {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + 5px);
+  z-index: var(--z-popover);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-block-size: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--lift);
+}
+
+.opcion {
+  inline-size: 100%;
+  text-align: start;
+  padding: 7px 9px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  transition: background 0.12s var(--salida);
+}
+
+.opcion:hover {
+  background: var(--sunken);
+}
+
+.opcion:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.opcion[data-vivo] .opcionNombre {
+  color: var(--accent);
+}
+
+.opcionNombre {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.34;
+}
+
+.opcionDato {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-block-start: 1px;
+}
+
+/* ── bloques ─────────────────────────────────────────────────────── */
+.bloque {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rotulo {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.vacio {
+  font-size: 12px;
+  color: var(--ink-3);
+  padding: 2px 8px;
+  line-height: 1.45;
+}
+
+.corridas,
+.acciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.corrida {
+  display: block;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border-inline-start: 2px solid transparent;
+  text-decoration: none;
+  transition: background 0.12s var(--salida);
+}
+
+.corrida:hover {
+  background: var(--sunken);
+}
+
+.viva {
+  border-inline-start-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.corrida:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.corridaId {
+  display: block;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.corridaDato {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Veinticuatro píxeles es el mínimo que la norma pide para un destino. */
+  min-block-size: 28px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 0.12s var(--salida), color 0.12s var(--salida);
+}
+
+.accion svg {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.accion:hover {
+  background: var(--sunken);
+  color: var(--ink);
+}
+
+.accion:hover svg {
+  color: var(--accent);
+}
+
+.accion:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.accionViva {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-tint);
+}
+
+.accionViva svg {
+  color: var(--accent);
+}
+
+/* ── el pie, pegado abajo ────────────────────────────────────────── */
+.pie {
+  margin-block-start: auto;
+  padding-block-start: 12px;
+  border-block-start: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.quien {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-inline-size: 0;
+  flex: 1;
+}
+
+.inicial {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 999px;
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.correo {
+  font-size: 12px;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.salir {
+  flex: none;
+  min-block-size: 26px;
+  font-size: 12.5px;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  padding: 4px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.14s var(--salida), color 0.14s var(--salida);
+}
+
+.salir:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.salir:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* En pantalla estrecha la columna se tumba y vuelve a ser una cabecera, que
+   es lo único que cabe. El desplegable y las acciones siguen ahí. */
+@media (max-width: 860px) {
+  .barra {
+    block-size: auto;
+    position: static;
+    gap: 14px;
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--line);
+  }
+  .menu {
+    display: block;
+  }
+  /* Plegada quedan la marca y el proyecto, que es lo que se consulta de un
+     vistazo. El resto sale al pulsar el botón. */
+  .barra:not([data-menu]) .bloque,
+  .barra:not([data-menu]) .pie {
+    display: none;
+  }
+  .pie {
+    margin-block-start: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flecha {
+    transition: none;
+  }
+}

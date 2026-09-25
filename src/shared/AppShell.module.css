@@ -1,101 +1,48 @@
-.shell { min-block-size: 100dvh; display: grid; grid-template-rows: auto 1fr; }
+.shell {
+  min-block-size: 100dvh;
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  background: var(--bg);
+}
 
-/* Fuera de la vista hasta que el teclado llega a el. */
+/* Fuera de la vista hasta que el teclado llega a él. */
 .salto {
-  position: absolute; inset-block-start: -100px; inset-inline-start: 12px;
+  position: absolute;
+  inset-block-start: -100px;
+  inset-inline-start: 12px;
   z-index: calc(var(--z-sticky) + 1);
-  background: var(--accent); color: var(--surface);
-  font-size: 13.5px; font-weight: 600;
-  padding: 10px 16px; border-radius: var(--radius-sm); text-decoration: none;
-}
-.salto:focus-visible { inset-block-start: 12px; outline: 2px solid var(--ink); outline-offset: 2px; }
-
-/* La barra queda fija y el contenido pasa por debajo, de modo que el fondo
-   va translucido: opaco tapaba la linea que se estaba leyendo al desplazar y
-   no habia forma de saber que seguia ahi. El color solido queda de reserva
-   para el navegador que no sepa difuminar. */
-.top {
-  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
-  padding: 12px 22px;
-  border-block-end: 1px solid var(--line);
-  background: var(--surface);
-  position: sticky; inset-block-start: 0; z-index: var(--z-sticky);
-}
-
-@supports (backdrop-filter: blur(1px)) {
-  .top {
-    background: color-mix(in oklch, var(--surface) 82%, transparent);
-    backdrop-filter: blur(12px) saturate(1.5);
-  }
-}
-.brand { display: flex; align-items: center; gap: 8px; }
-.brandMark { color: var(--accent); }
-.wordmark { font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
-
-/* La seccion en la que se esta se marca con una regla pegada al borde de la
-   barra, y no con una pastilla teñida: la regla dice que la barra y lo que hay
-   debajo son la misma cosa, la pastilla flota y podria ser un boton mas. */
-.nav { display: flex; gap: 2px; align-self: stretch; margin-block: -12px; }
-.link {
-  position: relative;
-  display: flex; align-items: center;
-  font-size: 14px; color: var(--ink-2); text-decoration: none;
-  padding: 0 12px;
-  transition: color 0.14s var(--salida);
-}
-.link::after {
-  content: ""; position: absolute; inset-inline: 8px;
-  inset-block-end: -1px; block-size: 2px; border-radius: 2px 2px 0 0;
   background: var(--accent);
-  transform: scaleX(0); transform-origin: center;
-  transition: transform 0.18s var(--salida);
-}
-.link:hover { color: var(--ink); }
-.link:hover::after { transform: scaleX(0.4); }
-.link:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: var(--radius-sm); }
-.active { color: var(--accent); font-weight: 600; }
-.active::after { transform: scaleX(1); }
-
-@media (prefers-reduced-motion: reduce) {
-  .link::after { transition: none; }
+  color: var(--surface);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
 }
 
-.right { display: flex; align-items: center; gap: 9px; margin-inline-start: auto; }
-.fixture {
-  font-size: 11.5px; color: var(--check);
-  border: 1px dashed var(--check); border-radius: 999px; padding: 3px 10px;
+.salto:focus-visible {
+  inset-block-start: 12px;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
-/* Quien esta dentro. Se recorta en pantallas estrechas antes que empujar las
-   acciones fuera de la barra. */
-.quien {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 12.5px; color: var(--ink-3);
-  max-inline-size: 26ch; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-}
-/* La inicial del correo, para reconocer la cuenta de un vistazo cuando el
-   texto se recorta. */
-.inicial {
-  flex: none;
-  display: grid; place-items: center;
-  inline-size: 22px; block-size: 22px; border-radius: 999px;
-  background: var(--accent-tint); color: var(--accent);
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-}
-.chip {
-  font-size: 12.5px; background: var(--surface);
-  border: 1px solid var(--line); color: var(--ink-2);
-  padding: 6px 12px; border-radius: 999px;
-  transition: border-color 0.14s var(--salida), color 0.14s var(--salida);
-}
-.chip:hover:not(:disabled) { border-color: var(--line-strong); color: var(--ink); }
-.chip:disabled { opacity: 0.45; cursor: default; }
 
-.body { padding: 26px 22px 56px; max-inline-size: 1180px; inline-size: 100%; margin-inline: auto; }
+.body {
+  min-inline-size: 0;
+  padding: 26px 26px 56px;
+}
 
-@media (max-width: 640px) {
-  .top { gap: 14px; padding: 10px 16px; }
-  .nav { margin-block: -10px; }
-  .quien { display: none; }
-  .body { padding: 20px 16px 40px; }
+/* La columna de lectura no crece con la ventana: a partir de cierto ancho
+   una línea de texto deja de poder seguirse de un renglón al siguiente. */
+.dentro {
+  max-inline-size: 1180px;
+  margin-inline: auto;
+}
+
+@media (max-width: 860px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .body {
+    padding: 20px 16px 40px;
+  }
 }
