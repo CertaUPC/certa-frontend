@@ -21,7 +21,13 @@ export function ExecutionDetailScreen() {
   );
 
   const run = useAction(async () => {
-    const r = await api.run(id);
+    /* Una corrida que se cortó vuelve a la cola por su propio camino. El
+       trabajador toma las pendientes, así que encolar sin más la que quedó
+       interrumpida la dejaba parada donde estaba. */
+    const r =
+      exec.data?.status === "fallida"
+        ? await api.resume(id)
+        : await api.run(id);
     exec.reload();
     metrics.reload();
     return r;

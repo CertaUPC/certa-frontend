@@ -187,18 +187,18 @@ export function SideNav() {
                   to={`/executions/${corridas[0].id}/compare`}
                 >
                   <Icono d="M3 4.6h4.4M3 8h4.4M3 11.4h4.4M10 4.6h3M10 8h3M10 11.4h3" />
-                  Comparar dos corridas
+                  Comparar dos ejecuciones
                 </NavLink>
               </li>
             )}
-            {corridas.length > A_LA_VISTA && (
-              <li>
-                <NavLink className={enlace} to="/executions">
-                  <Icono d="M2.6 4.4h10.8v7.2H2.6zM2.6 7h10.8" />
-                  Ver las {corridas.length}
-                </NavLink>
-              </li>
-            )}
+            {/* Siempre, no solo cuando la lista de arriba se queda corta: la
+                pantalla completa trae el estado, las reglas y el avance. */}
+            <li>
+              <NavLink className={enlace} to="/executions" end>
+                <Icono d="M2.6 4.4h10.8v7.2H2.6zM2.6 7h10.8" />
+                Ver las {corridas.length} con su detalle
+              </NavLink>
+            </li>
           </ul>
         </section>
       )}
