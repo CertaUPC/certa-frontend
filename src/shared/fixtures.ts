@@ -41,6 +41,8 @@ export const EXECUTIONS: Execution[] = [
     progress: 1,
     progress_text: "41 de 41 hallazgos validados (100 %), 0 pendientes",
     failure_reason: null,
+    claimed_by: "certa-worker",
+    started_at: "2026-09-09T14:22:00Z",
     created_at: "2026-09-09T14:20:00Z",
   },
   {
@@ -56,6 +58,8 @@ export const EXECUTIONS: Execution[] = [
     progress: 0.594,
     progress_text: "76 de 128 hallazgos validados (59 %), 52 pendientes",
     failure_reason: null,
+    claimed_by: "certa-worker",
+    started_at: "2026-09-10T09:06:00Z",
     created_at: "2026-09-10T09:05:00Z",
   },
   {
@@ -72,6 +76,8 @@ export const EXECUTIONS: Execution[] = [
     progress_text: "12 de 41 hallazgos validados (29 %), 29 pendientes",
     failure_reason:
       "Se alcanzó el límite de 30 consultas. Lo validado se conserva y el resto queda pendiente.",
+    claimed_by: null,
+    started_at: "2026-09-08T16:41:00Z",
     created_at: "2026-09-08T16:40:00Z",
   },
   {
@@ -87,6 +93,8 @@ export const EXECUTIONS: Execution[] = [
     progress: 0,
     progress_text: "0 de 7 hallazgos validados (0 %), 7 pendientes",
     failure_reason: null,
+    claimed_by: null,
+    started_at: null,
     created_at: "2026-09-10T11:52:00Z",
   },
 ];

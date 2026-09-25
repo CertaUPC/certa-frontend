@@ -56,6 +56,19 @@ export function ExecutionDetailScreen() {
     return true;
   });
 
+  /* Devolver a la cola la que se quedó en proceso. El trabajador de la
+     plataforma gratuita se reinicia, y la corrida que tenía reclamada no
+     vuelve sola: la cola mira el estado, y ese sigue diciendo «en proceso».
+     Confirmación en dos pasos porque, si el trabajador sigue vivo, dos
+     podrían validar los mismos hallazgos y eso se paga dos veces. */
+  const [devolviendo, setDevolviendo] = useState(false);
+  const devolver = useAction(async () => {
+    const r = await api.resume(id);
+    setDevolviendo(false);
+    exec.reload();
+    return r;
+  });
+
   /* Soltar el código conservado es irreversible: sin él, la pantalla de
      auditoría deja de poder enseñar el fragmento que explica el veredicto. De
      ahí la confirmación en dos pasos, en la propia línea y sin diálogo. */
@@ -85,6 +98,7 @@ export function ExecutionDetailScreen() {
 
   const pendiente = execution.status === "pendiente";
   const interrumpida = execution.status === "fallida";
+  const enProceso = execution.status === "en_proceso";
 
   return (
     <>
@@ -132,6 +146,33 @@ export function ExecutionDetailScreen() {
           <Link className={s.secondary} to={`/executions/${id}/compare`}>
             Comparar con otra
           </Link>
+          {enProceso &&
+            (devolviendo ? (
+              <span className={s.confirmar}>
+                ¿Devolverla a la cola?
+                <button
+                  className={s.peligro}
+                  disabled={devolver.busy}
+                  aria-busy={devolver.busy}
+                  onClick={() => devolver.run()}
+                >
+                  {devolver.busy ? "Devolviendo…" : "Sí, devolverla"}
+                </button>
+                <button
+                  className={s.secondary}
+                  onClick={() => setDevolviendo(false)}
+                >
+                  No
+                </button>
+              </span>
+            ) : (
+              <button
+                className={s.secondary}
+                onClick={() => setDevolviendo(true)}
+              >
+                Devolver a la cola
+              </button>
+            ))}
           {confirmando ? (
             <span className={s.confirmar}>
               ¿Soltar el código conservado?
@@ -164,6 +205,7 @@ export function ExecutionDetailScreen() {
       <div role="alert" aria-live="assertive">
         {run.error && <p className={s.problem}>{run.error}</p>}
         {download.error && <p className={s.problem}>{download.error}</p>}
+        {devolver.error && <p className={s.problem}>{devolver.error}</p>}
         {purge.error && <p className={s.problem}>{purge.error}</p>}
       </div>
       <div role="status" aria-live="polite">
@@ -175,6 +217,18 @@ export function ExecutionDetailScreen() {
           </p>
         )}
       </div>
+
+      {enProceso && (
+        <p className={s.notice}>
+          <b>La tomó {execution.claimed_by || "un trabajador"}</b>
+          {execution.started_at ? ` ${desde(execution.started_at)}` : ""}. Si ese
+          trabajador se reinició, la corrida se queda así: la cola mira el
+          estado, y devolverla es lo que la vuelve a poner al alcance del
+          siguiente. Lo ya validado se conserva. Hazlo solo si lleva parada,
+          porque con un trabajador todavía vivo habría dos validando los mismos
+          hallazgos y eso se paga dos veces.
+        </p>
+      )}
 
       {execution.failure_reason && (
         <p className={s.notice}>
@@ -262,6 +316,19 @@ export function ExecutionDetailScreen() {
 
 /* La fecha se formatea con el locale del navegador y no a mano: quien revise
    esto desde otro huso no tiene por que leer el nuestro. */
+/** Cuánto lleva así, en palabras. «hace 3 horas». */
+function desde(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const minutos = Math.round((Date.now() - d.getTime()) / 60000);
+  if (minutos < 1) return "hace un momento";
+  if (minutos < 60) return `hace ${minutos} ${minutos === 1 ? "minuto" : "minutos"}`;
+  const horas = Math.round(minutos / 60);
+  if (horas < 24) return `hace ${horas} ${horas === 1 ? "hora" : "horas"}`;
+  const dias = Math.round(horas / 24);
+  return `hace ${dias} ${dias === 1 ? "día" : "días"}`;
+}
+
 function cuando(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";

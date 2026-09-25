@@ -117,6 +117,10 @@ export interface Execution {
   progress: number;
   progress_text: string;
   failure_reason: string | null;
+  /* Quién la tomó y desde cuándo. Una corrida que se quedó en proceso porque
+     el trabajador se reinició no se distingue de una viva sin esto. */
+  claimed_by: string | null;
+  started_at: string | null;
   created_at: string;
 }
 
