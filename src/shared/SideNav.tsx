@@ -6,6 +6,18 @@
  * él. En vertical sí, y eso convierte la navegación en el sitio desde donde se
  * trabaja y no en una fila de rótulos.
  *
+ * El orden va de lo general a lo particular, y es deliberado:
+ *
+ *   1. Proyectos. Es el punto de partida, donde están todos los repositorios
+ *      bajo análisis. Va arriba del todo porque es a donde se vuelve.
+ *   2. El proyecto elegido: sus ejecuciones y lo que se lanza sobre él.
+ *   3. Validación con usuarios. La parte del estudio, que es otra tarea y no
+ *      una más del producto, de modo que va aparte y al final.
+ *
+ * Antes el bloque de arriba se llamaba «El estudio» y contenía participantes y
+ * proyectos juntos. Eso mezclaba dos cosas que no se parecen: los proyectos
+ * son el producto y los participantes son el experimento.
+ *
  * La auditoría no la monta: quien participa en el estudio no debe ver
  * navegación, ni ejecuciones ajenas, ni métricas. Solo la tarea que se le
  * pidió.
@@ -14,6 +26,7 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { USE_FIXTURES, api, clearSession, getEmail, type Execution } from "./api";
+import { EXECUTIONS } from "./fixtures";
 import { Mark } from "./Mark";
 import { ThemeToggle } from "./ThemeToggle";
 import { useProyecto } from "./project";
@@ -33,9 +46,14 @@ export function SideNav() {
   const [menu, setMenu] = useState(false);
   const [corridas, setCorridas] = useState<Execution[]>([]);
   const desplegable = useRef<HTMLDivElement>(null);
+  const selector = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!actual) return;
+    if (USE_FIXTURES) {
+      setCorridas(EXECUTIONS.filter((e) => e.project_id === actual.id));
+      return;
+    }
     let vigente = true;
     api
       .executions(actual.id)
@@ -54,7 +72,11 @@ export function SideNav() {
       if (!desplegable.current?.contains(e.target as Node)) setAbierto(false);
     };
     const escape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setAbierto(false);
+      if (e.key !== "Escape") return;
+      setAbierto(false);
+      // La opción enfocada desaparece al cerrar, y con ella el sitio donde
+      // estaba quien navega con teclado.
+      selector.current?.focus();
     };
     document.addEventListener("mousedown", fuera);
     document.addEventListener("keydown", escape);
@@ -92,17 +114,31 @@ export function SideNav() {
         </p>
       )}
 
-      {/* ── el proyecto y lo que se puede hacer sobre él ── */}
+      {/* ── el punto de partida ── */}
+      <ul className={s.acciones}>
+        <li>
+          <NavLink className={enlace} to="/projects" end>
+            <Icono d="M2.8 5.2h4L8 6.8h5.2v6H2.8z" />
+            Proyectos
+          </NavLink>
+        </li>
+      </ul>
+
+      {/* ── el proyecto elegido y lo que se puede hacer sobre él ── */}
       <div className={s.desplegable} ref={desplegable}>
         <button
           type="button"
           className={s.selector}
+          ref={selector}
           onClick={() => setAbierto((a) => !a)}
           aria-expanded={abierto}
           aria-haspopup="listbox"
           disabled={cargando && proyectos.length === 0}
         >
-          <span className={s.selectorRotulo}>Proyecto</span>
+          {/* «Proyecto» a secas, justo debajo del enlace «Proyectos», no
+              dejaba ver que uno lleva a la lista y el otro dice en cuál se
+              está trabajando. */}
+          <span className={s.selectorRotulo}>Trabajando en</span>
           <span className={s.selectorNombre}>
             {actual?.name ?? (cargando ? "Cargando…" : "Ninguno todavía")}
           </span>
@@ -140,7 +176,7 @@ export function SideNav() {
                   navigate("/projects");
                 }}
               >
-                <span className={s.opcionNombre}>Ver todos y crear uno</span>
+                <span className={s.opcionNombre}>Crear un proyecto</span>
               </button>
             </li>
           </ul>
@@ -177,7 +213,7 @@ export function SideNav() {
             <li>
               <NavLink className={enlace} to="/executions/new">
                 <Icono d="M8 3.2v9.6M3.2 8h9.6" />
-                Cargar un SARIF
+                Cargar un archivo SARIF
               </NavLink>
             </li>
             {corridas.length > 1 && (
@@ -196,7 +232,7 @@ export function SideNav() {
             <li>
               <NavLink className={enlace} to="/executions" end>
                 <Icono d="M2.6 4.4h10.8v7.2H2.6zM2.6 7h10.8" />
-                Ver las {corridas.length} con su detalle
+                Ver la lista completa
               </NavLink>
             </li>
           </ul>
@@ -204,18 +240,12 @@ export function SideNav() {
       )}
 
       <section className={s.bloque}>
-        <h2 className={s.rotulo}>El estudio</h2>
+        <h2 className={s.rotulo}>Validación con usuarios</h2>
         <ul className={s.acciones}>
           <li>
             <NavLink className={enlace} to="/participants">
               <Icono d="M8 8.6a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8zM3.4 13.2c0-2.1 2.1-3.2 4.6-3.2s4.6 1.1 4.6 3.2" />
-              Participantes
-            </NavLink>
-          </li>
-          <li>
-            <NavLink className={enlace} to="/projects">
-              <Icono d="M2.8 5.2h4L8 6.8h5.2v6H2.8z" />
-              Proyectos y equipo
+              Gestionar participantes
             </NavLink>
           </li>
         </ul>

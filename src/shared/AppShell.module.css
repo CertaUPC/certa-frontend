@@ -28,7 +28,10 @@
 
 .body {
   min-inline-size: 0;
-  padding: 26px 26px 56px;
+  /* El respiro de abajo era de 56 px. En una ventana de portátil el
+     presupuesto de alto es de unos 680 px, y ese aire decidía si una pantalla
+     entraba entera o pedía desplazarse. */
+  padding: 26px 26px 28px;
 }
 
 /* La columna de lectura no crece con la ventana: a partir de cierto ancho
@@ -43,6 +46,6 @@
     grid-template-columns: 1fr;
   }
   .body {
-    padding: 20px 16px 40px;
+    padding: 20px 16px 24px;
   }
 }

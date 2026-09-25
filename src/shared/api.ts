@@ -121,6 +121,10 @@ export interface Execution {
      el trabajador se reinició no se distingue de una viva sin esto. */
   claimed_by: string | null;
   started_at: string | null;
+  /* Lo que el trabajador dejó dicho en el último intento. Sobrevive a que la
+     corrida vuelva a la cola, que es cuando hay que leerlo. */
+  last_attempt_note: string | null;
+  last_attempt_at: string | null;
   created_at: string;
 }
 

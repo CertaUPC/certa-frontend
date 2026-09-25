@@ -1,0 +1,80 @@
+.caja {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+/* El destino es de 24 px aunque el dibujo mida 13: por debajo de eso, apuntar
+   con el dedo falla más veces de las que acierta. */
+.boton {
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  cursor: help;
+  transition: color 0.12s var(--salida);
+}
+
+.boton:hover,
+.caja[data-fijo] .boton {
+  color: var(--accent);
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-radius: 999px;
+}
+
+.globo {
+  position: absolute;
+  inset-block-end: calc(100% + 6px);
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  z-index: var(--z-popover);
+  inline-size: max-content;
+  max-inline-size: 260px;
+  padding: 9px 11px;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: start;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--lift);
+  /* Invisible pero presente en el árbol: `aria-describedby` lo lee igual, de
+     modo que quien no ve el globo recibe la misma explicación. */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s var(--salida);
+}
+
+.caja:hover .globo,
+.caja:focus-within .globo,
+.caja[data-fijo] .globo {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Cerca del borde derecho el globo centrado se saldría de la pantalla. */
+@media (max-width: 520px) {
+  .globo {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    translate: none;
+    max-inline-size: min(260px, 74vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton,
+  .globo {
+    transition: none;
+  }
+}

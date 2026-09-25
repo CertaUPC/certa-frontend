@@ -22,7 +22,9 @@ export function ExecutionsScreen() {
 
   const { data, loading, error, reload } = useApi(
     () => api.executions(actual?.id),
-    EXECUTIONS,
+    // Los de muestra se filtran igual que los de verdad: si no, el título
+    // dice un proyecto y la tabla enseña los de todos.
+    EXECUTIONS.filter((e) => !actual || e.project_id === actual.id),
     [actual?.id],
   );
 
@@ -94,6 +96,13 @@ export function ExecutionsScreen() {
                     {STATUS_LABEL[e.status]}
                   </span>
                   {e.failure_reason && <span className={s.sub}>{e.failure_reason}</span>}
+                  {/* Una corrida que rebota vuelve a «en espera», y sin esto
+                      se ve igual que una que aguarda su turno. */}
+                  {e.last_attempt_note && (
+                    <span className={s.sub} title={e.last_attempt_note}>
+                      el último intento no pudo empezar
+                    </span>
+                  )}
                 </td>
                 <td className={`${s.numeric} mono`}>{e.total_findings}</td>
                 <td className={s.progressCell}>

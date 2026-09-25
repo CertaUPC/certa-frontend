@@ -14,13 +14,16 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { ApiError, api } from "../../shared/api";
 import { PARTICIPANTS } from "../../shared/fixtures";
+import { Hint } from "../../shared/Hint";
 import { Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
 import s from "./ParticipantsScreen.module.css";
 
+/* «Control» es la palabra del método y no dice nada a quien no lo conoce.
+   Lo que la persona hace es revisar sin el asistente, y así se rotula. */
 const CONDITION_LABEL: Record<string, string> = {
   con_asistente: "Con asistente",
-  sin_asistente: "Control",
+  sin_asistente: "Sin asistente",
 };
 
 /* El vocabulario del anexo B, tal cual lo admite el servicio. Se declara aquí
@@ -143,12 +146,10 @@ export function ParticipantsScreen() {
 
   return (
     <>
-      <h1 className={s.title}>Participantes</h1>
+      <h1 className={s.title}>Gestionar participantes</h1>
       <p className={s.lead}>
-        Cada participante resuelve las dos condiciones y actúa como su propio
-        control. El orden se reparte de forma equilibrada para que el efecto de
-        haber practicado en la primera no se confunda con el efecto del
-        asistente.
+        Das de alta a quien se sienta a la prueba y le habilitas el acceso en el
+        mismo gesto.
       </p>
 
       <div className={s.cols}>
@@ -168,9 +169,8 @@ export function ParticipantsScreen() {
               required
             />
             <small>
-              El mismo que figura en su acta de consentimiento, con guion. Es lo
-              único que se guarda de la persona: ni nombre, ni correo, ni dónde
-              trabaja.
+              El de su acta de consentimiento, con guion. Es lo único que se
+              guarda de la persona.
             </small>
           </label>
 
@@ -183,7 +183,7 @@ export function ParticipantsScreen() {
                 </option>
               ))}
             </select>
-            <small>Entra como factor de control en el análisis.</small>
+            <small>Sirve para comparar a gente con experiencia parecida.</small>
           </label>
 
           <label className={s.field}>
@@ -233,22 +233,26 @@ export function ParticipantsScreen() {
               onChange={(e) => setRolSeguridad(e.target.checked)}
             />
             <span>
-              Tiene un rol formal en seguridad de aplicaciones. El estudio los
-              excluye, y marcarlo impide el alta.
+              Trabaja formalmente en seguridad: marcarlo impide el alta, porque
+              el estudio no los incluye.
             </span>
           </label>
 
-          <label className={s.check}>
+          {/* La ayuda va fuera de la etiqueta y no dentro: dentro, pulsarla
+              marcaría la casilla sin querer. */}
+          <div className={`${s.check} ${s.checkInline}`}>
             <input
+              id="piloto"
               type="checkbox"
               checked={piloto}
               onChange={(e) => setPiloto(e.target.checked)}
             />
-            <span>
-              Es sesión piloto o ensayo. Queda fuera del análisis y del
-              contrabalanceo, y no se puede añadir después.
-            </span>
-          </label>
+            <label htmlFor="piloto">Es una sesión piloto</label>
+            <Hint termino="sesión piloto">
+              Un ensayo antes del estudio. No entra en el análisis ni en el
+              reparto del orden, y eso no se puede cambiar después.
+            </Hint>
+          </div>
 
           <label className={s.check}>
             <input
@@ -257,8 +261,8 @@ export function ParticipantsScreen() {
               onChange={(e) => setConsentimiento(e.target.checked)}
             />
             <span>
-              Firmó el consentimiento informado y se le explicó que puede
-              retirarse en cualquier momento sin consecuencia.
+              Firmó el consentimiento y sabe que puede retirarse cuando quiera,
+              sin consecuencia.
             </span>
           </label>
 
@@ -275,7 +279,14 @@ export function ParticipantsScreen() {
           {alta && <Dictado alta={alta} />}
 
           <div className={s.balance}>
-            <h2 className={s.h2}>Reparto del orden</h2>
+            <h2 className={s.h2}>
+              Reparto del orden
+              <Hint termino="contrabalanceo">
+                Su nombre técnico es contrabalanceo. La mitad empieza con el
+                asistente y la otra mitad sin él, para no confundir lo que
+                aporta el asistente con lo que aporta haber practicado antes.
+              </Hint>
+            </h2>
             <div className={s.bars}>
               <div>
                 <span className={s.barLabel}>Empiezan con asistente</span>
@@ -292,7 +303,7 @@ export function ParticipantsScreen() {
                 <span className={`${s.barN} mono`}>{reparto.primero}</span>
               </div>
               <div>
-                <span className={s.barLabel}>Empiezan por control</span>
+                <span className={s.barLabel}>Empiezan sin asistente</span>
                 <span className={s.bar}>
                   <span
                     className={s.barFillB}
@@ -323,8 +334,8 @@ export function ParticipantsScreen() {
                 <tr>
                   <th>Código</th>
                   <th>Años programando</th>
-                  <th>Empieza por</th>
-                  <th>Mitades</th>
+                  <th>Empieza</th>
+                  <th>Tandas</th>
                 </tr>
               </thead>
               <tbody>
@@ -347,7 +358,7 @@ export function ParticipantsScreen() {
                     <td className="mono">
                       {p.first_batch && p.second_batch
                         ? `${p.first_batch}, ${p.second_batch}`
-                        : "—"}
+                        : "sin asignar"}
                     </td>
                   </tr>
                 ))}
@@ -384,7 +395,7 @@ function Dictado({ alta }: { alta: Alta }) {
           <dd>{CONDITION_LABEL[alta.order[0]] ?? alta.order[0]}</dd>
         </div>
         <div>
-          <dt>Mitades</dt>
+          <dt>Tandas</dt>
           <dd className="mono">
             {alta.first_batch}, luego {alta.second_batch}
           </dd>

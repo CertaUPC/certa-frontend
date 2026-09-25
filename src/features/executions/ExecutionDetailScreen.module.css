@@ -75,7 +75,13 @@
 .missing h1 { font-size: 22px; font-weight: 600; margin-block-end: 8px; }
 .missing p { font-size: 14.5px; color: var(--ink-2); margin-block-end: 18px; }
 
-@media (max-width: 560px) { .matrix { grid-template-columns: 1fr; } }
+/* Apilada en una columna medía el doble de alto y dejaba de leerse como una
+   matriz, que es lo único que la hace entendible. Se queda en 2x2. */
+@media (max-width: 560px) {
+  .matrix .cellN { font-size: 21px; }
+  .matrix .cellL { font-size: 11.5px; }
+  .matrix .cell { padding: 10px 11px; }
+}
 
 .problem {
   font-size: 13.5px; color: var(--real); line-height: 1.55;
@@ -88,6 +94,118 @@
 
 /* Confirmación en la propia línea, sin diálogo: soltar el contexto no tiene
    vuelta atrás y un clic de más no puede bastar. */
+/* ── el menú de lo que no es la acción principal ──────────────────── */
+.mas {
+  position: relative;
+}
+
+.masBoton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--sunken);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.masBoton:hover {
+  border-color: var(--line-strong);
+}
+
+.masBoton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.masLista {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 5px);
+  z-index: var(--z-popover);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  min-inline-size: 216px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--lift);
+}
+
+.masOpcion {
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+  /* El enlace de comparar convive con dos botones: sin esto llegaba subrayado
+     y en color de enlace, y los tres renglones del menú no se parecían. */
+  text-decoration: none;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.masOpcion:hover {
+  background: var(--sunken);
+}
+
+.masOpcion:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.masOpcion:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.masDato {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-block-start: 1px;
+  line-height: 1.35;
+}
+
+/* La confirmación ocupa su propia línea debajo de la cabecera. Metida entre
+   los botones, empujaba a los demás y costaba ver qué se estaba preguntando. */
+.confirmarFila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--sunken);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-block-end: 18px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  max-inline-size: 82ch;
+}
+
+.confirmarTexto {
+  flex: 1 1 260px;
+}
+
+/* La acción de recuperación vive junto a la explicación del problema, y no en
+   la fila de botones de arriba: ahí competía con exportar y comparar, que no
+   tienen nada que ver con estar atascado. */
+.avisoAccion {
+  display: block;
+  margin-block-start: 10px;
+}
+
 .confirmar {
   display: inline-flex;
   align-items: center;
