@@ -55,6 +55,7 @@ export function IngestScreen() {
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevaRuta, setNuevaRuta] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [nombre, setNombre] = useState("");
   const [severity, setSeverity] = useState("");
   const [cwes, setCwes] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -82,10 +83,12 @@ export function IngestScreen() {
       );
     }
 
-    const informe = await api.ingest(destino, sarif, {
-      cwes,
-      min_severity: severity || null,
-    });
+    const informe = await api.ingest(
+      destino,
+      sarif,
+      { cwes, min_severity: severity || null },
+      nombre,
+    );
     return informe;
   });
 
@@ -98,6 +101,9 @@ export function IngestScreen() {
       return;
     }
     setFile(f);
+    /* El archivo ya trae un nombre que quien lo eligió reconoce. Proponerlo
+       ahorra escribirlo, y se puede cambiar antes de cargar. */
+    if (f && !nombre.trim()) setNombre(f.name.replace(/\.(sarif|json)$/i, ""));
   }
 
   function toggleCwe(id: string) {
@@ -203,6 +209,23 @@ export function IngestScreen() {
             )}
           </label>
           {error && <p className={s.error}>{error}</p>}
+
+          {/* Sin nombre, la corrida se llama por su fecha. Con dos del mismo
+              día eso ya no alcanza para distinguirlas. */}
+          <label className={s.field}>
+            <span>Nombre de la ejecución (opcional)</span>
+            <input
+              className={s.input}
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              placeholder="Barrido del viernes, reglas 1.95"
+              maxLength={120}
+            />
+          </label>
+          <p className={s.note}>
+            Sirve para ubicarla después entre varias. Si lo dejas vacío, se
+            llamará por su fecha.
+          </p>
         </section>
 
         <details className={s.optional}>
