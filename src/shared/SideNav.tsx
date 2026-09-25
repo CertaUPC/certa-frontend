@@ -29,6 +29,7 @@ import { USE_FIXTURES, api, clearSession, getEmail, type Execution } from "./api
 import { EXECUTIONS } from "./fixtures";
 import { Mark } from "./Mark";
 import { ThemeToggle } from "./ThemeToggle";
+import { tituloCorto } from "./executions";
 import { useProyecto } from "./project";
 import s from "./SideNav.module.css";
 
@@ -198,9 +199,7 @@ export function SideNav() {
                     }
                     to={`/executions/${e.id}`}
                   >
-                    <span className={`${s.corridaId} mono`}>
-                      {e.id.slice(0, 8)}
-                    </span>
+                    <span className={s.corridaId}>{tituloCorto(e)}</span>
                     <span className={s.corridaDato}>
                       {e.validated_findings} de {e.total_findings} validados
                     </span>
@@ -216,23 +215,12 @@ export function SideNav() {
                 Cargar un archivo SARIF
               </NavLink>
             </li>
-            {corridas.length > 1 && (
-              <li>
-                <NavLink
-                  className={enlace}
-                  to={`/executions/${corridas[0].id}/compare`}
-                >
-                  <Icono d="M3 4.6h4.4M3 8h4.4M3 11.4h4.4M10 4.6h3M10 8h3M10 11.4h3" />
-                  Comparar dos ejecuciones
-                </NavLink>
-              </li>
-            )}
             {/* Siempre, no solo cuando la lista de arriba se queda corta: la
                 pantalla completa trae el estado, las reglas y el avance. */}
             <li>
               <NavLink className={enlace} to="/executions" end>
                 <Icono d="M2.6 4.4h10.8v7.2H2.6zM2.6 7h10.8" />
-                Ver la lista completa
+                Todas las ejecuciones
               </NavLink>
             </li>
           </ul>

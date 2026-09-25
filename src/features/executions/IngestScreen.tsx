@@ -5,10 +5,11 @@
  * ocupa media pantalla y empuja el botón de cargar fuera de la vista, de modo
  * que la pantalla parece pedir cinco decisiones cuando pide dos. */
 
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, USE_FIXTURES } from "../../shared/api";
 import { PROJECTS } from "../../shared/fixtures";
+import { useProyecto } from "../../shared/project";
 import { useAction, useApi } from "../../shared/useApi";
 import { Failed, Loading } from "../../shared/States";
 import s from "./IngestScreen.module.css";
@@ -22,7 +23,9 @@ const SEVERITIES = [
   { value: "error", label: "Solo alta" },
 ];
 
-const COMMON_CWES = [
+/* Atajos, no la lista. Son las cinco que más aparecen en los conjuntos con
+   verdad conocida; cualquier otra se escribe a mano. */
+const CWES_FRECUENTES = [
   { id: "CWE-89", name: "Inyección SQL" },
   { id: "CWE-79", name: "Texto sin escapar" },
   { id: "CWE-611", name: "Entidad externa de XML" },
@@ -30,11 +33,25 @@ const COMMON_CWES = [
   { id: "CWE-502", name: "Deserialización insegura" },
 ];
 
+/** Acepta «352», «cwe 352» o «CWE-352», que es como la gente lo escribe. */
+function normalizarCwe(texto: string): string | null {
+  const numero = texto.trim().replace(/^cwe[\s-]*/i, "");
+  return /^[0-9]{1,5}$/.test(numero) ? `CWE-${numero}` : null;
+}
+
 export function IngestScreen() {
   const navigate = useNavigate();
   const proyectos = useApi(() => api.projects(), PROJECTS);
 
+  /* Quien llega aquí desde la barra ya venía trabajando en un proyecto.
+     Volver a preguntárselo era pedirle dos veces lo mismo. */
+  const { actual } = useProyecto();
   const [projectId, setProjectId] = useState("");
+  useEffect(() => {
+    if (!projectId && actual) setProjectId(actual.id);
+  }, [actual, projectId]);
+
+  const [otroCwe, setOtroCwe] = useState("");
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevaRuta, setNuevaRuta] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -213,10 +230,13 @@ export function IngestScreen() {
           </label>
 
           <span className={s.fieldLabel}>
-            Categorías <span className={s.gloss}>tipos de falla, por su número CWE</span>
+            Tipos de falla{" "}
+            <span className={s.gloss}>
+              se nombran por su número CWE, un catálogo público
+            </span>
           </span>
           <div className={s.chips}>
-            {COMMON_CWES.map((c) => (
+            {CWES_FRECUENTES.map((c) => (
               <button
                 key={c.id}
                 type="button"
@@ -227,6 +247,45 @@ export function IngestScreen() {
                 <span className="mono">{c.id}</span> {c.name}
               </button>
             ))}
+            {/* Los cinco de arriba son atajos. Sin esto, la pantalla parecía
+                decir que solo existen cinco tipos de falla. */}
+            {cwes
+              .filter((id) => !CWES_FRECUENTES.some((c) => c.id === id))
+              .map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={s.cweChip}
+                  aria-pressed
+                  onClick={() => toggleCwe(id)}
+                >
+                  <span className="mono">{id}</span> quitar
+                </button>
+              ))}
+          </div>
+          <div className={s.otroCwe}>
+            <label className={s.field}>
+              <span className="solo-lectores">Agregar otro número CWE</span>
+              <input
+                className={s.input}
+                value={otroCwe}
+                onChange={(e) => setOtroCwe(e.target.value)}
+                placeholder="CWE-352, o el que necesites"
+              />
+            </label>
+            <button
+              type="button"
+              className={s.agregar}
+              disabled={!normalizarCwe(otroCwe)}
+              onClick={() => {
+                const id = normalizarCwe(otroCwe);
+                if (!id) return;
+                if (!cwes.includes(id)) toggleCwe(id);
+                setOtroCwe("");
+              }}
+            >
+              Agregar
+            </button>
           </div>
         </details>
 

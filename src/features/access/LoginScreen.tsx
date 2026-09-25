@@ -291,7 +291,7 @@ export function LoginScreen() {
                     required={!USE_FIXTURES}
                     aria-invalid={invalido}
                     aria-describedby={error ? "fallo-entrada" : undefined}
-                    placeholder="nombre@upc.edu.pe"
+                    placeholder="correo@ejemplo.com"
                   />
                 </label>
 

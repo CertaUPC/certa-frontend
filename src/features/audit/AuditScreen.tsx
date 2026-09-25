@@ -6,7 +6,7 @@
   useState,
   type ReactNode,
 } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Briefing } from "./Briefing";
 import { CodeViewer } from "./CodeViewer";
 import { FindingHistory } from "./FindingHistory";
@@ -170,7 +170,17 @@ export function AuditScreen() {
   );
 
   if (USE_FIXTURES) {
-    return <Session findings={FINDINGS} fixedCondition={fixedCondition} />;
+    /* La salida también en la versión de muestra: si no, la única forma de
+       comprobar que existe es contra el servicio levantado. */
+    return (
+      <Session
+        findings={FINDINGS}
+        fixedCondition={fixedCondition}
+        volverA={
+          participantId ? undefined : `/executions/${executionId ?? "7f3a2b10"}`
+        }
+      />
+    );
   }
   /* Esta pantalla no vive dentro del armazón, de modo que sus estados no
      heredan ni cabecera ni margen: se centran ellos. */
@@ -217,6 +227,11 @@ export function AuditScreen() {
          proyectos sería una salida del instrumento, y el tiempo de mirarlo
          entraría en la medición sin ser tiempo de decidir. */
       carril={participantId ? undefined : <ProjectRail executionId={executionId} />}
+      /* Se llegaba aquí desde la ejecución y no había por dónde volver: la
+         pantalla no lleva la barra de la aplicación, a propósito, porque
+         quien participa no debe ver navegación. Fuera del estudio eso dejaba
+         al usuario encerrado. */
+      volverA={participantId ? undefined : `/executions/${executionId}`}
       onThemeFixed={(tema) => {
         if (!participantId) return;
         api.recordTheme(participantId, tema).catch(() => {
@@ -255,6 +270,8 @@ interface SessionProps {
   /** Navegación del proyecto. Ausente durante una sesión medida: quien
       participa ve la tarea y ninguna salida hacia otra pantalla. */
   carril?: ReactNode;
+  /** A dónde vuelve quien no está en una sesión medida. */
+  volverA?: string;
 }
 
 /* Se exporta para poder probar la condición sin asistente. Esa pantalla es el
@@ -268,6 +285,7 @@ export function Session({
   onThemeFixed,
   onContinue,
   carril,
+  volverA,
 }: SessionProps) {
   const [stage, setStage] = useState<Stage>("briefing");
   const [index, setIndex] = useState(0);
@@ -277,6 +295,7 @@ export function Session({
   const { theme, lock, unlock } = useTheme();
   const [help, setHelp] = useState(false);
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  const [notaCerrada, setNotaCerrada] = useState(false);
 
   /* Dentro del experimento el tema queda fijado en cuanto empieza la tarea.
      Fuera de él no se toca: quien usa la herramienta en su trabajo elige
@@ -383,6 +402,7 @@ export function Session({
   if (stage === "briefing") {
     return (
       <Briefing
+        medida={fixedCondition != null}
         assisted={assisted}
         total={findings.length}
         onStart={() => setStage("review")}
@@ -410,6 +430,12 @@ export function Session({
           <Mark size={20} className={s.brandMark} />
           <span className={s.wordmark}>Certa</span>
         </span>
+
+        {volverA && (
+          <Link className={s.volver} to={volverA}>
+            <span aria-hidden="true">←</span> Volver a la ejecución
+          </Link>
+        )}
 
         <div className={s.progress}>
           <span className={s.count}>
@@ -447,11 +473,24 @@ export function Session({
         </p>
       )}
 
-      {!assisted && (
+      {/* Dentro del experimento la nota se queda: explica a quien participa
+          por qué no ve el juicio del asistente, y quitarla a mitad cambiaría
+          la presentación entre participantes. Fuera, es instrumentación que
+          no hace falta tener clavada toda la revisión. */}
+      {!assisted && !notaCerrada && (
         <p className={s.controlNote}>
           Misma pantalla, misma densidad, mismo orden. Solo se ocultan el
           veredicto, la confianza, la explicación y la comprobación, para que la
           usabilidad no explique la diferencia que se mide.
+          {fixedCondition == null && (
+            <button
+              className={s.cerrarNota}
+              onClick={() => setNotaCerrada(true)}
+              aria-label="Cerrar el aviso"
+            >
+              Entendido
+            </button>
+          )}
         </p>
       )}
 

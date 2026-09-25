@@ -30,6 +30,7 @@ export const PROJECTS: Project[] = [
 export const EXECUTIONS: Execution[] = [
   {
     id: "7f3a2b10",
+    label: "Corrida de referencia, reglas 1.95",
     project_id: "p1",
     project_name: "OWASP Benchmark",
     tool_name: "semgrep",
@@ -49,6 +50,7 @@ export const EXECUTIONS: Execution[] = [
   },
   {
     id: "c81d94f2",
+    label: "Primer barrido de CWE-89",
     project_id: "p2",
     project_name: "Juliet Test Suite, CWE-89",
     tool_name: "semgrep",
@@ -68,6 +70,7 @@ export const EXECUTIONS: Execution[] = [
   },
   {
     id: "a4e077bc",
+    label: "Prueba con presupuesto corto",
     project_id: "p1",
     project_name: "OWASP Benchmark",
     tool_name: "semgrep",
@@ -88,6 +91,7 @@ export const EXECUTIONS: Execution[] = [
   },
   {
     id: "b2f5109e",
+    label: null,
     project_id: "p3",
     project_name: "Repositorio de prueba interno",
     tool_name: "semgrep",
