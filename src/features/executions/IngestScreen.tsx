@@ -143,6 +143,7 @@ export function IngestScreen() {
         SARIF es el archivo donde ese analizador deja sus alertas.
       </p>
 
+      <div className={s.lienzo}>
       <div className={s.form}>
         <section className={s.block}>
           <h2 className={s.h2}>
@@ -347,6 +348,32 @@ export function IngestScreen() {
             {"Elige el archivo SARIF para continuar."}
           </p>
         )}
+      </div>
+
+        {/* Al costado, y no debajo: la pantalla dejaba novecientos píxeles de
+            ancho vacíos, y quien carga por primera vez no sabe qué va a pasar
+            después de pulsar. */}
+        <aside className={s.despues}>
+          <h2 className={s.h2Aparte}>Qué pasa después</h2>
+          <ol className={s.pasos}>
+            <li>
+              La ejecución queda creada y entra en cola. Puedes cerrar la
+              ventana.
+            </li>
+            <li>
+              El asistente juzga cada alerta y explica por qué, citando las
+              líneas del código en las que se apoya.
+            </li>
+            <li>
+              Cuando termina, revisas la lista ya ordenada: lo que parece real,
+              primero.
+            </li>
+          </ol>
+          <p className={s.pasosPie}>
+            Tarda entre diez y veinticinco segundos por alerta, así que un
+            archivo grande son horas.
+          </p>
+        </aside>
       </div>
     </>
   );

@@ -153,3 +153,54 @@
 .primary:disabled { background: var(--sunken); color: var(--ink-3); border: 1px dashed var(--line-strong); cursor: default; font-weight: 400; }
 .secondary { font-size: 14px; color: var(--ink-2); text-decoration: none; padding: 11px 14px; }
 .secondary:hover { color: var(--ink); text-decoration: underline; }
+
+/* El formulario y lo que pasa después, lado a lado cuando hay sitio. */
+.lienzo {
+  display: grid;
+  gap: 24px 40px;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .lienzo {
+    grid-template-columns: 640px minmax(260px, 340px);
+  }
+}
+
+.despues {
+  border-inline-start: 1px solid var(--line);
+  padding-inline-start: 22px;
+}
+
+@media (max-width: 1099px) {
+  .despues {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+    border-block-start: 1px solid var(--line);
+    padding-block-start: 18px;
+    max-inline-size: 640px;
+  }
+}
+
+.h2Aparte {
+  font-size: 14px;
+  font-weight: 600;
+  margin-block-end: 10px;
+}
+
+.pasos {
+  margin: 0;
+  padding-inline-start: 18px;
+  display: grid;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.pasosPie {
+  margin-block-start: 14px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}

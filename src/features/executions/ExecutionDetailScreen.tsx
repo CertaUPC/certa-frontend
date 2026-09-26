@@ -453,16 +453,21 @@ export function ExecutionDetailScreen() {
 
           <Cinta tramos={tramos} total={execution.total_findings} />
 
-          <ul className={s.cuentas}>
-            {tramos.map((t) => (
-              <Cuenta key={t.tipo} tipo={t.tipo} n={t.n} rotulo={t.rotulo} />
-            ))}
-          </ul>
+          {/* En un monitor ancho las cuentas y la matriz caben lado a lado.
+              Apiladas dejaban medio panel vacío a la derecha. */}
+          <div className={s.dosColumnas}>
+            <ul className={s.cuentas}>
+              {tramos.map((t) => (
+                <Cuenta key={t.tipo} tipo={t.tipo} n={t.n} rotulo={t.rotulo} />
+              ))}
+            </ul>
 
           {metrics.loading && <Loading what="las métricas" />}
 
           {execution.validated_findings > 0 && metrics.data && !metrics.error && (
-            <>
+            /* Un solo hijo de la rejilla: sueltos, el rótulo se iba a una
+               columna y la matriz a otra fila. */
+            <div className={s.contraVerdad}>
               <h3 className={s.h3}>
                 Frente a las respuestas que ya se conocen
                 <Hint termino="la comparación contra verdad conocida">
@@ -498,8 +503,9 @@ export function ExecutionDetailScreen() {
                   ayuda="Certa la descartó y efectivamente no era explotable. Es el trabajo de revisión que te ahorra."
                 />
               </div>
-            </>
+            </div>
           )}
+          </div>
         </section>
 
         {/* Sin nada juzgado no hay nada que medir, y enseñar cifras ahí es

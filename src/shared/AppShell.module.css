@@ -34,10 +34,13 @@
   padding: 26px 26px 28px;
 }
 
-/* La columna de lectura no crece con la ventana: a partir de cierto ancho
-   una línea de texto deja de poder seguirse de un renglón al siguiente. */
+/* El tope existe para que una línea de texto no se vuelva ilegible de tan
+   larga, pero 1180 px dejaban 436 sin usar en un monitor de 1920 y la
+   aplicación parecía recortada. Sube a 1560: los párrafos ya llevan su
+   propio tope en caracteres, así que lo que crece son tablas y tableros,
+   que es donde el ancho sirve de algo. */
 .dentro {
-  max-inline-size: 1180px;
+  max-inline-size: 1560px;
   margin-inline: auto;
 }
 
