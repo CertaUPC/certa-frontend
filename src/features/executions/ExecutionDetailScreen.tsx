@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api, getToken } from "../../shared/api";
-import { EXECUTIONS, METRICS, STATUS_LABEL } from "../../shared/fixtures";
+import { EXECUTIONS, METRICS, STATUS_FIGURA, STATUS_LABEL } from "../../shared/fixtures";
+import { Glyph, type Figura } from "../../shared/Glyph";
 import { toFinding } from "../audit/adapter";
 import { FINDINGS, VERDICT_SHORT } from "../audit/data";
 import { Hint } from "../../shared/Hint";
@@ -166,7 +167,18 @@ export function ExecutionDetailScreen() {
      cinta dice lo único cierto: cuánto se juzgó y cuánto sigue en cola.
      Repartirlo igual metía todo en «sin poder determinar», que era falso. */
   const conf = metrics.data?.confusion;
-  const tramos = conf
+  /* Que haya métricas no quiere decir que haya con qué compararlas. En un
+     repositorio cualquiera la matriz vuelve en ceros, y con eso la cinta
+     metía lo juzgado entero en «sin poder determinar» y el marcador enseñaba
+     cinco ceros como si el asistente hubiera fallado en todo. */
+  const conVerdad =
+    !!conf &&
+    conf.verdaderos_positivos +
+      conf.falsos_positivos +
+      conf.falsos_negativos +
+      conf.verdaderos_negativos >
+      0;
+  const tramos = conVerdad && conf
     ? [
         {
           tipo: "real",
@@ -237,6 +249,10 @@ export function ExecutionDetailScreen() {
             <span
               className={`${s.badge} ${detenida ? s.fallida : s[execution.status]}`}
             >
+              <Glyph
+                figura={detenida ? "detenida" : STATUS_FIGURA[execution.status]}
+                tam={12}
+              />
               {detenida ? "Detenida" : STATUS_LABEL[execution.status]}
             </span>
             <span className="mono" translate="no">
@@ -464,7 +480,7 @@ export function ExecutionDetailScreen() {
 
           {metrics.loading && <Loading what="las métricas" />}
 
-          {execution.validated_findings > 0 && metrics.data && !metrics.error && (
+          {conVerdad && metrics.data && (
             /* Un solo hijo de la rejilla: sueltos, el rótulo se iba a una
                columna y la matriz a otra fila. */
             <div className={s.contraVerdad}>
@@ -512,9 +528,24 @@ export function ExecutionDetailScreen() {
             enseñar cifras de otra ejecución. */}
         {execution.validated_findings > 0 && metrics.data && !metrics.error && (
           <aside className={s.marcador}>
-            <h2 className={s.h2}>Qué tan bien juzgó</h2>
+            <h2 className={s.h2}>
+              {conVerdad ? "Qué tan bien juzgó" : "Cómo se comportó"}
+            </h2>
+            {!conVerdad && (
+              <p className={s.sinVerdad}>
+                De este repositorio no se sabe de antemano qué alertas eran
+                reales, así que no se puede contar en qué acertó. Lo que sí se
+                comprueba es si las líneas que cita existen.
+              </p>
+            )}
 
             <dl className={s.scores}>
+              {/* Las cuatro primeras se calculan contra las respuestas
+                  conocidas. Sin ellas valen cero y ese cero no significa que
+                  el asistente fallara, sino que no hay con qué medirlo. El
+                  anclaje sí: mira si las líneas citadas existen. */}
+              {conVerdad && (
+                <>
               <Score
                 label="F1"
                 value={metrics.data.confusion.f1}
@@ -536,6 +567,8 @@ export function ExecutionDetailScreen() {
                 value={metrics.data.confusion.exhaustividad}
                 ayuda="De las alertas que sí eran vulnerabilidades reales, qué parte alcanzó a marcar Certa. Si baja, quedan vulnerabilidades de verdad enterradas al fondo de la lista."
               />
+                </>
+              )}
               <Score
                 label="Anclaje a la primera"
                 value={metrics.data.anchor_rate_first_try}
@@ -633,12 +666,25 @@ function Cinta({ tramos, total }: { tramos: Tramo[]; total: number }) {
   );
 }
 
+/* La figura dice de qué desenlace habla cada cuenta. El cuadrito de color
+   solo servía para atarla al tramo de la cinta, y para quien no distingue
+   bien los colores no decía nada. */
+const FIGURA_TRAMO: Record<string, Figura> = {
+  real: "real",
+  descartada: "descartada",
+  indeterminada: "duda",
+  cola: "cola",
+  juzgada: "terminada",
+};
+
 function Cuenta({
   tipo, n, rotulo,
 }: { tipo: string; n: number; rotulo: string }) {
   return (
     <li className={s.cuenta}>
-      <span className={s.cuentaMarca} data-tipo={tipo} aria-hidden="true" />
+      <span className={s.cuentaMarca} data-tipo={tipo}>
+        <Glyph figura={FIGURA_TRAMO[tipo] ?? "cola"} tam={13} />
+      </span>
       <span className={`${s.cuentaN} mono`}>{n}</span>
       <span className={s.cuentaR}>{rotulo}</span>
     </li>

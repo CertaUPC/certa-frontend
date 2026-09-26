@@ -5,6 +5,7 @@
  */
 
 import type { Execution, Metrics, Participant, Project } from "./api";
+import type { Figura } from "./Glyph";
 
 export const PROJECTS: Project[] = [
   {
@@ -173,6 +174,15 @@ export const PARTICIPANTS: Participant[] = [
     second_batch: "B",
   },
 ];
+
+/* La figura que acompaña a cada estado. Vive junto al rótulo para que no se
+   separen: un estado nuevo sin dibujo se nota al escribirlo. */
+export const STATUS_FIGURA: Record<Execution["status"], Figura> = {
+  pendiente: "espera",
+  en_proceso: "procesando",
+  completada: "terminada",
+  fallida: "fallida",
+};
 
 export const STATUS_LABEL: Record<Execution["status"], string> = {
   pendiente: "En espera",

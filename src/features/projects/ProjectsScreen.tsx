@@ -20,6 +20,7 @@ import { ApiError, api, getEmail, type Project } from "../../shared/api";
 import { PROJECTS } from "../../shared/fixtures";
 import { Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
+import { Glyph } from "../../shared/Glyph";
 import { Hint } from "../../shared/Hint";
 import { Team } from "./Team";
 import s from "./ProjectsScreen.module.css";
@@ -108,7 +109,10 @@ function Ficha({
       <div className={s.fichaTop}>
         <div className={s.fichaQue}>
           <h2 className={s.nombre}>{proyecto.name}</h2>
-          <p className={`${s.ruta} mono`}>{proyecto.repository_path}</p>
+          <p className={s.ruta}>
+            <Glyph figura="carpeta" tam={13} />
+            <span className="mono">{proyecto.repository_path}</span>
+          </p>
           {/* El rótulo solo no dice nada a quien no viene de investigación, y
               la explicación al lado cuesta una línea. */}
           {/* La glosa estaba en cada ficha. Con dos proyectos ya se repetía,
