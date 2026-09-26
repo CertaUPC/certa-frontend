@@ -1,8 +1,8 @@
 /* ── la cabecera y su única acción con peso ─────────────────────── */
 .head {
-  /* Al ancho de las fichas: el botón suelto en la esquina de una ventana de
-     1440 queda tan lejos del título que deja de leerse con él. */
-  max-inline-size: 860px;
+  /* El botón no se va a la esquina de la ventana, donde deja de leerse junto
+     al título, pero tampoco se queda pegado al ancho de una sola ficha. */
+  max-inline-size: 1100px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -73,7 +73,8 @@
   padding: 0;
   display: grid;
   gap: 12px;
-  max-inline-size: 860px;
+  /* El mínimo no puede ser mayor que la pantalla, o la rejilla desborda. */
+  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
 }
 
 .ficha {

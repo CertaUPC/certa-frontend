@@ -525,3 +525,28 @@
     grid-row: 1 / span 3;
   }
 }
+
+/* Las cuentas y la matriz, lado a lado cuando hay sitio. */
+.dosColumnas {
+  display: grid;
+  gap: 0 32px;
+}
+
+@media (min-width: 1340px) {
+  .dosColumnas {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .dosColumnas .cuentas {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+  .dosColumnas .contraVerdad .h3 {
+    margin-block-start: 0;
+  }
+}
+
+/* La lista de alertas no se estira a lo ancho del monitor: el veredicto
+   acabaría a medio metro del titular que describe. */
+.porEmpezar {
+  max-inline-size: 1180px;
+}
