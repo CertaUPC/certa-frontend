@@ -12,12 +12,21 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useProyecto } from "../../shared/project";
 import { api, type ChangedFinding, type Execution } from "../../shared/api";
 import { EXECUTIONS } from "../../shared/fixtures";
+import { corto, titulo } from "../../shared/executions";
 import { Hint } from "../../shared/Hint";
 import { Empty, Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
 import s from "./CompareScreen.module.css";
 
 type Grupo = "nuevos" | "resueltos" | "siguen";
+
+/* La notación de un diff, que es lo que esto es: lo que entra, lo que sale y
+   lo que no se movió. */
+const SIGNO: Record<Grupo, string> = {
+  nuevos: "+",
+  resueltos: "−",
+  siguen: "=",
+};
 
 /* El informe trae la severidad en el vocabulario de SARIF. «warning» en medio
    de una tabla en castellano obliga a traducir mentalmente en cada fila. */
@@ -75,7 +84,7 @@ export function CompareScreen() {
         <Link to="/executions">Ejecuciones</Link>{" "}
         <span aria-hidden="true">/</span>{" "}
         <Link to={`/executions/${id}`}>
-          <span className="mono">{id.slice(0, 8)}</span>
+          <span className="mono">{corto({ id } as Execution)}</span>
         </Link>{" "}
         <span aria-hidden="true">/</span> Comparar
       </p>
@@ -142,9 +151,11 @@ function Selector({
     <div className={s.selector}>
       <span className={s.fija}>
         <span className={s.fijaRotulo}>Esta ejecución</span>
-        <span className={`${s.fijaId} mono`}>{esta?.id.slice(0, 8)}</span>
+        {/* Por su nombre, como en el resto de la aplicación. Ocho caracteres
+            de un identificador no dicen cuál de las dos es. */}
+        <span className={s.fijaId}>{esta ? titulo(esta) : ""}</span>
         <span className={s.fijaDato}>
-          {esta?.total_findings} hallazgos · {cuando(esta?.created_at)}
+          {esta?.total_findings} alertas
         </span>
       </span>
 
@@ -158,8 +169,7 @@ function Selector({
           <option value="">Elige con cuál comparar…</option>
           {hermanas.map((e) => (
             <option key={e.id} value={e.id}>
-              {e.id.slice(0, 8)} · {e.total_findings} hallazgos ·{" "}
-              {cuando(e.created_at)}
+              {titulo(e)} ({e.total_findings} alertas)
             </option>
           ))}
         </select>
@@ -214,7 +224,15 @@ function Resultado({ id, contra }: { id: string; contra: string }) {
             aria-pressed={abierto === g.clave}
             onClick={() => setAbierto(abierto === g.clave ? null : g.clave)}
           >
-            <span className={`${s.cuenta} mono`}>{datos[g.clave].length}</span>
+            {/* El signo lleva el color y la cifra se queda en tinta normal.
+                Tres numerotes en rojo, verde y ámbar, cada uno con su barrita
+                de color al costado, se leían como un semáforo. */}
+            <span className={`${s.cifra} mono`}>
+              <span className={s.signo} aria-hidden="true">
+                {SIGNO[g.clave]}
+              </span>
+              {datos[g.clave].length}
+            </span>
             <span className={s.rotulo}>{g.rotulo}</span>
             <span className={s.dice}>{g.dice}</span>
             {/* Cuál se está viendo, escrito. El fondo más oscuro solo lo
@@ -282,10 +300,3 @@ function Tabla({ filas }: { filas: ChangedFinding[] }) {
   );
 }
 
-function cuando(iso?: string) {
-  if (!iso) return "";
-  return new Date(iso).toLocaleDateString("es-PE", {
-    day: "numeric",
-    month: "short",
-  });
-}
