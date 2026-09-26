@@ -20,6 +20,7 @@ import { ApiError, api, getEmail, type Project } from "../../shared/api";
 import { PROJECTS } from "../../shared/fixtures";
 import { Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
+import { Hint } from "../../shared/Hint";
 import { Team } from "./Team";
 import s from "./ProjectsScreen.module.css";
 
@@ -110,10 +111,15 @@ function Ficha({
           <p className={`${s.ruta} mono`}>{proyecto.repository_path}</p>
           {/* El rótulo solo no dice nada a quien no viene de investigación, y
               la explicación al lado cuesta una línea. */}
+          {/* La glosa estaba en cada ficha. Con dos proyectos ya se repetía,
+              con veinte sería una pared. */}
           {proyecto.is_public_dataset && (
             <p className={s.publico}>
               <span className={s.publicoMarca}>conjunto de referencia</span>
-              <span>sus fallas ya se conocen, así que sirve para medir</span>
+              <Hint termino="conjunto de referencia">
+                De cada alerta de este repositorio ya se sabe si era real, así
+                que sirve para medir cuánto acierta el asistente.
+              </Hint>
             </p>
           )}
         </div>
@@ -159,7 +165,8 @@ function Nuevo({
 }) {
   const [nombre, setNombre] = useState("");
   const [ruta, setRuta] = useState("");
-  const [lenguaje, setLenguaje] = useState("java");
+  // Fijo mientras solo haya un lenguaje con conjuntos de verdad conocida.
+  const lenguaje = "java";
   const [error, setError] = useState<string | null>(null);
   const [hecho, setHecho] = useState<string | null>(null);
   const [trabajando, setTrabajando] = useState(false);
@@ -214,16 +221,19 @@ function Nuevo({
             placeholder="/repos/portal"
             required
           />
-          <small>Donde está el código de verdad. De ahí se saca el contexto.</small>
+          <small>
+            La carpeta donde está el código fuente. De ahí se lee el fragmento
+            que acompaña a cada alerta.
+          </small>
         </label>
 
-        <label className={s.campo}>
+        {/* Un desplegable con una sola opción promete una elección que no
+            existe. Cuando haya un segundo lenguaje, vuelve a ser desplegable. */}
+        <div className={s.campo}>
           <span>Lenguaje</span>
-          <select value={lenguaje} onChange={(e) => setLenguaje(e.target.value)}>
-            <option value="java">Java</option>
-          </select>
-          <small>De momento solo Java.</small>
-        </label>
+          <p className={s.fijo}>Java</p>
+          <small>Es el único con conjuntos de verdad conocida para medir.</small>
+        </div>
       </div>
 
       <div role="alert" aria-live="assertive">

@@ -104,7 +104,7 @@ describe("Condición sin asistente", () => {
     pintar(false);
     empezar();
     expect(
-      screen.queryByRole("button", { name: /condición de control|volver a la asistida/i }),
+      screen.queryByRole("button", { name: /ocultar el juicio del asistente|volver a verlo/i }),
       "el participante no puede elegir la condición que se está midiendo",
     ).toBeNull();
   });
@@ -126,7 +126,7 @@ describe("Condición asistida", () => {
     pintar(true);
     empezar();
     expect(
-      screen.queryByRole("button", { name: /condición de control|volver a la asistida/i }),
+      screen.queryByRole("button", { name: /ocultar el juicio del asistente|volver a verlo/i }),
     ).toBeNull();
   });
 });
@@ -174,10 +174,12 @@ describe("Alerta que la cadena no ha analizado", () => {
 
 describe("Fuera del experimento", () => {
   it("permite alternar cuando no hay condición fijada", () => {
+    /* El rótulo decía «Ver condición de control» y lo que hacía era cambiar
+       la sesión entera, no enseñar una vista previa. Ahora dice lo que hace. */
     pintar();
     empezar();
     expect(
-      screen.getByRole("button", { name: /condición de control/i }),
+      screen.getByRole("button", { name: /ocultar el juicio del asistente/i }),
     ).toBeInTheDocument();
   });
 });

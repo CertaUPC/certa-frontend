@@ -138,6 +138,7 @@
 .tramo[data-tipo="real"] { background: var(--real); }
 .tramo[data-tipo="descartada"] { background: var(--safe); }
 .tramo[data-tipo="indeterminada"] { background: var(--check); }
+.tramo[data-tipo="juzgada"] { background: var(--accent); }
 
 /* Lo que sigue en cola va rayado y no en color plano: todavía no es un
    resultado, y pintarlo como los demás lo haría parecer uno. */
@@ -178,6 +179,7 @@
 .cuentaMarca[data-tipo="real"] { background: var(--real); }
 .cuentaMarca[data-tipo="descartada"] { background: var(--safe); }
 .cuentaMarca[data-tipo="indeterminada"] { background: var(--check); }
+.cuentaMarca[data-tipo="juzgada"] { background: var(--accent); }
 .cuentaMarca[data-tipo="cola"] { background: var(--line-strong); }
 
 .cuentaN {

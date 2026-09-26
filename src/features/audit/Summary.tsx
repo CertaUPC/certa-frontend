@@ -37,9 +37,13 @@ export function Summary({ records, total: esperadas, onReview, onContinue }: Pro
       <div className={s.sheet}>
         <p className={s.wordmark}>Certa</p>
         <h1 className={s.title}>Terminaste la revisión</h1>
+        {/* Prometía «antes de continuar» aunque no hubiera segunda parte, y
+            el cierre de una sesión de una hora dejaba a la persona en el aire. */}
         <p className={s.lead}>
-          Quedaron registradas {total} de {esperadas} respuestas. Puedes volver
-          y cambiar cualquiera antes de continuar.
+          Quedaron registradas {total} de {esperadas} respuestas.{" "}
+          {onContinue
+            ? "Puedes volver y cambiar cualquiera antes de pasar a la segunda parte."
+            : "Puedes volver y cambiar cualquiera, o cerrar la ventana: ya terminaste."}
         </p>
 
         <dl className={s.facts}>
@@ -73,7 +77,7 @@ export function Summary({ records, total: esperadas, onReview, onContinue }: Pro
 
         <div className={s.actions}>
           <button className={s.back} onClick={onReview}>
-            Volver a la lista
+            Volver a las alertas
           </button>
           {onContinue && (
             <button className={s.next} onClick={onContinue}>

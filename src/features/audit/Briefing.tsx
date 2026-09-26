@@ -108,16 +108,20 @@ export function Briefing({ assisted, total, onStart, medida, volverA }: Props) {
 
           <section>
             <h2 className={s.h2}>Para responder</h2>
+            {/* Decía que elegir y confirmar eran dos pasos y que Enter
+                confirmaba. No es así: una sola pulsación responde y pasa a la
+                siguiente, con el ratón y con el teclado. Prometer una red que
+                no existe es peor que no prometer ninguna. */}
             <p className={s.keysBody}>
-              Con el ratón, pulsa el botón que corresponda. Con el teclado,{" "}
+              Pulsa el botón que corresponda, o las teclas{" "}
               <kbd className={s.kbd}>1</kbd> <kbd className={s.kbd}>2</kbd>{" "}
-              <kbd className={s.kbd}>3</kbd> eligen y{" "}
-              <kbd className={s.kbd}>Enter</kbd> confirma.
+              <kbd className={s.kbd}>3</kbd>. La respuesta queda registrada y
+              pasas a la siguiente alerta.
             </p>
             <p className={s.keysBody}>
-              Hacen falta dos pulsaciones a propósito, para que un golpe
-              involuntario no registre una respuesta que no querías. Siempre
-              puedes corregir la anterior.
+              Si te equivocas, <kbd className={s.kbd}>Retroceso</kbd> corrige la
+              anterior. Se guarda la corrección y también lo que respondiste
+              antes.
             </p>
           </section>
         </div>

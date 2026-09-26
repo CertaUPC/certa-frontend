@@ -15,6 +15,10 @@ const BASE =
 
 const TOKEN_KEY = "certa.token";
 const ROLE_KEY = "certa.role";
+/* Quien entra con su código de participante no es un usuario del producto.
+   Su credencial solo sirve para su sesión, y las pantallas del equipo no
+   tienen por qué abrirse aunque escriba la dirección a mano. */
+const PARTICIPANTE_KEY = "certa.participante";
 
 export type Role = "desarrollador" | "investigador" | "lider_tecnico";
 
@@ -59,10 +63,27 @@ export function getEmail(): string | null {
   }
 }
 
+export function esParticipante(): boolean {
+  try {
+    return sessionStorage.getItem(PARTICIPANTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function marcarParticipante(): void {
+  try {
+    sessionStorage.setItem(PARTICIPANTE_KEY, "1");
+  } catch {
+    /* Sin almacenamiento, el servicio sigue negando lo que no le toca. */
+  }
+}
+
 export function clearSession(): void {
   try {
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(ROLE_KEY);
+    sessionStorage.removeItem(PARTICIPANTE_KEY);
   } catch { /* nada que limpiar */ }
 }
 

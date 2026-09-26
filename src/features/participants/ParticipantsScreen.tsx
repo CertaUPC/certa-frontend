@@ -68,7 +68,10 @@ export function ParticipantsScreen() {
   const [frecuencia, setFrecuencia] = useState("");
   const [formacion, setFormacion] = useState("");
   const [rolSeguridad, setRolSeguridad] = useState(false);
-  const [piloto, setPiloto] = useState(true);
+  /* Venía marcada. Quien no se fijara daba de alta a una persona del estudio
+     como ensayo, y un piloto no entra en el análisis ni se puede convertir
+     después. Va desmarcada y se marca a propósito. */
+  const [piloto, setPiloto] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alta, setAlta] = useState<Alta | null>(null);
@@ -148,13 +151,12 @@ export function ParticipantsScreen() {
     <>
       <h1 className={s.title}>Gestionar participantes</h1>
       <p className={s.lead}>
-        Das de alta a quien se sienta a la prueba y le habilitas el acceso en el
-        mismo gesto.
+        Registrarlo y habilitarle el acceso son el mismo gesto.
       </p>
 
       <div className={s.cols}>
         <form className={s.form} onSubmit={submit}>
-          <h2 className={s.h2}>Registrar a quien se sienta</h2>
+          <h2 className={s.h2}>Registrar un participante</h2>
 
           <label className={s.field}>
             <span>Código anónimo</span>
@@ -270,9 +272,21 @@ export function ParticipantsScreen() {
             {error && <p className={s.error}>{error}</p>}
           </div>
 
-          <button className={s.submit} type="submit" disabled={trabajando} aria-busy={trabajando}>
+          {/* El botón espera al consentimiento en vez de aceptarlo y reñir
+              después: en un estudio con personas ese es el orden. */}
+          <button
+            className={s.submit}
+            type="submit"
+            disabled={trabajando || !consentimiento}
+            aria-busy={trabajando}
+          >
             {trabajando ? "Registrando…" : "Registrar y habilitar su acceso"}
           </button>
+          {!consentimiento && (
+            <p className={s.porQue}>
+              Falta marcar que firmó el consentimiento.
+            </p>
+          )}
         </form>
 
         <div>
@@ -335,7 +349,16 @@ export function ParticipantsScreen() {
                   <th>Código</th>
                   <th>Años programando</th>
                   <th>Empieza</th>
-                  <th>Tandas</th>
+                  <th>
+                    Tandas
+                    <Hint termino="las tandas A y B">
+                      Las alertas se reparten en dos tandas iguales, A y B.
+                      Cada persona resuelve una con el asistente y la otra sin
+                      él, y el orden se alterna entre participantes para que
+                      haber practicado en la primera no se confunda con el
+                      efecto del asistente.
+                    </Hint>
+                  </th>
                 </tr>
               </thead>
               <tbody>

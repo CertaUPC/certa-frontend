@@ -110,8 +110,8 @@ export function SideNav() {
       </div>
 
       {USE_FIXTURES && (
-        <p className={s.muestra} title="El servicio no está conectado">
-          datos de muestra
+        <p className={s.muestra}>
+          Estás viendo datos de muestra, no los tuyos
         </p>
       )}
 

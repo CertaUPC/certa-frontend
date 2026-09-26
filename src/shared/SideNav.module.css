@@ -53,14 +53,16 @@
   outline-offset: 2px;
 }
 
+/* Antes era una pastilla naranja en el sitio más visible de la navegación,
+   que decía «datos de muestra» y nada más: parecía un botón que no hacía
+   nada. Ahora es una línea de aviso, discreta y completa. */
 .muestra {
   flex: none;
   font-size: 11.5px;
-  color: var(--check);
-  border: 1px dashed var(--check);
-  border-radius: 999px;
-  padding: 3px 10px;
-  text-align: center;
+  line-height: 1.4;
+  color: var(--ink-3);
+  border-block-end: 1px solid var(--line);
+  padding-block-end: 10px;
 }
 
 /* ── el desplegable de proyectos ─────────────────────────────────── */
