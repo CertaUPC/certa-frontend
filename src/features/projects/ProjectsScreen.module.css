@@ -74,7 +74,9 @@
   display: grid;
   gap: 12px;
   /* El mínimo no puede ser mayor que la pantalla, o la rejilla desborda. */
-  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+  /* auto-fit y no auto-fill: con dos proyectos, auto-fill dejaba una tercera
+     columna vacía y las fichas se quedaban en 1100 de 1616. */
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
 }
 
 .ficha {
