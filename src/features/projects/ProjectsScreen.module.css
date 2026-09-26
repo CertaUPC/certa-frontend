@@ -327,3 +327,10 @@
     justify-content: center;
   }
 }
+
+/* Un dato que todavía no se elige: se enseña como texto, no como control. */
+.fijo {
+  font-size: 14px;
+  color: var(--ink);
+  padding-block: 6px;
+}

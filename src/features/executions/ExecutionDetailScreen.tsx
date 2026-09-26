@@ -28,11 +28,10 @@ export function ExecutionDetailScreen() {
     [id],
   );
 
-  const metrics = useApi(
-    () => api.metrics(id),
-    METRICS[id] ?? METRICS["7f3a2b10"],
-    [id],
-  );
+  /* Con datos de muestra, la que no tiene métricas propias no hereda las de
+     otra: eso pintaba las mismas cinco cifras en tres ejecuciones distintas,
+     una de ellas sin nada validado. */
+  const metrics = useApi(() => api.metrics(id), METRICS[id], [id]);
 
   const run = useAction(async () => {
     /* Una corrida que se cortó vuelve a la cola por su propio camino. El
@@ -162,21 +161,64 @@ export function ExecutionDetailScreen() {
   /* La cinta se arma con lo que ya está juzgado. Los indeterminados no entran
      en la matriz, así que se cuentan por diferencia: si no, la cinta no
      sumaría el total y nadie sabría dónde fueron a parar. */
+  /* Solo un conjunto de referencia permite repartir lo juzgado entre reales y
+     descartadas. En un repositorio cualquiera no hay con qué, de modo que la
+     cinta dice lo único cierto: cuánto se juzgó y cuánto sigue en cola.
+     Repartirlo igual metía todo en «sin poder determinar», que era falso. */
   const conf = metrics.data?.confusion;
-  const reales = conf
-    ? conf.verdaderos_positivos + conf.falsos_positivos
-    : 0;
-  const descartadas = conf
-    ? conf.falsos_negativos + conf.verdaderos_negativos
-    : 0;
-  const indeterminadas = Math.max(
-    0,
-    execution.validated_findings - reales - descartadas,
-  );
+  const tramos = conf
+    ? [
+        {
+          tipo: "real",
+          n: conf.verdaderos_positivos + conf.falsos_positivos,
+          rotulo: "marcadas como reales",
+        },
+        {
+          tipo: "descartada",
+          n: conf.falsos_negativos + conf.verdaderos_negativos,
+          rotulo: "descartadas",
+        },
+        {
+          tipo: "indeterminada",
+          n: Math.max(
+            0,
+            execution.validated_findings -
+              conf.verdaderos_positivos -
+              conf.falsos_positivos -
+              conf.falsos_negativos -
+              conf.verdaderos_negativos,
+          ),
+          rotulo: "sin poder determinar",
+        },
+        {
+          tipo: "cola",
+          n: execution.pending_findings,
+          rotulo: "todavía en cola",
+        },
+      ]
+    : [
+        {
+          tipo: "juzgada",
+          n: execution.validated_findings,
+          rotulo: "ya juzgadas por el asistente",
+        },
+        {
+          tipo: "cola",
+          n: execution.pending_findings,
+          rotulo: "todavía en cola",
+        },
+      ];
 
   const pendiente = execution.status === "pendiente";
   const interrumpida = execution.status === "fallida";
   const enProceso = execution.status === "en_proceso";
+  /* «Procesando» en verde mientras lleva dieciséis días parada es el peor de
+     los dos mensajes posibles. Pasadas dos horas sin terminar, lo honesto es
+     decir que está detenida. */
+  const detenida =
+    enProceso &&
+    !!execution.started_at &&
+    Date.now() - new Date(execution.started_at).getTime() > 2 * 60 * 60 * 1000;
   const terminada = execution.status === "completada";
 
   return (
@@ -192,8 +234,10 @@ export function ExecutionDetailScreen() {
               la barra, y dos corridas del mismo se llamaban igual. */}
           <h1 className={s.title}>{titulo(execution)}</h1>
           <p className={s.facts}>
-            <span className={`${s.badge} ${s[execution.status]}`}>
-              {STATUS_LABEL[execution.status]}
+            <span
+              className={`${s.badge} ${detenida ? s.fallida : s[execution.status]}`}
+            >
+              {detenida ? "Detenida" : STATUS_LABEL[execution.status]}
             </span>
             <span className="mono" translate="no">
               {execution.tool_name} {execution.ruleset_version}
@@ -351,22 +395,24 @@ export function ExecutionDetailScreen() {
           tiene sentido junto a la explicación de por qué haría falta. */}
       {enProceso && (
         <div className={s.notice}>
-          <b>La tomó {execution.claimed_by || "un trabajador"}</b>
-          {execution.started_at ? ` ${desde(execution.started_at)}` : ""}. Si ese
-          trabajador se reinició, la corrida se queda así: la cola mira el
-          estado, y devolverla es lo que la vuelve a poner al alcance del
-          siguiente. Lo ya validado se conserva.
+          <b>
+            Esta ejecución empezó{" "}
+            {execution.started_at ? desde(execution.started_at) : "hace rato"} y
+            no ha terminado.
+          </b>{" "}
+          Reanudarla no pierde nada de lo que el asistente ya juzgó.
           {devolviendo ? (
             <span className={`${s.confirmar} ${s.avisoAccion}`}>
-              ¿Devolverla? Con un trabajador todavía vivo habría dos validando
-              los mismos hallazgos, y eso se paga dos veces.
+              ¿Reanudarla? Si el asistente todavía está trabajando en ella,
+              reanudar ahora haría que dos la juzguen a la vez, y eso se paga
+              dos veces.
               <button
                 className={s.peligro}
                 disabled={devolver.busy}
                 aria-busy={devolver.busy}
                 onClick={() => devolver.run()}
               >
-                {devolver.busy ? "Devolviendo…" : "Sí, devolverla"}
+                {devolver.busy ? "Reanudando…" : "Sí, reanudarla"}
               </button>
               <button
                 className={s.secondary}
@@ -381,7 +427,7 @@ export function ExecutionDetailScreen() {
                 className={s.secondary}
                 onClick={() => setDevolviendo(true)}
               >
-                Devolver a la cola
+                Reanudar
               </button>
             </span>
           )}
@@ -405,32 +451,17 @@ export function ExecutionDetailScreen() {
             <b className="mono">{execution.total_findings}</b> alertas
           </h2>
 
-          <Cinta
-            reales={reales}
-            descartadas={descartadas}
-            indeterminadas={indeterminadas}
-            enCola={execution.pending_findings}
-            total={execution.total_findings}
-          />
+          <Cinta tramos={tramos} total={execution.total_findings} />
 
           <ul className={s.cuentas}>
-            <Cuenta tipo="real" n={reales} rotulo="marcadas como reales" />
-            <Cuenta tipo="descartada" n={descartadas} rotulo="descartadas" />
-            <Cuenta
-              tipo="indeterminada"
-              n={indeterminadas}
-              rotulo="sin poder determinar"
-            />
-            <Cuenta
-              tipo="cola"
-              n={execution.pending_findings}
-              rotulo="todavía en cola"
-            />
+            {tramos.map((t) => (
+              <Cuenta key={t.tipo} tipo={t.tipo} n={t.n} rotulo={t.rotulo} />
+            ))}
           </ul>
 
           {metrics.loading && <Loading what="las métricas" />}
 
-          {metrics.data && !metrics.error && (
+          {execution.validated_findings > 0 && metrics.data && !metrics.error && (
             <>
               <h3 className={s.h3}>
                 Frente a las respuestas que ya se conocen
@@ -471,7 +502,9 @@ export function ExecutionDetailScreen() {
           )}
         </section>
 
-        {metrics.data && !metrics.error && (
+        {/* Sin nada juzgado no hay nada que medir, y enseñar cifras ahí es
+            enseñar cifras de otra ejecución. */}
+        {execution.validated_findings > 0 && metrics.data && !metrics.error && (
           <aside className={s.marcador}>
             <h2 className={s.h2}>Qué tan bien juzgó</h2>
 
@@ -566,25 +599,15 @@ function desde(iso: string): string {
    desenlace, y lo que sigue en cola va rayado porque todavía no es nada. Es el
    único elemento con peso visual de la pantalla, y no es adorno: es el
    resultado de la corrida dibujado a escala. */
-function Cinta({
-  reales, descartadas, indeterminadas, enCola, total,
-}: {
-  reales: number;
-  descartadas: number;
-  indeterminadas: number;
-  enCola: number;
-  total: number;
-}) {
-  const tramos = [
-    { tipo: "real", n: reales },
-    { tipo: "descartada", n: descartadas },
-    { tipo: "indeterminada", n: indeterminadas },
-    { tipo: "cola", n: enCola },
-  ].filter((t) => t.n > 0);
+interface Tramo {
+  tipo: string;
+  n: number;
+  rotulo: string;
+}
 
-  const dicho = tramos
-    .map((t) => `${t.n} ${ROTULO[t.tipo]}`)
-    .join(", ");
+function Cinta({ tramos, total }: { tramos: Tramo[]; total: number }) {
+  const visibles = tramos.filter((t) => t.n > 0);
+  const dicho = visibles.map((t) => `${t.n} ${t.rotulo}`).join(", ");
 
   return (
     <div
@@ -592,7 +615,7 @@ function Cinta({
       role="img"
       aria-label={total ? `De ${total} alertas: ${dicho}.` : "Sin alertas"}
     >
-      {tramos.map((t) => (
+      {visibles.map((t) => (
         <span
           key={t.tipo}
           className={s.tramo}
@@ -603,13 +626,6 @@ function Cinta({
     </div>
   );
 }
-
-const ROTULO: Record<string, string> = {
-  real: "marcadas como reales",
-  descartada: "descartadas",
-  indeterminada: "sin poder determinar",
-  cola: "todavía en cola",
-};
 
 function Cuenta({
   tipo, n, rotulo,

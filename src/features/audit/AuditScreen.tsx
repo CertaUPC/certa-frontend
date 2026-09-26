@@ -12,6 +12,7 @@ import { CodeViewer } from "./CodeViewer";
 import { FindingHistory } from "./FindingHistory";
 import { ProjectRail } from "./ProjectRail";
 import { ShortcutHelp } from "./ShortcutHelp";
+import { Hint } from "../../shared/Hint";
 import { Summary } from "./Summary";
 import { warmUp } from "./highlight";
 import {
@@ -468,7 +469,9 @@ export function Session({
               onClick={() => setAssisted((a) => !a)}
               aria-pressed={!assisted}
             >
-              {assisted ? "Ver condición de control" : "Volver a la asistida"}
+              {assisted
+                ? "Ocultar el juicio del asistente"
+                : "Volver a verlo"}
             </button>
           )}
           <ThemeToggle />
@@ -600,11 +603,19 @@ export function Session({
             theme={theme}
           />
 
-          <p className={s.fingerprint}>
-            Huella <span className="mono">{finding.fingerprint}</span>. Se calcula
-            sobre el contenido y no sobre el número de línea, así que esta alerta
-            se reconoce aunque el código se mueva.
-          </p>
+          {/* La huella es dato de quien construye Certa. En la pantalla
+              donde alguien decide si hay una vulnerabilidad, distrae. Se
+              queda fuera de la sesión medida. */}
+          {carril && (
+            <p className={s.fingerprint}>
+              Huella <span className="mono">{finding.fingerprint}</span>
+              <Hint termino="la huella">
+                Se calcula sobre el contenido y no sobre el número de línea,
+                así que la alerta se reconoce como la misma aunque el código se
+                mueva de sitio.
+              </Hint>
+            </p>
+          )}
         </main>
 
         <aside className={s.judgement} aria-label="Juicio del asistente">

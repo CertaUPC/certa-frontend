@@ -7,8 +7,9 @@
  * comparación no serviría para nada.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useProyecto } from "../../shared/project";
 import { api, type ChangedFinding, type Execution } from "../../shared/api";
 import { EXECUTIONS } from "../../shared/fixtures";
 import { Hint } from "../../shared/Hint";
@@ -47,11 +48,18 @@ const GRUPOS: { clave: Grupo; rotulo: string; dice: string }[] = [
 
 export function CompareScreen() {
   const { id = "" } = useParams<{ id: string }>();
+  /* La cabecera decía un proyecto y la barra otro: llegar por enlace a la
+     ejecución de otro proyecto no movía el selector. */
+  const { actual, elegir } = useProyecto();
   const [params, setParams] = useSearchParams();
   const contra = params.get("against") ?? "";
 
   const ejecuciones = useApi(() => api.executions(), EXECUTIONS);
   const esta = ejecuciones.data?.find((e) => e.id === id) ?? null;
+  const suyo = esta?.project_id;
+  useEffect(() => {
+    if (suyo && suyo !== actual?.id) elegir(suyo);
+  }, [suyo, actual?.id, elegir]);
 
   const hermanas = useMemo(
     () =>

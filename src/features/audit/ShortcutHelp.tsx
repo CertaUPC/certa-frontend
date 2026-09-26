@@ -24,8 +24,9 @@ export function ShortcutHelp({ open, onClose }: Props) {
     <dialog ref={ref} className={s.dialog} onClose={onClose}>
       <h2 className={s.title}>Atajos de teclado</h2>
       <p className={s.note}>
-        Elegir y confirmar son dos pasos para que un golpe involuntario no
-        registre una respuesta.
+        Una sola pulsación responde y pasa a la siguiente alerta. Lo que cubre
+        el golpe involuntario es poder corregir: la respuesta anterior se
+        conserva y queda marcada como rectificada.
       </p>
 
       <dl className={s.list}>

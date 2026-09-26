@@ -31,8 +31,8 @@ export function isFiltering(f: Filters): boolean {
 const VERDICTS: { value: Verdict; label: string }[] = [
   { value: "real", label: "Parecen reales" },
   { value: "descartado", label: "Descartadas" },
-  { value: "revisar", label: "Sin determinar" },
-  { value: "sin_analizar", label: "Sin analizar" },
+  { value: "revisar", label: "El asistente no se pronunció" },
+  { value: "sin_analizar", label: "Todavía sin juzgar" },
 ];
 
 interface Props {
@@ -57,7 +57,7 @@ export function FindingFilters({
           aria-pressed={filters.pending}
           onClick={() => onChange({ ...filters, pending: !filters.pending })}
         >
-          Sin responder
+          Que no he respondido
         </button>
 
         {assisted &&
@@ -88,7 +88,7 @@ export function FindingFilters({
               })
             }
           >
-            Sin comprobar
+            Cita líneas que no existen
           </button>
         )}
 

@@ -9,6 +9,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, USE_FIXTURES } from "../../shared/api";
 import { PROJECTS } from "../../shared/fixtures";
+import { Hint } from "../../shared/Hint";
 import { useProyecto } from "../../shared/project";
 import { useAction, useApi } from "../../shared/useApi";
 import { Failed, Loading } from "../../shared/States";
@@ -212,8 +213,17 @@ export function IngestScreen() {
 
           {/* Sin nombre, la corrida se llama por su fecha. Con dos del mismo
               día eso ya no alcanza para distinguirlas. */}
+          {/* La explicación va detrás del icono y no en un párrafo: son dos
+              renglones que empujan el botón de cargar fuera de la vista en una
+              ventana de portátil. */}
           <label className={s.field}>
-            <span>Nombre de la ejecución (opcional)</span>
+            <span>
+              Nombre de la ejecución (opcional){" "}
+              <Hint termino="el nombre de la ejecución">
+                Sirve para ubicarla después entre varias. Si lo dejas vacío, se
+                llamará por su fecha y su hora.
+              </Hint>
+            </span>
             <input
               className={s.input}
               value={nombre}
@@ -222,15 +232,11 @@ export function IngestScreen() {
               maxLength={120}
             />
           </label>
-          <p className={s.note}>
-            Sirve para ubicarla después entre varias. Si lo dejas vacío, se
-            llamará por su fecha.
-          </p>
         </section>
 
         <details className={s.optional}>
           <summary className={s.optionalTitle}>
-            Acotar qué se procesa
+            <span className={s.step}>3</span> Acotar qué se procesa
             <span className={s.optionalTag}>opcional</span>
           </summary>
 
@@ -333,11 +339,12 @@ export function IngestScreen() {
           <Link className={s.secondary} to="/executions">Cancelar</Link>
         </div>
 
-        {!listo && !enviar.busy && (
+        {/* El motivo aparece cuando ya elegiste algo, no al entrar: la
+            pantalla te recibía diciendo que falta el archivo antes de que
+            tuvieras ocasión de ponerlo. */}
+        {!listo && !enviar.busy && proyectoListo && (
           <p className={s.missing}>
-            {!proyectoListo
-              ? "Elige el proyecto para continuar."
-              : "Falta el archivo SARIF."}
+            {"Elige el archivo SARIF para continuar."}
           </p>
         )}
       </div>

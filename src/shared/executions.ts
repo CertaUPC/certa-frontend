@@ -25,15 +25,15 @@ const HORA = new Intl.DateTimeFormat("es-PE", {
   minute: "2-digit",
 });
 
-/** «Primer barrido de CWE-89», o «Corrida del 9 de setiembre, 2:20 p. m.».
+/** «Primer barrido de CWE-89», o «Ejecución del 9 de setiembre, 2:20 p. m.».
  *
  * La hora entra siempre que no hay nombre: dos corridas del mismo día son lo
  * normal, y con la fecha sola las dos se llamaban igual. */
 export function titulo(e: Execution): string {
   if (e.label) return e.label;
   const d = new Date(e.created_at);
-  if (Number.isNaN(d.getTime())) return `Corrida ${corto(e)}`;
-  return `Corrida del ${MES_LARGO.format(d)}, ${HORA.format(d)}`;
+  if (Number.isNaN(d.getTime())) return `Ejecución ${corto(e)}`;
+  return `Ejecución del ${MES_LARGO.format(d)}, ${HORA.format(d)}`;
 }
 
 /** La versión que entra en una barra angosta o en una celda de tabla. */
@@ -41,10 +41,10 @@ export function tituloCorto(e: Execution): string {
   if (e.label) return e.label;
   const d = new Date(e.created_at);
   if (Number.isNaN(d.getTime())) return corto(e);
-  return `Corrida del ${MES_CORTO.format(d)}, ${HORA.format(d)}`;
+  return `Ejecución del ${MES_CORTO.format(d)}, ${HORA.format(d)}`;
 }
 
-/** Fecha y hora, para distinguir dos corridas del mismo día. */
+/** Fecha y hora, para distinguir dos ejecuciones del mismo día. */
 export function cuando(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";

@@ -23,7 +23,14 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { ApiError, USE_FIXTURES, api, saveSession, type Role } from "../../shared/api";
+import {
+  ApiError,
+  USE_FIXTURES,
+  api,
+  marcarParticipante,
+  saveSession,
+  type Role,
+} from "../../shared/api";
 import { useTheme } from "../../shared/theme";
 import { Mark } from "../../shared/Mark";
 import { ThemeToggle } from "../../shared/ThemeToggle";
@@ -168,6 +175,7 @@ export function LoginScreen() {
       );
     }
     saveSession(r.access_token, "desarrollador");
+    marcarParticipante();
 
     /* Las dos condiciones van en la dirección, y no en memoria, para que
        recargar a mitad de sesión no pierda cuál toca después. */
@@ -322,7 +330,10 @@ export function LoginScreen() {
 
                 {USE_FIXTURES && (
                   <label className={s.field}>
-                    <span>Rol, mientras no hay servicio conectado</span>
+                    {/* El aviso de que no hay servicio no va metido dentro
+                        del nombre de un campo: se leía como si el rol
+                        dependiera de la conexión. */}
+                    <span>Rol</span>
                     <select
                       value={role}
                       onChange={(e) => setRole(e.target.value as Role)}

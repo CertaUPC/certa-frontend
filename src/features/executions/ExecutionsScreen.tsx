@@ -112,8 +112,8 @@ export function ExecutionsScreen() {
               <th>Ejecución</th>
               <th>Reglas</th>
               <th>Estado</th>
-              <th className={s.numeric}>Hallazgos</th>
-              <th>Avance</th>
+              <th className={s.numeric}>Alertas</th>
+              <th>Juzgadas por el asistente</th>
               <th>
                 <span className="solo-lectores">Acciones</span>
               </th>
