@@ -1,8 +1,8 @@
 /* ── la cabecera y su única acción con peso ─────────────────────── */
 .head {
-  /* El botón no se va a la esquina de la ventana, donde deja de leerse junto
-     al título, pero tampoco se queda pegado al ancho de una sola ficha. */
-  max-inline-size: 1100px;
+  /* Al ancho de la rejilla, no menos: topada en 1100 mientras las fichas
+     llegaban a 1560, el titulo y el boton se cortaban a media pantalla y la
+     rejilla seguia sola hacia la derecha. */
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -105,6 +105,9 @@
 }
 
 .ruta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12.5px;
   color: var(--ink-3);
   margin-block-start: 3px;

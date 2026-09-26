@@ -3,7 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../shared/api";
 import { corto, cuando, titulo } from "../../shared/executions";
 import { useProyecto } from "../../shared/project";
-import { EXECUTIONS, STATUS_LABEL } from "../../shared/fixtures";
+import { EXECUTIONS, STATUS_FIGURA, STATUS_LABEL } from "../../shared/fixtures";
+import { Glyph } from "../../shared/Glyph";
 import { Empty, Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
 import s from "./ExecutionsScreen.module.css";
@@ -147,6 +148,7 @@ export function ExecutionsScreen() {
                 </td>
                 <td>
                   <span className={`${s.badge} ${s[e.status]}`}>
+                    <Glyph figura={STATUS_FIGURA[e.status]} tam={12} />
                     {STATUS_LABEL[e.status]}
                   </span>
                   {e.failure_reason && <span className={s.sub}>{e.failure_reason}</span>}
