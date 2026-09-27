@@ -382,6 +382,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
+  padding-inline-end: 32px;
 }
 
 .field input::placeholder {
