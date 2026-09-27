@@ -29,9 +29,16 @@ const SEVERITIES = [
 const CWES_FRECUENTES = [
   { id: "CWE-89", name: "Inyección SQL" },
   { id: "CWE-79", name: "Texto sin escapar" },
-  { id: "CWE-611", name: "Entidad externa de XML" },
+  { id: "CWE-78", name: "Comando del sistema" },
   { id: "CWE-22", name: "Ruta manipulable" },
+  { id: "CWE-611", name: "Entidad externa de XML" },
   { id: "CWE-502", name: "Deserialización insegura" },
+  { id: "CWE-918", name: "Destino que viene del usuario" },
+  { id: "CWE-352", name: "Petición falsificada" },
+  { id: "CWE-327", name: "Criptografía débil" },
+  { id: "CWE-798", name: "Credencial en el código" },
+  { id: "CWE-732", name: "Permisos demasiado abiertos" },
+  { id: "CWE-532", name: "Dato sensible en la bitácora" },
 ];
 
 /** Acepta «352», «cwe 352» o «CWE-352», que es como la gente lo escribe. */
@@ -382,7 +389,7 @@ export function IngestScreen() {
                   className={s.input}
                   value={otroCwe}
                   onChange={(e) => setOtroCwe(e.target.value)}
-                  placeholder="CWE-352, o el que necesites"
+                  placeholder="CWE-190, o el que necesites"
                 />
               </label>
               <button

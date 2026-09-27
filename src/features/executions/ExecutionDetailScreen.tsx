@@ -336,10 +336,10 @@ export function ExecutionDetailScreen() {
                       setConfirmando(true);
                     }}
                   >
-                    Borrar el código guardado
+                    Borrar los fragmentos de código guardados
                     <span className={s.masDato}>
-                      Los veredictos se quedan; se pierde el fragmento que los
-                      sostiene
+                      Libera espacio. Tu repositorio no se toca y los
+                      veredictos tampoco
                     </span>
                   </button>
                 </li>
@@ -352,11 +352,13 @@ export function ExecutionDetailScreen() {
       {confirmando && (
         <div className={s.confirmarFila}>
           <span className={s.confirmarTexto}>
-            <b>¿Borrar el código guardado de esta ejecución?</b> Certa copia
-            el pedazo de código que el modelo miró para justificar cada
-            veredicto. Los veredictos y sus justificaciones se quedan; lo que
-            se pierde es poder abrir esa copia y ver de qué hablaban. No se
-            deshace.
+            <b>¿Borrar los fragmentos de código de esta ejecución?</b> Para
+            poder explicar cada veredicto, Certa copió el pedazo de código que
+            el asistente miró. Esas copias son lo que se borra: tu repositorio
+            no se toca, y los veredictos y sus justificaciones se quedan como
+            están. Lo que pierdes es que al revisar las alertas ya no vas a
+            ver el código al costado, solo lo que el asistente dijo de él. No
+            se deshace.
           </span>
           <button
             className={s.peligro}

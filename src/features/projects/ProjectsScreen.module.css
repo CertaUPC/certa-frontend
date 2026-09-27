@@ -343,3 +343,10 @@
   color: var(--ink);
   padding-block: 6px;
 }
+
+/* La flecha del desplegable la dibuja el navegador pegada al borde: sin este
+   respiro roza la esquina. Va aparte de la regla que comparte con el campo de
+   texto, que no lo necesita. */
+.campo select {
+  padding-inline-end: 32px;
+}
