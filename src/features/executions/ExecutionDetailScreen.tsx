@@ -523,6 +523,38 @@ export function ExecutionDetailScreen() {
           </div>
         </section>
 
+        {alertas.data && alertas.data.length > 0 && (
+          <section className={s.porEmpezar}>
+            <div className={s.porEmpezarTop}>
+              <h2 className={s.h2}>Por dónde empezar</h2>
+              <Link className={s.verTodas} to={`/review?execution=${id}`}>
+                Revisar las {execution.total_findings} alertas
+              </Link>
+            </div>
+            <ul className={s.alertas}>
+              {alertas.data.slice(0, 3).map((a) => (
+                <li key={a.id} className={s.alerta}>
+                  {/* El mensaje de la regla puede ser un párrafo entero en
+                      inglés. Aquí basta la primera frase. */}
+                  <span className={s.alertaQue}>{primeraFrase(a.title)}</span>
+                  <span className={s.alertaDonde}>
+                    <span className="mono">
+                      {a.file}:{a.line}
+                    </span>{" "}
+                    {a.cweName}
+                  </span>
+                  <span className={s.alertaSeveridad} data-nivel={a.severity}>
+                    severidad {a.severity}
+                  </span>
+                  <span className={s.alertaVeredicto} data-valor={a.verdict}>
+                    {VERDICT_SHORT[a.verdict]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* Sin nada juzgado no hay nada que medir, y enseñar cifras ahí es
             enseñar cifras de otra ejecución. */}
         {execution.validated_findings > 0 && metrics.data && !metrics.error && (
@@ -576,45 +608,21 @@ export function ExecutionDetailScreen() {
               />
             </dl>
 
+            {/* El veredicto solo, en una línea, y el porqué debajo en letra
+                menor: el párrafo entero costaba de leer de un vistazo, que es
+                justo como se mira esta parte. */}
             <p className={metrics.data.run_is_valid ? s.valid : s.invalid}>
-              {metrics.data.run_quality_reason}
+              <b>{veredicto(metrics.data.run_quality_reason).que}</b>
+              <span className={s.porQue}>
+                {veredicto(metrics.data.run_quality_reason).porQue}
+              </span>
             </p>
             <p className={s.budget}>{metrics.data.budget}</p>
           </aside>
         )}
       </div>
 
-      {alertas.data && alertas.data.length > 0 && (
-        <section className={s.porEmpezar}>
-          <div className={s.porEmpezarTop}>
-            <h2 className={s.h2}>Por dónde empezar</h2>
-            <Link className={s.verTodas} to={`/review?execution=${id}`}>
-              Revisar las {execution.total_findings} alertas
-            </Link>
-          </div>
-          <ul className={s.alertas}>
-            {alertas.data.slice(0, 3).map((a) => (
-              <li key={a.id} className={s.alerta}>
-                {/* El mensaje de la regla puede ser un párrafo entero en
-                    inglés. Aquí basta la primera frase. */}
-                <span className={s.alertaQue}>{primeraFrase(a.title)}</span>
-                <span className={s.alertaDonde}>
-                  <span className="mono">
-                    {a.file}:{a.line}
-                  </span>{" "}
-                  {a.cweName}
-                </span>
-                <span className={s.alertaSeveridad} data-nivel={a.severity}>
-                  severidad {a.severity}
-                </span>
-                <span className={s.alertaVeredicto} data-valor={a.verdict}>
-                  {VERDICT_SHORT[a.verdict]}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+
 
     </>
   );
@@ -622,6 +630,14 @@ export function ExecutionDetailScreen() {
 
 /* La fecha se formatea con el locale del navegador y no a mano: quien revise
    esto desde otro huso no tiene por que leer el nuestro. */
+/** Parte «Se puede confiar en estos números: el asistente…» en sus dos
+ *  mitades. Si el servicio devolviera otra forma, todo queda como veredicto. */
+function veredicto(frase: string): { que: string; porQue: string } {
+  const corte = frase.indexOf(": ");
+  if (corte < 0) return { que: frase, porQue: "" };
+  return { que: frase.slice(0, corte), porQue: frase.slice(corte + 2) };
+}
+
 /** La primera frase, o los primeros cien caracteres si no la hay. */
 function primeraFrase(texto: string): string {
   const corte = texto.search(/\.\s/);

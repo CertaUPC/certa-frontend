@@ -133,7 +133,18 @@ function Ficha({
             <b className="mono">{cuenta}</b>{" "}
             {cuenta === 1 ? "ejecución" : "ejecuciones"}
           </span>
-          <span className={`${s.dato} ${s.lenguaje}`}>{proyecto.language}</span>
+          {/* El lenguaje con su dibujo: la etiqueta decía «java» en
+              minúscula y parecía una extensión de archivo. */}
+          <span className={`${s.dato} ${s.lenguaje}`}>
+            {proyecto.language === "java" ? (
+              <>
+                <Glyph figura="java" tam={14} />
+                Java
+              </>
+            ) : (
+              proyecto.language
+            )}
+          </span>
         </div>
       </div>
 

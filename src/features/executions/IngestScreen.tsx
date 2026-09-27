@@ -200,6 +200,15 @@ export function IngestScreen() {
                 La ruta identifica al proyecto. Si repites una, se reusa el
                 proyecto que ya existe en vez de duplicarlo.
               </p>
+              <p className={s.note}>
+                <b>Dónde tiene que estar el código.</b> Quien analiza no es
+                esta pantalla sino un proceso aparte, que lee los archivos de
+                su propio disco. Si corres Certa en tu máquina, pon la ruta
+                absoluta de tu copia del repositorio. Si usas el servicio
+                desplegado, tiene que ser una carpeta que ese proceso tenga
+                delante; si no la encuentra, la ejecución vuelve a la cola y lo
+                dice con la ruta exacta que intentó.
+              </p>
             </>
           )}
         </section>
@@ -247,90 +256,6 @@ export function IngestScreen() {
           </label>
         </section>
 
-        <details className={s.optional}>
-          <summary className={s.optionalTitle}>
-            <span className={s.step}>3</span> Acotar qué se procesa
-            <span className={s.optionalTag}>opcional</span>
-          </summary>
-
-          <p className={s.note}>
-            Dejar fuera lo que hoy no vas a atender ahorra tiempo y consultas
-            al asistente.
-          </p>
-
-          <label className={s.field}>
-            <span>Severidad mínima</span>
-            <select
-              className={s.input}
-              value={severity}
-              onChange={(e) => setSeverity(e.target.value)}
-            >
-              {SEVERITIES.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </label>
-
-          <span className={s.fieldLabel}>
-            Tipos de falla{" "}
-            <span className={s.gloss}>
-              se nombran por su número CWE, un catálogo público
-            </span>
-          </span>
-          <div className={s.chips}>
-            {CWES_FRECUENTES.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                className={s.cweChip}
-                aria-pressed={cwes.includes(c.id)}
-                onClick={() => toggleCwe(c.id)}
-              >
-                <span className="mono">{c.id}</span> {c.name}
-              </button>
-            ))}
-            {/* Los cinco de arriba son atajos. Sin esto, la pantalla parecía
-                decir que solo existen cinco tipos de falla. */}
-            {cwes
-              .filter((id) => !CWES_FRECUENTES.some((c) => c.id === id))
-              .map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={s.cweChip}
-                  aria-pressed
-                  onClick={() => toggleCwe(id)}
-                >
-                  <span className="mono">{id}</span> quitar
-                </button>
-              ))}
-          </div>
-          <div className={s.otroCwe}>
-            <label className={s.field}>
-              <span className="solo-lectores">Agregar otro número CWE</span>
-              <input
-                className={s.input}
-                value={otroCwe}
-                onChange={(e) => setOtroCwe(e.target.value)}
-                placeholder="CWE-352, o el que necesites"
-              />
-            </label>
-            <button
-              type="button"
-              className={s.agregar}
-              disabled={!normalizarCwe(otroCwe)}
-              onClick={() => {
-                const id = normalizarCwe(otroCwe);
-                if (!id) return;
-                if (!cwes.includes(id)) toggleCwe(id);
-                setOtroCwe("");
-              }}
-            >
-              Agregar
-            </button>
-          </div>
-        </details>
-
         {enviar.error && <p className={s.error}>{enviar.error}</p>}
 
         {/* Lo que va a pasar al pulsar, dicho antes de pulsar y fuera del
@@ -365,7 +290,7 @@ export function IngestScreen() {
         {/* Al costado, y no debajo: la pantalla dejaba novecientos píxeles de
             ancho vacíos, y quien carga por primera vez no sabe qué va a pasar
             después de pulsar. */}
-        <aside className={s.despues}>
+        <aside className={s.lado}>
           <h2 className={s.h2Aparte}>Qué pasa después</h2>
           <ol className={s.pasos}>
             <li>
@@ -385,6 +310,97 @@ export function IngestScreen() {
             Tarda entre diez y veinticinco segundos por alerta, así que un
             archivo grande son horas.
           </p>
+
+          {/* El alcance vive aquí y no debajo del formulario: abierto medía
+              setecientos píxeles y empujaba el botón de cargar fuera de la
+              pantalla, mientras este costado se quedaba vacío. */}
+          <details className={s.optional}>
+            <summary className={s.optionalTitle}>
+              <span className={s.step}>3</span> Acotar qué se procesa
+              <span className={s.optionalTag}>opcional</span>
+            </summary>
+
+            <p className={s.note}>
+              Dejar fuera lo que hoy no vas a atender ahorra tiempo y consultas
+              al asistente.
+            </p>
+
+            <label className={s.field}>
+              <span>Severidad mínima</span>
+              <select
+                className={s.input}
+                value={severity}
+                onChange={(e) => setSeverity(e.target.value)}
+              >
+                {SEVERITIES.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+
+            <span className={s.fieldLabel}>
+              Tipos de falla{" "}
+              <Hint termino="los tipos de falla y su número CWE">
+                CWE es un catálogo público de tipos de falla. Cada tipo tiene
+                su número, y las reglas del analizador lo traen puesto: CWE-89
+                es inyección SQL, CWE-79 es texto sin escapar en la página.
+                Acotar por uno deja fuera todo lo que no sea de ese tipo.
+              </Hint>
+            </span>
+            <div className={s.chips}>
+              {CWES_FRECUENTES.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className={s.cweChip}
+                  aria-pressed={cwes.includes(c.id)}
+                  onClick={() => toggleCwe(c.id)}
+                >
+                  <span className="mono">{c.id}</span> {c.name}
+                </button>
+              ))}
+              {/* Los cinco de arriba son atajos. Sin esto, la pantalla parecía
+                  decir que solo existen cinco tipos de falla. */}
+              {cwes
+                .filter((id) => !CWES_FRECUENTES.some((c) => c.id === id))
+                .map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={s.cweChip}
+                    aria-pressed
+                    onClick={() => toggleCwe(id)}
+                  >
+                    <span className="mono">{id}</span> quitar
+                  </button>
+                ))}
+            </div>
+            <div className={s.otroCwe}>
+              <label className={s.field}>
+                <span className="solo-lectores">Agregar otro número CWE</span>
+                <input
+                  className={s.input}
+                  value={otroCwe}
+                  onChange={(e) => setOtroCwe(e.target.value)}
+                  placeholder="CWE-352, o el que necesites"
+                />
+              </label>
+              <button
+                type="button"
+                className={s.agregar}
+                disabled={!normalizarCwe(otroCwe)}
+                onClick={() => {
+                  const id = normalizarCwe(otroCwe);
+                  if (!id) return;
+                  if (!cwes.includes(id)) toggleCwe(id);
+                  setOtroCwe("");
+                }}
+              >
+                Agregar
+              </button>
+            </div>
+          </details>
+
         </aside>
       </div>
     </>
