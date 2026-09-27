@@ -137,10 +137,18 @@ export function IngestScreen() {
         <Link to="/executions">Ejecuciones</Link> <span aria-hidden="true">/</span> Nueva
       </p>
 
-      <h1 className={s.title}>Cargar un archivo SARIF</h1>
+      <h1 className={s.title}>
+        Cargar un archivo SARIF
+        <Hint termino="SARIF">
+          Es el formato en que los analizadores de código escriben lo que
+          encontraron: un archivo de texto con una entrada por alerta, su
+          archivo, su línea y la regla que saltó. Semgrep, CodeQL y casi
+          cualquier analizador de hoy lo saben escribir, normalmente con una
+          opción como «--sarif».
+        </Hint>
+      </h1>
       <p className={s.lead}>
         Certa no busca fallas: trabaja con las que ya encontró tu analizador.
-        SARIF es el archivo donde ese analizador deja sus alertas.
       </p>
 
       <div className={s.lienzo}>
@@ -158,7 +166,11 @@ export function IngestScreen() {
             {lista.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
-                {p.execution_count > 0 ? ` (${p.execution_count} ejecuciones)` : ""}
+                {p.execution_count > 0
+                  ? ` (${p.execution_count} ${
+                      p.execution_count === 1 ? "ejecución" : "ejecuciones"
+                    })`
+                  : ""}
               </option>
             ))}
             <option value={NUEVO}>Crear uno nuevo</option>
@@ -242,8 +254,8 @@ export function IngestScreen() {
           </summary>
 
           <p className={s.note}>
-            Dejar fuera lo que hoy no vas a atender ahorra tiempo y consultas al
-            modelo.
+            Dejar fuera lo que hoy no vas a atender ahorra tiempo y consultas
+            al asistente.
           </p>
 
           <label className={s.field}>

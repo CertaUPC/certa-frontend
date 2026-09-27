@@ -7,7 +7,7 @@
  * comparación no serviría para nada.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useProyecto } from "../../shared/project";
 import { api, type ChangedFinding, type Execution } from "../../shared/api";
@@ -59,16 +59,23 @@ export function CompareScreen() {
   const { id = "" } = useParams<{ id: string }>();
   /* La cabecera decía un proyecto y la barra otro: llegar por enlace a la
      ejecución de otro proyecto no movía el selector. */
-  const { actual, elegir } = useProyecto();
+  const { elegir } = useProyecto();
   const [params, setParams] = useSearchParams();
   const contra = params.get("against") ?? "";
 
   const ejecuciones = useApi(() => api.executions(), EXECUTIONS);
   const esta = ejecuciones.data?.find((e) => e.id === id) ?? null;
   const suyo = esta?.project_id;
+  /* Se adopta una sola vez por ejecución. Comparando contra el proyecto
+     elegido, el efecto volvía a dispararse en cuanto el usuario elegía otro en
+     el desplegable y se lo devolvía al anterior: parecía que la barra no
+     dejaba cambiar de proyecto. */
+  const adoptado = useRef<string | null>(null);
   useEffect(() => {
-    if (suyo && suyo !== actual?.id) elegir(suyo);
-  }, [suyo, actual?.id, elegir]);
+    if (!suyo || adoptado.current === suyo) return;
+    adoptado.current = suyo;
+    elegir(suyo);
+  }, [suyo, elegir]);
 
   const hermanas = useMemo(
     () =>

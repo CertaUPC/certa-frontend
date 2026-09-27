@@ -24,7 +24,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { USE_FIXTURES, api, clearSession, getEmail, type Execution } from "./api";
 import { EXECUTIONS } from "./fixtures";
 import { Mark } from "./Mark";
@@ -39,6 +39,7 @@ const A_LA_VISTA = 4;
 
 export function SideNav() {
   const navigate = useNavigate();
+  const lugar = useLocation();
   const email = getEmail();
   const { proyectos, actual, elegir, cargando } = useProyecto();
   const [abierto, setAbierto] = useState(false);
@@ -157,6 +158,12 @@ export function SideNav() {
                   onClick={() => {
                     elegir(p.id);
                     setAbierto(false);
+                    /* Si se estaba mirando una ejecución, es de otro
+                       proyecto: quedarse ahí dejaba la barra diciendo un
+                       proyecto y la pantalla enseñando otro. */
+                    if (/^\/executions\/[^/]+/.test(lugar.pathname)) {
+                      navigate("/executions");
+                    }
                   }}
                 >
                   <span className={s.opcionNombre}>{p.name}</span>
@@ -248,15 +255,27 @@ export function SideNav() {
             <span className={s.correo}>{email}</span>
           </span>
         )}
+        {/* Un dibujo y no una palabra: el pie es lo más angosto de la barra,
+            y ahí «Salir» le comía el sitio al correo. */}
         <button
           type="button"
           className={s.salir}
+          title="Cerrar la sesión"
+          aria-label="Cerrar la sesión"
           onClick={() => {
             clearSession();
             navigate("/sign-in");
           }}
         >
-          Salir
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+            <path
+              d="M6.2 13.4H3.4V2.6h2.8M9.6 10.8 12.4 8 9.6 5.2M12.4 8H6.4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
     </nav>
