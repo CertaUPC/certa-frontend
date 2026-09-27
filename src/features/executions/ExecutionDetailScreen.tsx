@@ -73,11 +73,18 @@ export function ExecutionDetailScreen() {
   /* Llegar a una ejecución por enlace cambia el proyecto de la barra. Sin
      esto, la barra seguía enseñando las corridas de otro proyecto mientras la
      pantalla hablaba de este. */
-  const { actual, elegir } = useProyecto();
+  const { elegir } = useProyecto();
   const suyo = exec.data?.project_id;
+  /* Se adopta una sola vez por ejecución. Comparando contra el proyecto
+     elegido, el efecto volvía a dispararse en cuanto el usuario elegía otro en
+     el desplegable y se lo devolvía al anterior: parecía que la barra no
+     dejaba cambiar de proyecto. */
+  const adoptado = useRef<string | null>(null);
   useEffect(() => {
-    if (suyo && suyo !== actual?.id) elegir(suyo);
-  }, [suyo, actual?.id, elegir]);
+    if (!suyo || adoptado.current === suyo) return;
+    adoptado.current = suyo;
+    elegir(suyo);
+  }, [suyo, elegir]);
 
   /* Una sola acción principal a la vista, y el resto plegado. Exportar,
      comparar, soltar el contexto y reanudar en la misma fila y con el mismo
@@ -167,10 +174,10 @@ export function ExecutionDetailScreen() {
      cinta dice lo único cierto: cuánto se juzgó y cuánto sigue en cola.
      Repartirlo igual metía todo en «sin poder determinar», que era falso. */
   const conf = metrics.data?.confusion;
-  /* Que haya métricas no quiere decir que haya con qué compararlas. En un
-     repositorio cualquiera la matriz vuelve en ceros, y con eso la cinta
-     metía lo juzgado entero en «sin poder determinar» y el marcador enseñaba
-     cinco ceros como si el asistente hubiera fallado en todo. */
+  /* La matriz cuenta comparaciones contra la verdad conocida, no alertas de
+     esta corrida: sus cuatro casillas sumaban 1746 cuando la corrida llevaba
+     727 juzgadas. Mezclarlas hacía que la cinta dijera 3185 de 2166. La cinta
+     se queda con lo único que suma el total. */
   const conVerdad =
     !!conf &&
     conf.verdaderos_positivos +
@@ -178,48 +185,20 @@ export function ExecutionDetailScreen() {
       conf.falsos_negativos +
       conf.verdaderos_negativos >
       0;
-  const tramos = conVerdad && conf
-    ? [
-        {
-          tipo: "real",
-          n: conf.verdaderos_positivos + conf.falsos_positivos,
-          rotulo: "marcadas como reales",
-        },
-        {
-          tipo: "descartada",
-          n: conf.falsos_negativos + conf.verdaderos_negativos,
-          rotulo: "descartadas",
-        },
-        {
-          tipo: "indeterminada",
-          n: Math.max(
-            0,
-            execution.validated_findings -
-              conf.verdaderos_positivos -
-              conf.falsos_positivos -
-              conf.falsos_negativos -
-              conf.verdaderos_negativos,
-          ),
-          rotulo: "sin poder determinar",
-        },
-        {
-          tipo: "cola",
-          n: execution.pending_findings,
-          rotulo: "todavía en cola",
-        },
-      ]
-    : [
-        {
-          tipo: "juzgada",
-          n: execution.validated_findings,
-          rotulo: "ya juzgadas por el asistente",
-        },
-        {
-          tipo: "cola",
-          n: execution.pending_findings,
-          rotulo: "todavía en cola",
-        },
-      ];
+  const comparadas = conVerdad && conf
+    ? conf.verdaderos_positivos +
+      conf.falsos_positivos +
+      conf.falsos_negativos +
+      conf.verdaderos_negativos
+    : 0;
+  const tramos = [
+    {
+      tipo: "juzgada",
+      n: execution.validated_findings,
+      rotulo: "ya juzgadas por el asistente",
+    },
+    { tipo: "cola", n: execution.pending_findings, rotulo: "todavía en cola" },
+  ];
 
   const pendiente = execution.status === "pendiente";
   const interrumpida = execution.status === "fallida";
@@ -255,14 +234,28 @@ export function ExecutionDetailScreen() {
               />
               {detenida ? "Detenida" : STATUS_LABEL[execution.status]}
             </span>
-            <span className="mono" translate="no">
-              {execution.tool_name} {execution.ruleset_version}
+            {/* Con rótulo cada uno. Sueltos eran cuatro datos en fila y no
+                había cómo saber cuál era el repositorio y cuál la herramienta. */}
+            <span className={s.dato}>
+              <span className={s.datoQue}>Repositorio</span>
+              {execution.project_name || "sin nombre"}
             </span>
-            <span className={s.cuando}>
-              {execution.project_name || "Proyecto sin nombre"}
+            <span className={s.dato}>
+              <span className={s.datoQue}>Analizador</span>
+              <span className="mono" translate="no">
+                {execution.tool_name} {execution.ruleset_version}
+              </span>
+              <Hint termino="el analizador">
+                El programa que revisó el código y produjo estas alertas. Certa
+                no busca fallas: juzga las que este encontró. El número es la
+                versión del conjunto de reglas con que corrió, y se guarda
+                porque dos versiones distintas no encuentran lo mismo.
+              </Hint>
             </span>
-            <span className={s.cuando}>{cuando(execution.created_at)}</span>
-            <span className={s.cuando}>{execution.progress_text}</span>
+            <span className={s.dato}>
+              <span className={s.datoQue}>Cargada</span>
+              {cuando(execution.created_at)}
+            </span>
           </p>
         </div>
         <div className={s.headActions}>
@@ -492,6 +485,12 @@ export function ExecutionDetailScreen() {
                   en qué no. En un repositorio tuyo esta parte no aparece,
                   porque no hay con qué comparar.
                 </Hint>
+                {/* El total se dice aquí: son comparaciones, y no coinciden
+                    con las alertas juzgadas de arriba. Sin esta línea, las dos
+                    cifras parecían contradecirse. */}
+                <span className={s.h3Dato}>
+                  {comparadas} comparaciones
+                </span>
               </h3>
               <div className={s.matrix}>
                 <Cell
@@ -596,7 +595,9 @@ export function ExecutionDetailScreen() {
           <ul className={s.alertas}>
             {alertas.data.slice(0, 3).map((a) => (
               <li key={a.id} className={s.alerta}>
-                <span className={s.alertaQue}>{a.title}</span>
+                {/* El mensaje de la regla puede ser un párrafo entero en
+                    inglés. Aquí basta la primera frase. */}
+                <span className={s.alertaQue}>{primeraFrase(a.title)}</span>
                 <span className={s.alertaDonde}>
                   <span className="mono">
                     {a.file}:{a.line}
@@ -621,6 +622,13 @@ export function ExecutionDetailScreen() {
 
 /* La fecha se formatea con el locale del navegador y no a mano: quien revise
    esto desde otro huso no tiene por que leer el nuestro. */
+/** La primera frase, o los primeros cien caracteres si no la hay. */
+function primeraFrase(texto: string): string {
+  const corte = texto.search(/\.\s/);
+  const frase = corte > 0 ? texto.slice(0, corte + 1) : texto;
+  return frase.length > 110 ? frase.slice(0, 107).trimEnd() + "…" : frase;
+}
+
 /** Cuánto lleva así, en palabras. «hace 3 horas». */
 function desde(iso: string): string {
   const d = new Date(iso);

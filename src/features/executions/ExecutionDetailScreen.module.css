@@ -21,7 +21,7 @@
 .facts { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin-block-start: 7px; }
 .headActions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
 .pendiente { background: var(--sunken); color: var(--ink-2); border: 1px solid var(--line-strong); }
 .en_proceso { background: var(--accent-tint); color: var(--accent); }
 .completada { background: var(--safe-tint); color: var(--safe); }
@@ -43,10 +43,13 @@
 }
 .secondary:hover { border-color: var(--line-strong); }
 
+/* Va al ancho del panel que tiene debajo. Topado en 82 caracteres, el
+   recuadro terminaba a media pantalla y parecía partido. El texto de dentro
+   ya se limita solo. */
 .notice {
   background: var(--check-tint); border: 1px solid var(--check);
-  border-radius: var(--radius-sm); padding: 11px 14px;
-  font-size: 13.5px; line-height: 1.55; margin-block-end: 20px; max-inline-size: 82ch;
+  border-radius: var(--radius-sm); padding: 12px 15px;
+  font-size: 13.5px; line-height: 1.55; margin-block-end: 16px;
 }
 
 .panel {
@@ -282,7 +285,7 @@
    matriz, que es lo único que la hace entendible. Se queda en 2x2. */
 @media (max-width: 560px) {
   .matrix .cellN { font-size: 21px; }
-  .matrix .cellL { font-size: 11.5px; }
+  .matrix .cellL { font-size: 12px; }
   .matrix .cell { padding: 10px 11px; }
 }
 
@@ -373,7 +376,7 @@
 
 .masDato {
   display: block;
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--ink-3);
   margin-block-start: 1px;
   line-height: 1.35;
@@ -492,7 +495,7 @@
 .alertaSeveridad {
   grid-column: 2;
   grid-row: 1 / span 2;
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--ink-2);
   white-space: nowrap;
 }
@@ -556,4 +559,43 @@
   color: var(--ink-3);
   line-height: 1.5;
   margin-block-end: 4px;
+}
+
+.h3Dato {
+  margin-inline-start: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cada dato con su rótulo encima, en columna. */
+.dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+}
+
+.datoQue {
+  color: var(--ink-3);
+}
+
+.datoQue::after {
+  content: ":";
+}
+
+.notice > b:first-child,
+.notice b {
+  color: var(--ink);
+}
+
+/* El texto dentro del recuadro sí se limita, que es lo que hace falta. */
+.notice {
+  max-inline-size: none;
+}
+
+.noticeTexto {
+  display: block;
+  max-inline-size: 86ch;
 }

@@ -24,9 +24,12 @@ function describe(err: unknown): string {
   // Un fallo de red llega como TypeError; cualquier otro Error trae un mensaje
   // que alguien escribió a propósito y decirlo es más útil que sustituirlo.
   if (err instanceof Error && !(err instanceof TypeError)) return err.message;
+  /* El servicio del despliegue se duerme cuando nadie lo usa, y la primera
+     petición después de eso tarda casi un minuto en volver. Decir solo «no se
+     pudo contactar» hacía pensar que estaba roto. */
   return (
-    "No se pudo contactar al servicio. Comprueba que esté levantado en la " +
-    "dirección configurada."
+    "No se pudo contactar al servicio. Si estuvo un rato sin usarse, puede " +
+    "tardar hasta un minuto en despertar: vuelve a intentar."
   );
 }
 
