@@ -79,3 +79,10 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* La flecha de un desplegable la dibuja el navegador pegada al borde derecho.
+   Con sitio a la derecha deja de rozar la esquina, y de paso el texto largo no
+   queda debajo de ella. */
+select {
+  padding-inline-end: 32px;
+}

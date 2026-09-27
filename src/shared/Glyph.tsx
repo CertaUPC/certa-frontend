@@ -20,7 +20,8 @@ export type Figura =
   | "descartada"
   | "duda"
   | "cola"
-  | "carpeta";
+  | "carpeta"
+  | "java";
 
 const TRAZOS: Record<Figura, string> = {
   // Visto: terminó y no queda nada por hacer.
@@ -43,6 +44,9 @@ const TRAZOS: Record<Figura, string> = {
   cola: "M2.8 4.6h10.4M2.8 8h6.8M2.8 11.4h4",
   // Carpeta: la ruta del repositorio.
   carpeta: "M2.6 4.8h4L7.8 6.4h5.6v6.2H2.6z",
+  // La taza de café, que es como se reconoce Java de un vistazo.
+  java:
+    "M3.4 7.2h7.2v3.4a2.8 2.8 0 0 1-2.8 2.8H6.2a2.8 2.8 0 0 1-2.8-2.8zM10.6 7.9h1.3a1.6 1.6 0 0 1 0 3.2h-1.3M5.9 2.6c0 1 .9 1 .9 2M8.3 2.4c0 1 .9 1 .9 2",
 };
 
 interface Props {

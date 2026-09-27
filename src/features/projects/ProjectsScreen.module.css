@@ -150,6 +150,9 @@
 }
 
 .lenguaje {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--ink-3);
   border: 1px solid var(--line);
   border-radius: 4px;

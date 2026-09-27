@@ -27,6 +27,7 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { USE_FIXTURES, api, clearSession, getEmail, type Execution } from "./api";
 import { EXECUTIONS } from "./fixtures";
+import { Glyph } from "./Glyph";
 import { Mark } from "./Mark";
 import { ThemeToggle } from "./ThemeToggle";
 import { tituloCorto } from "./executions";
@@ -35,7 +36,7 @@ import s from "./SideNav.module.css";
 
 /* Cuántas ejecuciones del proyecto se listan. Pasadas estas, el enlace de
    «todas» es más útil que una lista que no cabe. */
-const A_LA_VISTA = 4;
+const A_LA_VISTA = 6;
 
 export function SideNav() {
   const navigate = useNavigate();
@@ -48,6 +49,16 @@ export function SideNav() {
   const [menu, setMenu] = useState(false);
   const [corridas, setCorridas] = useState<Execution[]>([]);
   const desplegable = useRef<HTMLDivElement>(null);
+
+  /* Se suma sobre lo que ya se tiene a la vista. */
+  const suma = corridas.reduce(
+    (a, e) => ({
+      total: a.total + e.total_findings,
+      juzgadas: a.juzgadas + e.validated_findings,
+      pendientes: a.pendientes + e.pending_findings,
+    }),
+    { total: 0, juzgadas: 0, pendientes: 0 },
+  );
   const selector = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -190,6 +201,30 @@ export function SideNav() {
           </ul>
         )}
       </div>
+
+      {/* El resumen del proyecto, que es lo que antes no estaba y dejaba la
+          barra medio vacía: cuántas alertas tiene en total, cuántas juzgó ya
+          el asistente y cuántas siguen en cola. Sale de las mismas corridas
+          que ya se listan, sin pedir nada más al servicio. */}
+      {actual && corridas.length > 0 && (
+        <section className={s.bloque}>
+          <h2 className={s.rotulo}>En este proyecto</h2>
+          <ul className={s.resumen}>
+            <li className={s.resumenFila}>
+              <Glyph figura="cola" tam={13} />
+              <b className="mono">{suma.total}</b> alertas cargadas
+            </li>
+            <li className={s.resumenFila}>
+              <Glyph figura="terminada" tam={13} />
+              <b className="mono">{suma.juzgadas}</b> juzgadas
+            </li>
+            <li className={s.resumenFila} data-pendiente={suma.pendientes > 0 || undefined}>
+              <Glyph figura="espera" tam={13} />
+              <b className="mono">{suma.pendientes}</b> en cola
+            </li>
+          </ul>
+        </section>
+      )}
 
       {actual && (
         <section className={s.bloque}>

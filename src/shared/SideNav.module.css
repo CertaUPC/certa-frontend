@@ -398,3 +398,37 @@
     transition: none;
   }
 }
+
+/* ── el resumen del proyecto ──────────────────────────────────────── */
+.resumen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.resumenFila {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  padding: 3px 8px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.resumenFila svg {
+  color: var(--ink-3);
+}
+
+.resumenFila b {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumenFila[data-pendiente] svg {
+  color: var(--check);
+}

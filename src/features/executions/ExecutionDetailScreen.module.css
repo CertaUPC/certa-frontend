@@ -99,7 +99,17 @@
 @media (min-width: 1080px) {
   .lienzo {
     grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 22px;
+    gap: 22px 26px;
+  }
+  /* El marcador abarca las dos filas de la izquierda. Antes la rejilla tenía
+     una sola fila y debajo quedaba un hueco del alto del marcador. */
+  .marcador {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .corrida,
+  .porEmpezar {
+    grid-column: 1;
   }
 }
 
@@ -257,9 +267,10 @@
 /* El veredicto de la corrida era otro recuadro de color entero. Basta un
    punto al principio: lo que hay que leer es la frase. */
 .valid, .invalid {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 2px 9px;
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--ink-2);
@@ -551,7 +562,7 @@
 /* La lista de alertas no se estira a lo ancho del monitor: el veredicto
    acabaría a medio metro del titular que describe. */
 .porEmpezar {
-  max-inline-size: 1180px;
+  margin-block-end: 8px;
 }
 
 .sinVerdad {
@@ -598,4 +609,19 @@
 .noticeTexto {
   display: block;
   max-inline-size: 86ch;
+}
+
+.valid b, .invalid b {
+  grid-column: 2;
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.valid .porQue, .invalid .porQue {
+  grid-column: 2;
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
 }
