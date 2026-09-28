@@ -130,3 +130,56 @@
   color: var(--ink-3);
   margin-block-start: -4px;
 }
+
+/* ── si puede entrar o no ────────────────────────────────────────── */
+.puedeEntrar,
+.sinAcceso {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 13px;
+}
+
+.puedeEntrar {
+  color: var(--ink);
+}
+
+.hasta {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+/* Sin color de alarma: que una credencial venza a las doce horas es lo
+   previsto, no una avería. Lo que hace falta es que se vea y que el arreglo
+   esté al lado. */
+.sinAcceso {
+  color: var(--ink-2);
+}
+
+.habilitar {
+  min-block-size: 26px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.habilitar:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.habilitar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.habilitar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

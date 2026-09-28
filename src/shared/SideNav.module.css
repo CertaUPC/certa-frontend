@@ -366,9 +366,20 @@
   outline-offset: 2px;
 }
 
+/* Antes de tumbarse, la columna aprieta: el respiro lateral y el hueco entre
+   bloques son lo primero que sobra cuando el ancho escasea. */
+@media (max-width: 1080px) {
+  .barra {
+    gap: 14px;
+    padding: 14px 10px;
+  }
+}
+
 /* En pantalla estrecha la columna se tumba y vuelve a ser una cabecera, que
-   es lo único que cabe. El desplegable y las acciones siguen ahí. */
-@media (max-width: 860px) {
+   es lo único que cabe. El desplegable y las acciones siguen ahí.
+   El corte va con el del armazón: si no coinciden, hay una franja en la que
+   la barra se cree cabecera y el armazón le sigue guardando su columna. */
+@media (max-width: 980px) {
   .barra {
     block-size: auto;
     position: static;

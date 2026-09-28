@@ -44,7 +44,32 @@
   margin-inline: auto;
 }
 
-@media (max-width: 860px) {
+/* La barra medía 252 px hasta los 860 y ahí se tumbaba de golpe. Entre medio
+   quedaba una franja fea: en una ventana de 900 el contenido trabajaba con
+   648 px mientras la barra seguía con los suyos enteros, sin ceder un píxel.
+   Ahora cede en dos pasos antes de tumbarse, que es lo que hace que la
+   ventana y la aplicación parezcan la misma cosa al arrastrar el borde. */
+@media (max-width: 1280px) {
+  .shell {
+    grid-template-columns: 224px minmax(0, 1fr);
+  }
+  .body {
+    padding: 24px 22px 26px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .shell {
+    grid-template-columns: 198px minmax(0, 1fr);
+  }
+  .body {
+    padding: 22px 18px 24px;
+  }
+}
+
+/* Por debajo de esto la columna no da para un nombre de proyecto, así que
+   deja de ser columna. */
+@media (max-width: 980px) {
   .shell {
     grid-template-columns: 1fr;
   }

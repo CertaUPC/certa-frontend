@@ -154,6 +154,8 @@ export const PARTICIPANTS: Participant[] = [
     order: ["con_asistente", "sin_asistente"],
     first_batch: "A",
     second_batch: "B",
+    puede_entrar: true,
+    access_expires_at: "2026-09-28T22:00:00Z",
   },
   {
     participant_id: "u2",
@@ -163,6 +165,8 @@ export const PARTICIPANTS: Participant[] = [
     order: ["sin_asistente", "con_asistente"],
     first_batch: "B",
     second_batch: "A",
+    puede_entrar: true,
+    access_expires_at: "2026-09-28T22:00:00Z",
   },
   {
     participant_id: "u3",
@@ -172,6 +176,9 @@ export const PARTICIPANTS: Participant[] = [
     order: ["con_asistente", "sin_asistente"],
     first_batch: "A",
     second_batch: "B",
+    /* El ensayo ya pasó: su credencial venció y la tabla lo dice. */
+    puede_entrar: false,
+    access_expires_at: null,
   },
 ];
 

@@ -76,6 +76,28 @@ export function ParticipantsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [alta, setAlta] = useState<Alta | null>(null);
   const [trabajando, setTrabajando] = useState(false);
+  /* Quién está siendo rehabilitado, para apagar solo su botón. */
+  const [habilitando, setHabilitando] = useState<string | null>(null);
+
+  /* Una credencial vence en doce horas, así que una sesión que se corre de
+     día deja a alguien fuera sin que nadie haya hecho nada mal. Rehabilitarlo
+     es emitirle otra: no altera su reparto ni sus respuestas. */
+  async function habilitar(participantId: string) {
+    setError(null);
+    setHabilitando(participantId);
+    try {
+      await api.issueParticipationGrant(participantId);
+      cargado.reload();
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "No se pudo contactar al servicio.",
+      );
+    } finally {
+      setHabilitando(null);
+    }
+  }
 
   /* Los pilotos no cuentan. El contrabalanceo del servicio tampoco los
      cuenta, de modo que dibujarlos aquí mostraría un desequilibrio que no
@@ -111,10 +133,6 @@ export function ParticipantsScreen() {
         is_pilot: piloto,
       });
 
-      /* El acceso se habilita acto seguido. Sin eso el código no abre nada,
-         y separarlo en dos gestos es cómo se olvida el segundo. */
-      const grant = await api.issueParticipationGrant(r.participant_id);
-
       setAlta({
         /* El que devolvió el servicio y no el que se tecleó: «P04» se guarda
            como «P-04», y lo que hay que dictar es lo guardado. */
@@ -123,7 +141,7 @@ export function ParticipantsScreen() {
         first_batch: r.first_batch,
         second_batch: r.second_batch,
         is_pilot: r.is_pilot,
-        vence: grant.expires_at,
+        vence: r.access_expires_at,
       });
       setCodigo("");
       setLenguaje("");
@@ -350,6 +368,15 @@ export function ParticipantsScreen() {
                   <th>Años programando</th>
                   <th>Empieza</th>
                   <th>
+                    Acceso
+                    <Hint termino="el acceso del participante">
+                      Con su código entra a su sesión mientras la credencial
+                      siga vigente, y dura doce horas. Si venció o se revocó,
+                      aquí mismo se le emite otra: no cambia su reparto ni lo
+                      que haya respondido.
+                    </Hint>
+                  </th>
+                  <th>
                     Tandas
                     <Hint termino="las tandas A y B">
                       Las alertas se reparten en dos tandas iguales, A y B.
@@ -378,6 +405,32 @@ export function ParticipantsScreen() {
                       </span>
                       {p.is_pilot && <span className={s.tagPiloto}>Piloto</span>}
                     </td>
+                    <td>
+                      {p.puede_entrar ? (
+                        <span className={s.puedeEntrar}>
+                          Puede entrar
+                          {p.access_expires_at && (
+                            <span className={s.hasta}>
+                              hasta las {hora(p.access_expires_at)}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className={s.sinAcceso}>
+                          Sin acceso
+                          <button
+                            type="button"
+                            className={s.habilitar}
+                            disabled={habilitando === p.participant_id}
+                            onClick={() => habilitar(p.participant_id)}
+                          >
+                            {habilitando === p.participant_id
+                              ? "Habilitando…"
+                              : "Habilitar"}
+                          </button>
+                        </span>
+                      )}
+                    </td>
                     <td className="mono">
                       {p.first_batch && p.second_batch
                         ? `${p.first_batch}, ${p.second_batch}`
@@ -392,6 +445,14 @@ export function ParticipantsScreen() {
       </div>
     </>
   );
+}
+
+/** La hora a secas, que es lo que se dice en voz alta: «hasta las 2:40». */
+function hora(iso: string): string {
+  return new Date(iso).toLocaleTimeString("es-PE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 /* Lo que hay que decirle en voz alta. El código grande porque se dicta, y la
