@@ -15,6 +15,8 @@ export interface Filters {
   verdict: Verdict | null;
   anchored: boolean | null;
   pending: boolean;
+  /** Las que el asistente juzgó sobre un fragmento incompleto. */
+  degradado: boolean;
 }
 
 export const NO_FILTERS: Filters = {
@@ -22,10 +24,17 @@ export const NO_FILTERS: Filters = {
   verdict: null,
   anchored: null,
   pending: false,
+  degradado: false,
 };
 
 export function isFiltering(f: Filters): boolean {
-  return f.cwe !== null || f.verdict !== null || f.anchored !== null || f.pending;
+  return (
+    f.cwe !== null ||
+    f.verdict !== null ||
+    f.anchored !== null ||
+    f.pending ||
+    f.degradado
+  );
 }
 
 const VERDICTS: { value: Verdict; label: string }[] = [
@@ -58,6 +67,18 @@ export function FindingFilters({
           onClick={() => onChange({ ...filters, pending: !filters.pending })}
         >
           Que no he respondido
+        </button>
+
+        {/* Va con el filtro de lo pendiente y no con los del asistente: el
+            aviso de contexto incompleto se ve en las dos condiciones, porque
+            es del código y no de su juicio. Sin esto, dar con una era recorrer
+            dos mil alertas de a una. */}
+        <button
+          className={s.chip}
+          aria-pressed={filters.degradado}
+          onClick={() => onChange({ ...filters, degradado: !filters.degradado })}
+        >
+          Con contexto incompleto
         </button>
 
         {assisted &&

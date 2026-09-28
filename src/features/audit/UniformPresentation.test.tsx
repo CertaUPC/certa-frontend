@@ -39,6 +39,7 @@ const HALLAZGO: Finding = {
   cited: [{ line: 42, role: "ocurre" }],
   enclosing: "buscar",
   callers: ["atenderPeticion"],
+  degradado: false,
 };
 
 function pintar(

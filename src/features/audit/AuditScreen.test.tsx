@@ -41,6 +41,7 @@ const HALLAZGO: Finding = {
   cited: [],
   enclosing: "buscar",
   callers: ["atenderPeticion"],
+  degradado: false,
 };
 
 /* Lo que la condición de control tiene que ocultar, en las palabras con que la
@@ -181,5 +182,50 @@ describe("Fuera del experimento", () => {
     expect(
       screen.getByRole("button", { name: /ocultar el juicio del asistente/i }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Alerta sin fragmento guardado", () => {
+  /* El servicio responde 404 al contexto en dos casos corrientes: la alerta
+     que la cadena no ha tocado y la ejecución a la que le borraron los
+     fragmentos. La pantalla pintaba entonces un visor vacío de media pantalla
+     y el panel seguía diciendo que las líneas citadas estaban marcadas ahí. */
+  const SIN_CODIGO: Finding = {
+    ...HALLAZGO,
+    code: "",
+    enclosing: "",
+    callers: [],
+  };
+
+  function pintarSinCodigo() {
+    return render(
+      <ThemeProvider>
+        <Session findings={[SIN_CODIGO]} fixedCondition />
+      </ThemeProvider>,
+    );
+  }
+
+  it("dice que no hay código en vez de dejar el hueco", () => {
+    pintarSinCodigo();
+    empezar();
+    expect(screen.getByText(/no hay código que enseñar/i)).toBeInTheDocument();
+  });
+
+  it("no afirma que las líneas citadas están marcadas arriba", () => {
+    pintarSinCodigo();
+    empezar();
+    expect(
+      screen.queryByText(/Están marcadas para que las compruebes/),
+      "promete marcas sobre un código que no está en pantalla",
+    ).toBeNull();
+  });
+
+  it("no nombra una función que no se pudo aislar", () => {
+    pintarSinCodigo();
+    empezar();
+    expect(
+      screen.queryByText(/Esto es todo el código disponible/),
+      "decía «la función .», con el hueco y el punto",
+    ).toBeNull();
   });
 });

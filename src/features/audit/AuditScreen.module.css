@@ -332,3 +332,40 @@
   padding: 14px 10px; border: 1px dashed var(--line-strong);
   border-radius: var(--radius-sm); background: var(--sunken);
 }
+
+/* El aviso de contexto a medias. Va donde el código, no donde el juicio del
+   asistente: habla de lo que se pudo leer, no de lo que el modelo opina, y
+   por eso aparece igual en las dos condiciones del estudio. */
+.parcial {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  background: var(--check-tint);
+  border: 1px solid var(--check);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+  margin-block-end: 10px;
+  max-inline-size: 78ch;
+}
+
+.parcial b {
+  color: var(--ink);
+}
+
+/* El hueco donde iría el código. No se parece al aviso de contexto parcial: ahí
+   hay algo que leer y aquí no, así que va en tinta apagada y sin color de
+   aviso, para que no compita con la alerta. */
+.sinCodigo {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  background: var(--sunken);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  max-inline-size: 78ch;
+}
+
+.sinCodigo b {
+  color: var(--ink);
+}

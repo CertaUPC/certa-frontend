@@ -34,6 +34,10 @@ export interface Finding {
   cited: CitedLine[];
   enclosing: string;
   callers: string[];
+  /* El contexto se recuperó a medias: no se pudo aislar la función y lo que
+     se ve es una ventana de líneas alrededor. Quien revisa tiene que saberlo,
+     porque un juicio sobre contexto parcial vale menos. */
+  degradado: boolean;
 }
 
 const JAVA_SQLI = `public class UserDao {
@@ -94,6 +98,7 @@ export const FINDINGS: Finding[] = [
     ],
     enclosing: "findUnsafe",
     callers: ["handleRequest"],
+    degradado: false,
   },
   {
     id: "f2",
@@ -119,6 +124,7 @@ export const FINDINGS: Finding[] = [
     cited: [{ line: 5, role: "ocurre" }],
     enclosing: "load",
     callers: [],
+    degradado: false,
   },
   {
     id: "f3",
@@ -147,6 +153,7 @@ export const FINDINGS: Finding[] = [
     ],
     enclosing: "find",
     callers: [],
+    degradado: false,
   },
 ];
 
