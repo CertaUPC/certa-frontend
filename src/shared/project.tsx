@@ -90,10 +90,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const actual = useMemo(
-    () => proyectos.find((p) => p.id === elegido) ?? proyectos[0] ?? null,
-    [proyectos, elegido],
-  );
+  const actual = useMemo(() => {
+    const suyo = proyectos.find((p) => p.id === elegido);
+    if (suyo) return suyo;
+    /* Elegido pero todavía no en la lista: acaba de crearse y el proveedor no
+       ha vuelto a preguntar. Caer al primero enseñaba otro proyecto con el
+       nombre de otro, que es peor que no enseñar ninguno mientras llega. */
+    if (elegido) return null;
+    return proyectos[0] ?? null;
+  }, [proyectos, elegido]);
 
   const valor = useMemo(
     () => ({

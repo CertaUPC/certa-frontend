@@ -53,7 +53,7 @@ export function IngestScreen() {
 
   /* Quien llega aquí desde la barra ya venía trabajando en un proyecto.
      Volver a preguntárselo era pedirle dos veces lo mismo. */
-  const { actual } = useProyecto();
+  const { actual, recargar, elegir } = useProyecto();
   const [projectId, setProjectId] = useState("");
   useEffect(() => {
     if (!projectId && actual) setProjectId(actual.id);
@@ -78,6 +78,10 @@ export function IngestScreen() {
         nuevaRuta.trim() || nuevoNombre.trim(),
       );
       destino = creado.id;
+      // Igual que al crearlo desde Proyectos: la barra tiene su lista propia
+      // y el recién creado no está en ella hasta que vuelve a preguntar.
+      recargar();
+      elegir(creado.id);
     }
 
     const texto = await file.text();

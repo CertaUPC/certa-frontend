@@ -21,6 +21,7 @@ import { PROJECTS } from "../../shared/fixtures";
 import { Failed, Loading } from "../../shared/States";
 import { useApi } from "../../shared/useApi";
 import { Glyph } from "../../shared/Glyph";
+import { useProyecto } from "../../shared/project";
 import { Hint } from "../../shared/Hint";
 import { Team } from "./Team";
 import s from "./ProjectsScreen.module.css";
@@ -185,6 +186,7 @@ function Nuevo({
   const [error, setError] = useState<string | null>(null);
   const [hecho, setHecho] = useState<string | null>(null);
   const [trabajando, setTrabajando] = useState(false);
+  const { recargar, elegir } = useProyecto();
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -196,6 +198,11 @@ function Nuevo({
       setHecho(p.name);
       setNombre("");
       setRuta("");
+      /* La barra tiene su propia lista de proyectos, cargada al entrar. Sin
+         este aviso, el recién creado no estaba en ella: pedir sus ejecuciones
+         caía al primero de la lista y la pantalla enseñaba otro proyecto. */
+      recargar();
+      elegir(p.id);
       onCreado();
     } catch (err) {
       setError(
