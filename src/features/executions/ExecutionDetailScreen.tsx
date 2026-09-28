@@ -211,6 +211,11 @@ export function ExecutionDetailScreen() {
     !!execution.started_at &&
     Date.now() - new Date(execution.started_at).getTime() > 2 * 60 * 60 * 1000;
   const terminada = execution.status === "completada";
+  /* El archivo se leyó bien y el alcance no dejó pasar nada. La ficha pintaba
+     entonces «Cómo quedaron las 0 alertas» con dos ceros debajo y media
+     pantalla en blanco, sin decir por qué, y encima ofrecía el botón de
+     validar, que es el que cuesta dinero y aquí no tiene nada que validar. */
+  const vacia = execution.total_findings === 0;
 
   return (
     <>
@@ -259,7 +264,7 @@ export function ExecutionDetailScreen() {
           </p>
         </div>
         <div className={s.headActions}>
-          {(pendiente || interrumpida) && (
+          {(pendiente || interrumpida) && !vacia && (
             <button
               className={s.primary}
               disabled={run.busy}
@@ -452,9 +457,30 @@ export function ExecutionDetailScreen() {
         </p>
       )}
 
+      {vacia && (
+        <section className={s.vacia}>
+          <h2 className={s.h2}>Esta ejecución no tiene ninguna alerta</h2>
+          <p>
+            El archivo se leyó bien: lo que pasa es que ninguna de sus alertas
+            entró en el alcance que pusiste al cargarlo, o el analizador no
+            encontró nada. No es un error, es un resultado, y queda registrado
+            como tal.
+          </p>
+          <p>
+            Si esperabas encontrar alertas, vuelve a cargar el archivo con el
+            alcance más abierto: el tipo de falla y la severidad mínima son lo
+            que deja fuera al resto.
+          </p>
+          <Link className={s.vaciaAccion} to="/executions/new">
+            Cargar otro archivo SARIF
+          </Link>
+        </section>
+      )}
+
       {/* La corrida a la izquierda y el marcador a la derecha. Apilados, el
           ancho sobrante quedaba vacío y había que desplazarse para ver algo
           que cabe de sobra al costado. */}
+      {!vacia && (
       <div className={s.lienzo}>
         <section className={s.corrida}>
           <h2 className={s.h2}>
@@ -623,9 +649,7 @@ export function ExecutionDetailScreen() {
           </aside>
         )}
       </div>
-
-
-
+      )}
     </>
   );
 }
