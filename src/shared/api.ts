@@ -171,6 +171,11 @@ export interface Participant {
   order: string[];
   first_batch: string | null;
   second_batch: string | null;
+  /* Si su credencial sigue vigente. Sin esto, la tabla daba por hecho que
+     todo registrado podía entrar, y quien se quedaba sin acceso solo lo
+     descubría con la persona sentada delante escribiendo su código. */
+  puede_entrar: boolean;
+  access_expires_at: string | null;
 }
 
 export interface Project {
@@ -366,14 +371,16 @@ export const api = {
       first_batch: string;
       second_batch: string;
       is_pilot: boolean;
+      access_expires_at: string | null;
     }>("/api/v1/experiment/participants", {
       method: "POST",
       body: JSON.stringify(ficha),
     }),
 
-  /* Emite la credencial de participación. El token en claro sale una sola vez
-     y no hace falta guardarlo: lo canjea el servicio cuando la persona escribe
-     su código. Lo que importa es que exista y esté vigente. */
+  /* Vuelve a emitir la credencial de participación, que el alta ya emite por
+     su cuenta. Queda para el caso en que la anterior venció o se revocó y la
+     persona está por sentarse: el token en claro no hace falta guardarlo,
+     porque lo canjea el servicio cuando ella escribe su código. */
   issueParticipationGrant: (participantId: string) =>
     request<{ id: string; expires_at: string | null }>("/api/v1/auth/grants", {
       method: "POST",
