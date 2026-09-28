@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../shared/api";
 import { corto, cuando, titulo } from "../../shared/executions";
@@ -18,9 +18,15 @@ export function ExecutionsScreen() {
      Adoptarlo deja la barra y la lista mirando lo mismo. */
   const [consulta] = useSearchParams();
   const pedido = consulta.get("project");
+  /* Una sola vez por valor. Comparando contra el proyecto elegido, el efecto
+     se volvía a disparar en cuanto el usuario elegía otro en el desplegable y
+     lo devolvía al de la dirección: elegías el nuevo y saltabas al anterior. */
+  const adoptado = useRef<string | null>(null);
   useEffect(() => {
-    if (pedido && pedido !== actual?.id) elegir(pedido);
-  }, [pedido, actual?.id, elegir]);
+    if (!pedido || adoptado.current === pedido) return;
+    adoptado.current = pedido;
+    elegir(pedido);
+  }, [pedido, elegir]);
 
   /* Comparar se elige aquí, que es donde están las dos corridas a la vista.
      Estaba en la pantalla de una sola, así que había que abrir una, pedir
