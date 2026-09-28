@@ -150,22 +150,31 @@ export function AuditScreen() {
 
   const onAnswer = useCallback(
     (findingId: string, choice: Choice, seconds: number) => {
-      if (USE_FIXTURES || !participantId || !condicion) return;
-      api
-        .decide({
-          finding_id: findingId,
-          participant_id: participantId,
-          value: VALUE[choice],
-          seconds,
-          condition: condicion as "con_asistente" | "sin_asistente",
-        })
-        .then(() => setSaveError(null))
-        .catch(() =>
-          setSaveError(
-            "La última respuesta no llegó al servidor. Sigue revisando: al " +
-              "terminar avisa para no perderla.",
-          ),
-        );
+      if (USE_FIXTURES) return;
+
+      /* Dos caminos para el mismo acto. Dentro del estudio la decisión carga
+         participante, condición y lote, porque es lo que se mide. Fuera, no
+         carga ninguna de esas tres, y hasta ahora eso significaba que no se
+         guardaba en ninguna parte: quien usaba la herramienta respondía dos
+         mil alertas y al recargar la página no quedaba nada, mientras el panel
+         del historial de al lado salía siempre vacío. */
+      const guardar =
+        participantId && condicion
+          ? api.decide({
+              finding_id: findingId,
+              participant_id: participantId,
+              value: VALUE[choice],
+              seconds,
+              condition: condicion as "con_asistente" | "sin_asistente",
+            })
+          : api.audit(findingId, { value: VALUE[choice], seconds });
+
+      guardar.then(() => setSaveError(null)).catch(() =>
+        setSaveError(
+          "La última respuesta no llegó al servidor. Sigue revisando: al " +
+            "terminar avisa para no perderla.",
+        ),
+      );
     },
     [participantId, condicion],
   );

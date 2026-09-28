@@ -431,6 +431,15 @@ export const api = {
   audits: (findingId: string) =>
     request<ApiAudit[]>(`/api/v1/executions/findings/${findingId}/audits`),
 
+  /* La decisión de quien revisa fuera del estudio. Es la hermana de `decide`
+     sin las columnas del experimento: mismo acto, misma tabla, y aquí no hay
+     participante ni condición que registrar. */
+  audit: (findingId: string, cuerpo: { value: string; seconds: number }) =>
+    request<ApiAudit>(`/api/v1/executions/findings/${findingId}/audit`, {
+      method: "POST",
+      body: JSON.stringify(cuerpo),
+    }),
+
   findings: (executionId: string) =>
     request<ApiFinding[]>(`/api/v1/executions/${executionId}/findings`),
 
