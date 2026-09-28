@@ -169,11 +169,13 @@ export function SideNav() {
                   onClick={() => {
                     elegir(p.id);
                     setAbierto(false);
-                    /* Si se estaba mirando una ejecución, es de otro
-                       proyecto: quedarse ahí dejaba la barra diciendo un
-                       proyecto y la pantalla enseñando otro. */
-                    if (/^\/executions\/[^/]+/.test(lugar.pathname)) {
-                      navigate("/executions");
+                    /* Cualquier pantalla de ejecuciones se rehace limpia.
+                       Si era la de una ejecución, era de otro proyecto; y si
+                       era la lista, su dirección podía traer todavía
+                       `?project=` del proyecto anterior, que volvía a
+                       imponerse encima de lo que se acababa de elegir. */
+                    if (lugar.pathname.startsWith("/executions")) {
+                      navigate("/executions", { replace: true });
                     }
                   }}
                 >
