@@ -54,6 +54,7 @@ const ANCLADO: Finding = {
   ],
   enclosing: "buscar",
   callers: ["atenderPeticion"],
+  degradado: false,
 };
 
 /* Mismo hallazgo, salvo que sus citas no superaron la comprobación. */

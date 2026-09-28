@@ -115,5 +115,6 @@ export function toFinding(f: ApiFinding, ctx: ApiContext | null): Finding {
     cited: roles(v?.cited_lines ?? []),
     enclosing: ctx?.enclosing_function ?? "",
     callers: ctx?.callers ?? [],
+    degradado: ctx?.degraded_to_file ?? false,
   };
 }

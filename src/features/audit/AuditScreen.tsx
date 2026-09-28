@@ -322,6 +322,7 @@ export function Session({
     () =>
       findings.filter((f) => {
         if (filters.pending && records[f.id]) return false;
+        if (filters.degradado && !f.degradado) return false;
         if (filters.cwe && f.cwe !== filters.cwe) return false;
         if (assisted && filters.verdict && f.verdict !== filters.verdict) return false;
         if (assisted && filters.anchored !== null && f.anchored !== filters.anchored)
@@ -348,6 +349,14 @@ export function Session({
   const shownAt = useRef<number>(Date.now());
   const finding = findings[index];
   const resolved = Object.keys(records).length;
+
+  /* Dos huecos que la pantalla daba por imposibles. El servicio responde 404
+     cuando el fragmento no está, y «(no identificada)» es lo que el lector
+     escribe cuando no logró aislar la función. */
+  const sinCodigo = !finding?.code.trim();
+  const tieneFuncion =
+    Boolean(finding?.enclosing.trim()) &&
+    finding?.enclosing !== "(no identificada)";
 
   useEffect(() => {
     warmUp();
@@ -581,27 +590,57 @@ export function Session({
             {finding.cweName && <p className={s.mensaje}>{finding.title}</p>}
           </div>
 
-          <p className={s.scope}>
-            Esto es todo el código disponible: la función{" "}
-            <b className="mono">{finding.enclosing}</b>
-            {finding.callers.length > 0 && (
-              <> y quien la llama, <b className="mono">{finding.callers.join(", ")}</b></>
-            )}
-            .
-          </p>
+          {/* Sin función aislada no hay nada que nombrar. Decía «la función .»,
+              con el hueco y el punto, cada vez que el contexto venía degradado
+              o no llegó a recuperarse. */}
+          {tieneFuncion && (
+            <p className={s.scope}>
+              Esto es todo el código disponible: la función{" "}
+              <b className="mono">{finding.enclosing}</b>
+              {finding.callers.length > 0 && (
+                <> y quien la llama, <b className="mono">{finding.callers.join(", ")}</b></>
+              )}
+              .
+            </p>
+          )}
 
-          <CodeViewer
-            code={finding.code}
-            lang={finding.lang}
-            firstLine={finding.firstLine}
-            cited={finding.cited}
-            /* Solo se marca lo que el verificador dio por anclado. Marcar las
-               citas de un veredicto que no superó la comprobación presentaría
-               como respaldado lo que el sistema no pudo respaldar, que es
-               precisamente lo que el mecanismo existe para impedir. */
-            showRoles={assisted && finding.anchored}
-            theme={theme}
-          />
+          {/* El servicio ya avisaba de esto y la pantalla se lo callaba. Un
+              juicio sobre contexto parcial vale menos, y quien revisa tiene
+              que saberlo antes de decidir, no después. */}
+          {finding.degradado && !sinCodigo && (
+            <p className={s.parcial}>
+              <b>El contexto está incompleto.</b> No se pudo aislar la función,
+              así que lo que ves es una ventana de líneas alrededor de la
+              alerta. Puede faltar justo lo que decide el caso.
+            </p>
+          )}
+
+          {/* El visor sin texto pintaba un rectángulo negro de media pantalla
+              con un solo número de línea, y el panel de al lado seguía diciendo
+              que las líneas citadas estaban marcadas ahí. Pasa en dos casos
+              reales: la alerta que la cadena todavía no ha tocado, y la
+              ejecución a la que le borraron los fragmentos. */}
+          {sinCodigo ? (
+            <p className={s.sinCodigo}>
+              <b>Aquí no hay código que enseñar.</b>{" "}
+              {finding.verdict === "sin_analizar"
+                ? "La cadena todavía no ha llegado a esta alerta, así que no llegó a recuperar el fragmento. Con la ruta y la línea de arriba puedes abrirlo en tu editor."
+                : "El fragmento que el asistente miró ya no está guardado: o se borraron los fragmentos de esta ejecución, o no se pudo leer el archivo. El veredicto y su justificación siguen intactos, pero comprobarlos exige abrir el archivo en tu editor."}
+            </p>
+          ) : (
+            <CodeViewer
+              code={finding.code}
+              lang={finding.lang}
+              firstLine={finding.firstLine}
+              cited={finding.cited}
+              /* Solo se marca lo que el verificador dio por anclado. Marcar las
+                 citas de un veredicto que no superó la comprobación presentaría
+                 como respaldado lo que el sistema no pudo respaldar, que es
+                 precisamente lo que el mecanismo existe para impedir. */
+              showRoles={assisted && finding.anchored}
+              theme={theme}
+            />
+          )}
 
           {/* La huella es dato de quien construye Certa. En la pantalla
               donde alguien decide si hay una vulnerabilidad, distrae. Se
@@ -654,7 +693,13 @@ export function Session({
                 <span className={s.rowLabel}>Comprobación</span>
                 <p className={s.checked}>
                   <Tick ok={finding.anchored} />
-                  {finding.anchored ? (
+                  {finding.anchored && sinCodigo ? (
+                    <>
+                      Las {finding.citedCount} líneas que cita existían en el
+                      fragmento que se le enseñó y la comprobación pasó. Aquí no
+                      se pueden marcar porque ese fragmento ya no está guardado.
+                    </>
+                  ) : finding.anchored ? (
                     <>
                       Las {finding.citedCount} líneas que cita existen en el código
                       de arriba. Están marcadas para que las compruebes tú.
