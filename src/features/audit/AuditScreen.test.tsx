@@ -281,3 +281,41 @@ describe("Las líneas citadas no se escapan de su condición", () => {
     expect(lineasMarcadas()).toBe(0);
   });
 });
+
+describe("La lista sobrevive a que los hallazgos se actualicen", () => {
+  /* Los contextos llegan por tandas después de pintar, y cada tanda produce un
+     arreglo nuevo con objetos nuevos. La lista se quedaba con los objetos
+     viejos: al pulsar uno, buscarlo en el arreglo vigente devolvía -1, el
+     índice se iba fuera de rango y la pantalla entera se caía en negro con un
+     «Cannot read properties of undefined». */
+  const UNO: Finding = { ...HALLAZGO, id: "h1", title: "La primera alerta" };
+  const DOS: Finding = { ...HALLAZGO, id: "h2", title: "La segunda alerta" };
+
+  it("deja abrir una alerta después de que su objeto se haya reemplazado", () => {
+    const { rerender } = render(
+      <ThemeProvider>
+        <Session findings={[UNO, DOS]} fixedCondition />
+      </ThemeProvider>,
+    );
+    empezar();
+
+    /* La misma lista, con objetos nuevos: es lo que hace setFindings cuando
+       entra una tanda de contextos. */
+    rerender(
+      <ThemeProvider>
+        <Session
+          findings={[{ ...UNO, code: "public void a() {}" },
+                     { ...DOS, code: "public void b() {}" }]}
+          fixedCondition
+        />
+      </ThemeProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /La segunda alerta/ }));
+    expect(
+      screen.getByRole("heading", { name: HALLAZGO.cweName }),
+      "la pantalla se cayó al abrir la alerta",
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Alerta/)).toBeInTheDocument();
+  });
+});
