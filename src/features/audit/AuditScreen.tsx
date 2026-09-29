@@ -338,7 +338,12 @@ export function Session({
           return false;
         return true;
       }),
-    [filters, records, assisted],
+    /* `findings` entra en la lista de dependencias, y esa es la corrección.
+       Los contextos llegan por tandas después de pintar, y cada tanda produce
+       un arreglo nuevo con objetos nuevos. Sin esta dependencia, la lista
+       seguía mostrando los objetos de la versión anterior, de modo que buscar
+       uno de ellos en el arreglo vigente no lo encontraba. */
+    [findings, filters, records, assisted],
   );
 
   /* Ordenadas por su numero y no como texto: alfabeticamente CWE-78 cae
@@ -356,7 +361,11 @@ export function Session({
   );
 
   const shownAt = useRef<number>(Date.now());
-  const finding = findings[index];
+  /* El índice se acota al arreglo vigente. Un índice fuera de rango dejaba
+     `finding` en indefinido y la pantalla entera se caía con la lista a la
+     vista, que para quien participa en una sesión medida es el peor momento
+     posible: pierde el hilo y no hay forma de retomar la alerta. */
+  const finding = findings[Math.min(Math.max(index, 0), findings.length - 1)];
   const resolved = Object.keys(records).length;
 
   /* Dos huecos que la pantalla daba por imposibles. El servicio responde 404
@@ -549,7 +558,10 @@ export function Session({
               </li>
             )}
             {visible.map((f) => {
-              const i = findings.indexOf(f);
+              /* Por identificador y no por referencia del objeto: una
+                 referencia de una tanda anterior devolvía -1, y con -1 la
+                 pantalla se quedaba sin hallazgo que pintar. */
+              const i = findings.findIndex((x) => x.id === f.id);
               const rec = records[f.id];
               return (
                 <li key={f.id}>
