@@ -19,8 +19,7 @@
   transition: color 0.12s var(--salida);
 }
 
-.boton:hover,
-.caja[data-fijo] .boton {
+.boton[data-abierto] {
   color: var(--accent);
 }
 
@@ -30,14 +29,15 @@
   border-radius: 999px;
 }
 
+/* Respecto de la ventana: colgado del contenedor, cualquier caja que recorte
+   lo que sobra se lo comía. Las coordenadas las pone el componente, que sabe
+   dónde está el botón y cuánto sitio queda arriba. */
 .globo {
-  position: absolute;
-  inset-block-end: calc(100% + 6px);
-  inset-inline-start: 50%;
+  position: fixed;
   translate: -50% 0;
   z-index: var(--z-popover);
   inline-size: max-content;
-  max-inline-size: 260px;
+  max-inline-size: min(260px, calc(100vw - 16px));
   padding: 9px 11px;
   font-size: 12.5px;
   font-weight: 400;
@@ -53,23 +53,20 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.12s var(--salida);
+  /* El globo no se interpone. Al taparse con lo que tiene encima, el puntero
+     no llegaba a lo que hubiera debajo y el término de al lado se volvía
+     inalcanzable. Fijado con un clic sí recibe al puntero, que es cuando hace
+     falta para leerlo entero o copiarlo. */
+  pointer-events: none;
 }
 
-.caja:hover .globo,
-.caja:focus-within .globo,
-.caja[data-fijo] .globo {
+.globo[data-fijo] {
+  pointer-events: auto;
+}
+
+.globo[data-visible] {
   opacity: 1;
   visibility: visible;
-}
-
-/* Cerca del borde derecho el globo centrado se saldría de la pantalla. */
-@media (max-width: 520px) {
-  .globo {
-    inset-inline-start: auto;
-    inset-inline-end: 0;
-    translate: none;
-    max-inline-size: min(260px, 74vw);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
