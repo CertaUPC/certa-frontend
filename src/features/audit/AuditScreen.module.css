@@ -236,14 +236,16 @@
 .rowValue b { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
 .rowValue em { font-style: normal; font-size: 12.5px; color: var(--ink-2); }
 
-.scale { position: relative; display: block; block-size: 20px; margin-block-start: 7px; }
+/* Dos píxeles más altos que antes para que quepa la rotulación de la
+   escala sin encogerla: ningún texto de la pantalla baja de doce. */
+.scale { position: relative; display: block; block-size: 23px; margin-block-start: 7px; }
 .axis { position: absolute; inset-inline: 0; inset-block-end: 8px; block-size: 1px; background: var(--line-strong); }
 .tickMajor, .tickMinor { position: absolute; inset-block-end: 8px; inline-size: 1px; background: var(--line-strong); }
 .tickMajor { block-size: 6px; }
 .tickMinor { block-size: 3px; }
 .tickMajor em {
   position: absolute; inset-block-start: 7px; inset-inline-start: 50%;
-  transform: translateX(-50%); font-style: normal; font-size: 9.5px; color: var(--ink-3);
+  transform: translateX(-50%); font-style: normal; font-size: 12px; color: var(--ink-3);
 }
 .needle { position: absolute; inset-block-end: 8px; inline-size: 2px; block-size: 13px; background: var(--accent); }
 .needle::before {
@@ -308,7 +310,7 @@
 .hint, .undo { font-size: 12px; color: var(--ink-2); margin-block-start: 8px; line-height: 1.5; }
 .inlineKbd {
   font-family: "Cascadia Code", ui-monospace, monospace;
-  font-size: 10.5px; border: 1px solid var(--line-strong); border-radius: 3px;
+  font-size: 12px; border: 1px solid var(--line-strong); border-radius: 3px;
   padding: 0 4px; background: var(--sunken); color: var(--ink);
 }
 .linkish {
