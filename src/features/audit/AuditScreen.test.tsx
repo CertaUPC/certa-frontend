@@ -229,3 +229,55 @@ describe("Alerta sin fragmento guardado", () => {
     ).toBeNull();
   });
 });
+
+describe("Las líneas citadas no se escapan de su condición", () => {
+  /* El resaltado es la cita hecha visible. Ocultar el rótulo y dejar la línea
+     marcada enseña dónde miró el asistente, que es la ayuda que la condición
+     de control retira; y sobre un veredicto sin anclaje comprobado, presenta
+     como respaldado lo que no se pudo respaldar. */
+  function lineasMarcadas(): number {
+    return document.querySelectorAll("[class*='marked']").length;
+  }
+
+  it("las marca en la condición asistida cuando el anclaje se comprobó", () => {
+    render(
+      <ThemeProvider>
+        <Session
+          findings={[{ ...HALLAZGO, code: "a\nb\nc", firstLine: 1,
+            cited: [{ line: 1, role: "entra" }, { line: 3, role: "ocurre" }] }]}
+          fixedCondition
+        />
+      </ThemeProvider>,
+    );
+    empezar();
+    expect(lineasMarcadas()).toBe(2);
+  });
+
+  it("no marca ninguna en la condición de control", () => {
+    render(
+      <ThemeProvider>
+        <Session
+          findings={[{ ...HALLAZGO, code: "a\nb\nc", firstLine: 1,
+            cited: [{ line: 1, role: "entra" }, { line: 3, role: "ocurre" }] }]}
+          fixedCondition={false}
+        />
+      </ThemeProvider>,
+    );
+    empezar();
+    expect(lineasMarcadas(), "el resaltado delata la cita del asistente").toBe(0);
+  });
+
+  it("no marca ninguna cuando el anclaje no se comprobó", () => {
+    render(
+      <ThemeProvider>
+        <Session
+          findings={[{ ...HALLAZGO, anchored: false, code: "a\nb\nc", firstLine: 1,
+            cited: [{ line: 1, role: "entra" }, { line: 3, role: "ocurre" }] }]}
+          fixedCondition
+        />
+      </ThemeProvider>,
+    );
+    empezar();
+    expect(lineasMarcadas()).toBe(0);
+  });
+});

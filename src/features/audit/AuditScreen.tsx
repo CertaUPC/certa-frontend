@@ -641,11 +641,16 @@ export function Session({
               code={finding.code}
               lang={finding.lang}
               firstLine={finding.firstLine}
-              cited={finding.cited}
-              /* Solo se marca lo que el verificador dio por anclado. Marcar las
-                 citas de un veredicto que no superó la comprobación presentaría
-                 como respaldado lo que el sistema no pudo respaldar, que es
-                 precisamente lo que el mecanismo existe para impedir. */
+              /* Las líneas citadas no llegan al visor salvo que haya juicio
+                 que enseñar y que su anclaje se haya comprobado.
+
+                 Se pasaban siempre y solo se ocultaban los rótulos, de modo que
+                 el resaltado seguía ahí: en la condición de control se veía
+                 exactamente dónde había mirado el asistente, que es la ayuda
+                 que esa condición retira, y en un veredicto que no superó la
+                 comprobación se presentaba como respaldado lo que el sistema no
+                 pudo respaldar. */
+              cited={assisted && finding.anchored ? finding.cited : []}
               showRoles={assisted && finding.anchored}
               theme={theme}
             />
