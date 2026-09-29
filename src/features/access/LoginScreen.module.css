@@ -424,6 +424,19 @@
   display: none;
 }
 
+/* Neutro a propósito: no es un fallo de quien entra, es el estado de la
+   pestaña. */
+.motivo {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  line-height: 1.5;
+}
+
 .error {
   display: flex;
   align-items: flex-start;

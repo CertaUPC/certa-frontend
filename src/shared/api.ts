@@ -38,6 +38,13 @@ export function saveSession(token: string, role: Role): void {
   try {
     sessionStorage.setItem(TOKEN_KEY, token);
     sessionStorage.setItem(ROLE_KEY, role);
+    /* La marca pertenece a la sesión que se está reemplazando, no a la que
+       empieza. Sin esta línea sobrevivía a la sesión de estudio: el mismo
+       navegador que dirige el estudio es el del equipo, y al volver con la
+       cuenta propia la credencial se emitía bien pero la guarda de las rutas
+       la devolvía a la entrada, sin mensaje y sin nada que mirar. Quien entra
+       como participante vuelve a ponerla justo después de guardar. */
+    sessionStorage.removeItem(PARTICIPANTE_KEY);
   } catch { /* sesión privada: se opera igual, sin recordar */ }
 }
 /* El correo de quien entro, sacado del propio token.

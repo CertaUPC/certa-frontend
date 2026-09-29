@@ -17,13 +17,19 @@ import { ProjectsScreen } from "./features/projects/ProjectsScreen";
 import { AppShell } from "./shared/AppShell";
 import { esParticipante, getToken } from "./shared/api";
 
-function Protegida({ children }: { children: React.ReactNode }) {
+/* Se exporta para poder probar la guarda por sí sola. Cuando rebota, la
+   pantalla de entrada vuelve a aparecer sin decir nada, de modo que un rebote
+   indebido se ve igual que una contraseña mal escrita. */
+export function Protegida({ children }: { children: React.ReactNode }) {
   if (!getToken()) return <Navigate to="/sign-in" replace />;
   /* Quien entró con su código de participante se queda en su sesión. El
      servicio ya no le entrega nada de esto, pero la pantalla tampoco debe
      abrirse: ver la ficha de la ejecución que está resolviendo le enseñaría
      las respuestas. */
-  if (esParticipante()) return <Navigate to="/sign-in" replace />;
+  /* Con el motivo en la dirección: un rebote sin explicación se ve igual
+     que una contraseña mal escrita, y eso ya costó una sesión. */
+  if (esParticipante())
+    return <Navigate to="/sign-in?motivo=sesion-de-estudio" replace />;
   return <>{children}</>;
 }
 
