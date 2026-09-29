@@ -22,7 +22,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ApiError,
   USE_FIXTURES,
@@ -118,6 +118,11 @@ const FRAGMENTO = {
 export function LoginScreen() {
   const navigate = useNavigate();
   useTheme();
+
+  const [parametros] = useSearchParams();
+  /* Puesto por la guarda de las rutas cuando esta pestaña tiene abierta una
+     sesión de estudio. */
+  const rebotado = parametros.get("motivo") === "sesion-de-estudio";
 
   const [camino, setCamino] = useState<Camino>("equipo");
   const [modo, setModo] = useState<Modo>("entrar");
@@ -376,6 +381,13 @@ export function LoginScreen() {
 
           {/* Lo que el sistema dice en voz alta: el fallo y el trabajo en curso. */}
           <div className={s.aviso} role="alert" aria-live="assertive">
+            {rebotado && !error && (
+              <p className={s.motivo}>
+                Esta pestaña tiene abierta una sesión de estudio, y por eso las
+                pantallas del equipo están cerradas. Entra con tu correo para
+                volver a tus proyectos.
+              </p>
+            )}
             {error && (
               <p className={s.error} id="fallo-entrada">
                 <svg
