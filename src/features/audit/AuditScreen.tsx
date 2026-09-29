@@ -741,10 +741,16 @@ export function Session({
                 </div>
               )}
 
-              <div className={s.row}>
-                <span className={s.rowLabel}>Por qué está aquí</span>
-                <p className={s.plain}>{finding.priorityReason}</p>
-              </div>
+              {/* Sin razón no hay fila. El orden se calcula al recorrer la
+                  ejecución entera, y una corrida que solo emitió veredictos
+                  deja el campo vacío: la pantalla enseñaba el rótulo con nada
+                  debajo, que se lee como un fallo de carga. */}
+              {finding.priorityReason.trim() && (
+                <div className={s.row}>
+                  <span className={s.rowLabel}>Por qué está aquí</span>
+                  <p className={s.plain}>{finding.priorityReason}</p>
+                </div>
+              )}
             </>
           ) : (
             <p className={s.blind}>
