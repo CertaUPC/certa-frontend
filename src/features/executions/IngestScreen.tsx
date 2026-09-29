@@ -88,10 +88,18 @@ export function IngestScreen() {
     let sarif: unknown;
     try {
       sarif = JSON.parse(texto);
-    } catch {
+    } catch (e) {
+      /* El detalle del intérprete hace la diferencia. Un archivo cortado a
+         medias, que es lo que deja una descarga interrumpida o una copia hecha
+         a mano, falla en la última posición del texto y no en la primera. Sin
+         esa posición el mensaje insinúa un formato equivocado y manda a buscar
+         donde no está el problema. */
+      const detalle = e instanceof Error ? e.message : String(e);
       throw new Error(
-        "El archivo no es JSON válido. SARIF es un documento JSON: comprueba " +
-          "que sea la salida del analizador y no un informe en otro formato.",
+        `El archivo no es JSON válido: ${detalle}. SARIF es un documento ` +
+          "JSON. Si el error señala el final del texto, el archivo está " +
+          "incompleto y hay que volver a obtener la salida del analizador; si " +
+          "señala el principio, no es un SARIF.",
       );
     }
 
