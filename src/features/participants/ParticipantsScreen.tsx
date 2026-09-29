@@ -26,25 +26,30 @@ const CONDITION_LABEL: Record<string, string> = {
   sin_asistente: "Sin asistente",
 };
 
-/* El vocabulario del anexo B, tal cual lo admite el servicio. Se declara aquí
-   y no se inventa: una banda que el dominio no conozca se rechaza. */
+/* El anexo B del protocolo, literal. Las etiquetas se copian de ahí y no se
+   redactan de nuevo: la persona responde lo que lee, así que «alguna vez al
+   mes» y «mensualmente» no son la misma pregunta aunque se guarden con la
+   misma clave. Si el protocolo cambia, cambia esto y no al revés.
+
+   Los valores son los que el servicio admite; una banda que el dominio no
+   conozca se rechaza. */
 const BANDAS = [
-  { valor: "menos_de_1", rotulo: "Menos de 1 año" },
-  { valor: "de_1_a_3", rotulo: "De 1 a 3 años" },
-  { valor: "de_4_a_7", rotulo: "De 4 a 7 años" },
-  { valor: "mas_de_7", rotulo: "Más de 7 años" },
+  { valor: "menos_de_1", rotulo: "Menos de 1" },
+  { valor: "de_1_a_3", rotulo: "De 1 a 3" },
+  { valor: "de_4_a_7", rotulo: "De 4 a 7" },
+  { valor: "mas_de_7", rotulo: "Más de 7" },
 ];
 const FRECUENCIAS = [
   { valor: "nunca", rotulo: "Nunca" },
   { valor: "alguna_vez", rotulo: "Alguna vez" },
-  { valor: "mensual", rotulo: "Alguna vez al mes" },
-  { valor: "semanal", rotulo: "Cada semana" },
+  { valor: "mensual", rotulo: "Mensualmente" },
+  { valor: "semanal", rotulo: "Semanalmente" },
   { valor: "diaria", rotulo: "A diario" },
 ];
 const FORMACIONES = [
   { valor: "ninguna", rotulo: "Ninguna" },
-  { valor: "autodidacta", rotulo: "Por mi cuenta" },
-  { valor: "curso", rotulo: "Un curso formal" },
+  { valor: "autodidacta", rotulo: "Autodidacta" },
+  { valor: "curso", rotulo: "Curso o certificación" },
 ];
 
 const BANDA_ROTULO = Object.fromEntries(BANDAS.map((b) => [b.valor, b.rotulo]));
@@ -67,7 +72,10 @@ export function ParticipantsScreen() {
   const [lenguaje, setLenguaje] = useState("");
   const [frecuencia, setFrecuencia] = useState("");
   const [formacion, setFormacion] = useState("");
-  const [rolSeguridad, setRolSeguridad] = useState(false);
+  /* La pregunta que decide la exclusión. Empieza sin responder y no como un
+     «no» por omisión: era una casilla, y una casilla que nadie mira dice que
+     no trabaja en seguridad sin que nadie se lo haya preguntado. */
+  const [rolSeguridad, setRolSeguridad] = useState<"" | "si" | "no">("");
   /* Venía marcada. Quien no se fijara daba de alta a una persona del estudio
      como ensayo, y un piloto no entra en el análisis ni se puede convertir
      después. Va desmarcada y se marca a propósito. */
@@ -120,12 +128,25 @@ export function ParticipantsScreen() {
       return;
     }
 
+    /* El dominio también lo rechaza, pero enterarse por un error del servicio
+       después de teclear la ficha entera no es forma de tratar a quien está
+       con una persona delante. */
+    if (rolSeguridad === "si") {
+      setError(
+        "El estudio no incluye a quien desempeña un rol formal de seguridad, " +
+          "así que esta alta no se puede completar.",
+      );
+      return;
+    }
+
     setTrabajando(true);
     try {
       const r = await api.registerParticipant({
         anonymous_code: codigo.trim().toUpperCase(),
         experience_band: banda,
-        has_security_role: rolSeguridad,
+        // Aquí ya solo llega quien respondió que no: la guarda de arriba
+        // devuelve antes, y el dominio lo rechazaría igual.
+        has_security_role: false,
         main_language: lenguaje.trim() || null,
         alert_frequency: frecuencia || null,
         security_training: formacion || null,
@@ -147,7 +168,7 @@ export function ParticipantsScreen() {
       setLenguaje("");
       setFrecuencia("");
       setFormacion("");
-      setRolSeguridad(false);
+      setRolSeguridad("");
       setConsentimiento(false);
       cargado.reload();
     } catch (err) {
@@ -195,7 +216,7 @@ export function ParticipantsScreen() {
           </label>
 
           <label className={s.field}>
-            <span>Años programando</span>
+            <span>¿Cuántos años lleva desarrollando software de manera profesional?</span>
             <select value={banda} onChange={(e) => setBanda(e.target.value)}>
               {BANDAS.map((b) => (
                 <option key={b.valor} value={b.valor}>
@@ -207,22 +228,29 @@ export function ParticipantsScreen() {
           </label>
 
           <label className={s.field}>
-            <span>Lenguaje principal</span>
+            <span>¿Qué lenguaje de programación emplea principalmente en su trabajo?</span>
             <input
               value={lenguaje}
               onChange={(e) => setLenguaje(e.target.value)}
               placeholder="Java"
               maxLength={40}
+              required
             />
           </label>
 
           <label className={s.field}>
-            <span>Con qué frecuencia revisa alertas de seguridad</span>
+            <span>
+              ¿Con qué frecuencia recibe alertas de una herramienta de análisis
+              estático?
+            </span>
             <select
               value={frecuencia}
               onChange={(e) => setFrecuencia(e.target.value)}
+              required
             >
-              <option value="">Sin responder</option>
+              <option value="" disabled>
+                Elige una
+              </option>
               {FRECUENCIAS.map((f) => (
                 <option key={f.valor} value={f.valor}>
                   {f.rotulo}
@@ -232,12 +260,15 @@ export function ParticipantsScreen() {
           </label>
 
           <label className={s.field}>
-            <span>Formación en seguridad</span>
+            <span>¿Ha recibido formación específica en seguridad de aplicaciones?</span>
             <select
               value={formacion}
               onChange={(e) => setFormacion(e.target.value)}
+              required
             >
-              <option value="">Sin responder</option>
+              <option value="" disabled>
+                Elige una
+              </option>
               {FORMACIONES.map((f) => (
                 <option key={f.valor} value={f.valor}>
                   {f.rotulo}
@@ -246,17 +277,37 @@ export function ParticipantsScreen() {
             </select>
           </label>
 
-          <label className={s.check}>
-            <input
-              type="checkbox"
-              checked={rolSeguridad}
-              onChange={(e) => setRolSeguridad(e.target.checked)}
-            />
-            <span>
-              Trabaja formalmente en seguridad: marcarlo impide el alta, porque
-              el estudio no los incluye.
-            </span>
-          </label>
+          {/* La del apartado 4.4: una respuesta afirmativa excluye. Va con sus
+              dos opciones y sin valor por omisión, para que quede respondida y
+              no supuesta. */}
+          <fieldset className={s.grupo}>
+            <legend>
+              ¿Desempeña un rol formal de seguridad de aplicaciones en su
+              equipo?
+            </legend>
+            <div className={s.opciones}>
+              {(["si", "no"] as const).map((v) => (
+                <label key={v} className={s.opcion}>
+                  <input
+                    type="radio"
+                    name="rol-seguridad"
+                    value={v}
+                    checked={rolSeguridad === v}
+                    onChange={() => setRolSeguridad(v)}
+                    required
+                  />
+                  <span>{v === "si" ? "Sí" : "No"}</span>
+                </label>
+              ))}
+            </div>
+            {rolSeguridad === "si" && (
+              <p className={s.excluye}>
+                El estudio no incluye a quien tiene un rol formal de seguridad,
+                así que esta alta no se puede completar. Es el criterio de
+                exclusión del apartado 4.4 del protocolo.
+              </p>
+            )}
+          </fieldset>
 
           {/* La ayuda va fuera de la etiqueta y no dentro: dentro, pulsarla
               marcaría la casilla sin querer. */}
