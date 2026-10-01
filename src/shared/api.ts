@@ -310,6 +310,7 @@ export const api = {
     request<{
       access_token: string;
       participant_id: string;
+      session_id: string;
       order: string[];
       first_batch: string;
       second_batch: string;
@@ -478,9 +479,29 @@ export const api = {
       `/api/v1/experiment/batches/${batch}`,
     ),
 
+  /* Cierra la sesión del participante. Lo completo no lo decide el
+     cliente: el servidor lo comprueba contra el lote congelado, de modo
+     que una pantalla cerrada a destiempo no pueda declarar terminado lo
+     que no lo está. */
+  finishSession: (participantId: string, sessionId: string) =>
+    request<{ is_complete: boolean; decided: number; expected: number }>(
+      "/api/v1/experiment/sessions/finish",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          participant_id: participantId,
+          session_id: sessionId,
+        }),
+      },
+    ),
+
+  /* La sesión viaja con cada decisión. Sin ella las respuestas quedaban
+     huérfanas: el análisis sabía quién decidió y bajo qué condición, pero
+     no a qué recorrido pertenecía cada una. */
   decide: (body: {
     finding_id: string;
     participant_id: string;
+    session_id: string;
     value: "confirmado" | "descartado" | "dudoso";
     seconds: number;
     condition: "con_asistente" | "sin_asistente";

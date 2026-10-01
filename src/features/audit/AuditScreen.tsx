@@ -69,6 +69,7 @@ export function AuditScreen() {
   const [params] = useSearchParams();
   const executionId = params.get("execution");
   const participantId = params.get("participant");
+  const sessionId = params.get("session");
   const condicion = params.get("condition");
   const lote = params.get("batch");
   const siguienteCondicion = params.get("next_condition");
@@ -159,10 +160,11 @@ export function AuditScreen() {
          mil alertas y al recargar la página no quedaba nada, mientras el panel
          del historial de al lado salía siempre vacío. */
       const guardar =
-        participantId && condicion
+        participantId && sessionId && condicion
           ? api.decide({
               finding_id: findingId,
               participant_id: participantId,
+              session_id: sessionId,
               value: VALUE[choice],
               seconds,
               condition: condicion as "con_asistente" | "sin_asistente",
@@ -176,7 +178,7 @@ export function AuditScreen() {
         ),
       );
     },
-    [participantId, condicion],
+    [participantId, sessionId, condicion],
   );
 
   if (USE_FIXTURES) {
@@ -258,8 +260,23 @@ export function AuditScreen() {
           ? () =>
               navigate(
                 `/session?execution=${executionId}&participant=${participantId}` +
+                  `&session=${sessionId}` +
                   `&condition=${siguienteCondicion}&batch=${siguienteLote}`,
               )
+          : undefined
+      }
+      /* Al cerrar el último bloque la sesión se declara terminada. Antes
+         no había por dónde: el repositorio sabía cerrarla y ninguna ruta
+         lo pedía, así que el análisis no distinguía a quien recorrió los
+         dos lotes de quien abandonó en el primero. */
+      onFinish={
+        participantId && sessionId && !siguienteCondicion
+          ? () => {
+              api.finishSession(participantId, sessionId).catch(() => {
+                /* No interrumpe el cierre de la pantalla: las decisiones
+                   ya están guardadas y el estado se puede reponer. */
+              });
+            }
           : undefined
       }
     />
@@ -270,6 +287,8 @@ interface SessionProps {
   findings: Finding[];
   /** Presente solo cuando queda una segunda condicion por recorrer. */
   onContinue?: () => void;
+  /** Presente solo en el ultimo bloque: cierra la sesion al terminarlo. */
+  onFinish?: () => void;
   /** Nulo fuera del experimento: entonces la respuesta no se registra. */
   onAnswer?: (findingId: string, choice: Choice, seconds: number) => void;
   /** Fijada por el investigador al preparar la sesión. Sin ella, se puede alternar. */
@@ -294,6 +313,7 @@ export function Session({
   saveError,
   onThemeFixed,
   onContinue,
+  onFinish,
   carril,
   volverA,
 }: SessionProps) {
@@ -313,6 +333,17 @@ export function Session({
   useEffect(() => {
     if (fixedCondition != null) medir();
   }, [fixedCondition, medir]);
+
+  /* El resumen del último bloque es el final de la sesión. Se avisa una sola
+     vez, y no en el botón de cerrar, porque quien participa puede irse sin
+     pulsarlo y la sesión quedaría abierta igual que hasta ahora. */
+  const cerrada = useRef(false);
+  useEffect(() => {
+    if (stage === "summary" && onFinish && !cerrada.current) {
+      cerrada.current = true;
+      onFinish();
+    }
+  }, [stage, onFinish]);
 
   /* Dentro del experimento el tema queda fijado en cuanto empieza la tarea.
      Fuera de él no se toca: quien usa la herramienta en su trabajo elige

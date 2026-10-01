@@ -187,6 +187,7 @@ export function LoginScreen() {
     const [primera, segunda] = r.order;
     navigate(
       `/session?execution=${r.execution_id}&participant=${r.participant_id}` +
+        `&session=${r.session_id}` +
         `&condition=${primera}&batch=${r.first_batch}` +
         `&next_condition=${segunda}&next_batch=${r.second_batch}`,
     );
