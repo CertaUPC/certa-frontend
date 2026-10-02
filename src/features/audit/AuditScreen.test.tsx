@@ -319,3 +319,42 @@ describe("La lista sobrevive a que los hallazgos se actualicen", () => {
     expect(screen.getByText(/Alerta/)).toBeInTheDocument();
   });
 });
+
+
+/* El cierre del ultimo bloque. La sesion ya quedo sellada en el servidor al
+   llegar al resumen, de modo que devolver a las alertas no era solo confuso:
+   una decision mas entraba despues del cierre, y eso dejo dos sesiones
+   completas marcadas como incompletas. */
+describe("Cierre de la sesion entera", () => {
+  function terminar(props: { onExit?: () => void } = {}) {
+    render(
+      <ThemeProvider>
+        <Session findings={[HALLAZGO]} fixedCondition {...props} />
+      </ThemeProvider>,
+    );
+    empezar();
+    /* El boton lleva la tecla del atajo dentro, de modo que su nombre
+       accesible no es solo la etiqueta. */
+    fireEvent.click(screen.getByRole("button", { name: /No, es falsa alarma/ }));
+  }
+
+  it("ofrece salir y no volver a las alertas", () => {
+    terminar({ onExit: () => {} });
+    expect(screen.getByRole("button", { name: "Salir" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Volver a las alertas" })).toBeNull();
+  });
+
+  it("al salir avisa a quien sabe adonde ir", () => {
+    const visitas: number[] = [];
+    terminar({ onExit: () => visitas.push(1) });
+    fireEvent.click(screen.getByRole("button", { name: "Salir" }));
+    expect(visitas).toHaveLength(1);
+  });
+
+  it("sin salida declarada sigue dejando corregir", () => {
+    /* La revision libre no cierra ninguna sesion: ahi volver es correcto. */
+    terminar();
+    expect(screen.getByRole("button", { name: "Volver a las alertas" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Salir" })).toBeNull();
+  });
+});

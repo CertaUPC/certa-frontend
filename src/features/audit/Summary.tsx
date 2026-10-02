@@ -14,9 +14,17 @@ interface Props {
   onReview: () => void;
   /** Presente solo cuando queda una segunda condicion por recorrer. */
   onContinue?: () => void;
+  /** Presente solo al cerrar la sesion entera: saca al acceso. */
+  onExit?: () => void;
 }
 
-export function Summary({ records, total: esperadas, onReview, onContinue }: Props) {
+export function Summary({
+  records,
+  total: esperadas,
+  onReview,
+  onContinue,
+  onExit,
+}: Props) {
   const entries = Object.values(records);
   const total = entries.length;
   const seconds = entries.reduce((a, r) => a + r.seconds, 0);
@@ -43,7 +51,9 @@ export function Summary({ records, total: esperadas, onReview, onContinue }: Pro
           Quedaron registradas {total} de {esperadas} respuestas.{" "}
           {onContinue
             ? "Puedes volver y cambiar cualquiera antes de pasar a la segunda parte."
-            : "Puedes volver y cambiar cualquiera, o cerrar la ventana: ya terminaste."}
+            : onExit
+              ? "Ya terminaste. Tus respuestas quedaron guardadas y la sesión está cerrada."
+              : "Puedes volver y cambiar cualquiera, o cerrar la ventana: ya terminaste."}
         </p>
 
         <dl className={s.facts}>
@@ -76,12 +86,19 @@ export function Summary({ records, total: esperadas, onReview, onContinue }: Pro
         </div>
 
         <div className={s.actions}>
-          <button className={s.back} onClick={onReview}>
-            Volver a las alertas
-          </button>
+          {!onExit && (
+            <button className={s.back} onClick={onReview}>
+              Volver a las alertas
+            </button>
+          )}
           {onContinue && (
             <button className={s.next} onClick={onContinue}>
               Continuar con la segunda parte
+            </button>
+          )}
+          {onExit && (
+            <button className={s.next} onClick={onExit}>
+              Salir
             </button>
           )}
         </div>

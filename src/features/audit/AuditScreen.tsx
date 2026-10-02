@@ -279,6 +279,14 @@ export function AuditScreen() {
             }
           : undefined
       }
+      /* Terminado el ultimo bloque se sale al acceso. Antes el unico boton
+         devolvia a las alertas, de modo que quien participa salia del cierre
+         y volvia al lote que ya habia cerrado. */
+      onExit={
+        participantId && !siguienteCondicion
+          ? () => navigate("/sign-in")
+          : undefined
+      }
     />
   );
 }
@@ -289,6 +297,8 @@ interface SessionProps {
   onContinue?: () => void;
   /** Presente solo en el ultimo bloque: cierra la sesion al terminarlo. */
   onFinish?: () => void;
+  /** Presente solo en el ultimo bloque: saca al acceso en vez de al lote. */
+  onExit?: () => void;
   /** Nulo fuera del experimento: entonces la respuesta no se registra. */
   onAnswer?: (findingId: string, choice: Choice, seconds: number) => void;
   /** Fijada por el investigador al preparar la sesión. Sin ella, se puede alternar. */
@@ -314,11 +324,23 @@ export function Session({
   onThemeFixed,
   onContinue,
   onFinish,
+  onExit,
   carril,
   volverA,
 }: SessionProps) {
   const [stage, setStage] = useState<Stage>("briefing");
   const [index, setIndex] = useState(0);
+  /* La cola nace cerrada en pantalla estrecha y abierta en ancha. Se decide
+     una vez al montar y no se vuelve a imponer: si la persona la abre en el
+     telefono, se queda abierta. */
+  const [colaAbierta, setColaAbierta] = useState(
+    () =>
+      !(
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(max-width: 720px)").matches
+      ),
+  );
   const [records, setRecords] = useState<Record<string, Record_>>({});
   const [lastId, setLastId] = useState<string | null>(null);
   const [assisted, setAssisted] = useState(fixedCondition ?? true);
@@ -484,6 +506,7 @@ export function Session({
         total={findings.length}
         onReview={() => { setIndex(0); setStage("review"); }}
         onContinue={onContinue}
+        onExit={onExit}
       />
     );
   }
@@ -567,10 +590,17 @@ export function Session({
         <nav className={s.queue} aria-label="Alertas por revisar">
           {carril}
 
-          <h2 className={s.queueTitle}>
-            Por revisar
-            <span>Ordenadas por lo que más urge. No se quita ninguna.</span>
-          </h2>
+          {/* Desplegable y no lista suelta: apilada encima del contenido
+              obligaba a recorrer las doce alertas para leer la primera. */}
+          <details
+            className={s.queueBox}
+            open={colaAbierta}
+            onToggle={(e) => setColaAbierta(e.currentTarget.open)}
+          >
+            <summary className={s.queueTitle}>
+              Por revisar
+              <span>Ordenadas por lo que más urge. No se quita ninguna.</span>
+            </summary>
 
           <FindingFilters
             filters={filters}
@@ -620,6 +650,7 @@ export function Session({
               );
             })}
           </ul>
+          </details>
         </nav>
 
         <main className={s.main}>
