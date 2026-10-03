@@ -70,6 +70,9 @@ export function AuditScreen() {
   const executionId = params.get("execution");
   const participantId = params.get("participant");
   const sessionId = params.get("session");
+  /* El codigo anonimo, para que el cierre pueda enseñarselo cuando le
+     pida rellenar el cuestionario. El formulario une por esa columna. */
+  const participantCode = params.get("code");
   const condicion = params.get("condition");
   const lote = params.get("batch");
   const siguienteCondicion = params.get("next_condition");
@@ -260,7 +263,7 @@ export function AuditScreen() {
           ? () =>
               navigate(
                 `/session?execution=${executionId}&participant=${participantId}` +
-                  `&session=${sessionId}` +
+                  `&session=${sessionId}&code=${encodeURIComponent(participantCode ?? "")}` +
                   `&condition=${siguienteCondicion}&batch=${siguienteLote}`,
               )
           : undefined
@@ -287,6 +290,7 @@ export function AuditScreen() {
           ? () => navigate("/sign-in")
           : undefined
       }
+      participantCode={participantCode}
     />
   );
 }
@@ -299,6 +303,8 @@ interface SessionProps {
   onFinish?: () => void;
   /** Presente solo en el ultimo bloque: saca al acceso en vez de al lote. */
   onExit?: () => void;
+  /** El codigo anonimo, que el cierre enseña para el cuestionario. */
+  participantCode?: string | null;
   /** Nulo fuera del experimento: entonces la respuesta no se registra. */
   onAnswer?: (findingId: string, choice: Choice, seconds: number) => void;
   /** Fijada por el investigador al preparar la sesión. Sin ella, se puede alternar. */
@@ -325,6 +331,7 @@ export function Session({
   onContinue,
   onFinish,
   onExit,
+  participantCode,
   carril,
   volverA,
 }: SessionProps) {
@@ -507,6 +514,7 @@ export function Session({
         onReview={() => { setIndex(0); setStage("review"); }}
         onContinue={onContinue}
         onExit={onExit}
+        participantCode={participantCode}
       />
     );
   }

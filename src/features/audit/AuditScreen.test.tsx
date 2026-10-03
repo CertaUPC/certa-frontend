@@ -326,7 +326,9 @@ describe("La lista sobrevive a que los hallazgos se actualicen", () => {
    una decision mas entraba despues del cierre, y eso dejo dos sesiones
    completas marcadas como incompletas. */
 describe("Cierre de la sesion entera", () => {
-  function terminar(props: { onExit?: () => void } = {}) {
+  function terminar(
+    props: { onExit?: () => void; participantCode?: string } = {},
+  ) {
     render(
       <ThemeProvider>
         <Session findings={[HALLAZGO]} fixedCondition {...props} />
@@ -349,6 +351,27 @@ describe("Cierre de la sesion entera", () => {
     terminar({ onExit: () => visitas.push(1) });
     fireEvent.click(screen.getByRole("button", { name: "Salir" }));
     expect(visitas).toHaveLength(1);
+  });
+
+  it("pide el cuestionario antes de dejar salir", () => {
+    /* Es el unico dato del estudio que no se puede recoger despues: nadie
+       puntua la usabilidad de una sesion que hizo hace tres dias. */
+    terminar({ onExit: () => {} });
+    const enlace = screen.getByRole("link", { name: /cuestionario/i });
+    expect(enlace.getAttribute("href")).toContain("forms.gle");
+    expect(enlace.getAttribute("target")).toBe("_blank");
+  });
+
+  it("enseña el codigo que el cuestionario va a pedir", () => {
+    /* El guion que puntua une por esa columna: un codigo escrito de memoria y
+       mal deja el cuestionario huerfano. */
+    terminar({ onExit: () => {}, participantCode: "P-07" });
+    expect(screen.getByText("P-07")).toBeTruthy();
+  });
+
+  it("no pide cuestionario cuando no se cierra la sesion", () => {
+    terminar();
+    expect(screen.queryByRole("link", { name: /cuestionario/i })).toBeNull();
   });
 
   it("sin salida declarada sigue dejando corregir", () => {

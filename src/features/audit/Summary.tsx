@@ -7,6 +7,11 @@
 import { CHOICE_LABEL, type Choice } from "./shortcuts";
 import s from "./Summary.module.css";
 
+/* El cuestionario de cierre. Vive aqui y no en la configuracion porque
+   pertenece al instrumento del estudio, no al despliegue: cambiarlo es
+   cambiar el instrumento, y eso debe constar en el repositorio. */
+const FORMULARIO = "https://forms.gle/WUmsaPg1rFM7rahbA";
+
 interface Props {
   records: Record<string, { choice: Choice; seconds: number }>;
   /** Cuantas alertas traia esta mitad, no cuantas se respondieron. */
@@ -16,6 +21,8 @@ interface Props {
   onContinue?: () => void;
   /** Presente solo al cerrar la sesion entera: saca al acceso. */
   onExit?: () => void;
+  /** El codigo anonimo, que el cuestionario pide en su primera pregunta. */
+  participantCode?: string | null;
 }
 
 export function Summary({
@@ -24,6 +31,7 @@ export function Summary({
   onReview,
   onContinue,
   onExit,
+  participantCode,
 }: Props) {
   const entries = Object.values(records);
   const total = entries.length;
@@ -85,6 +93,35 @@ export function Summary({
           </ul>
         </div>
 
+        {/* Falta un paso, y es el que no se puede reponer despues: la
+            escala de usabilidad solo tiene sentido recien terminada la
+            sesion. Va antes de los botones y con el codigo a la vista,
+            porque el formulario une las respuestas por esa columna. */}
+        {onExit && (
+          <div className={s.cuestionario}>
+            <h2 className={s.h2}>Falta un último paso</h2>
+            <p className={s.lead}>
+              Un cuestionario breve sobre cómo te resultó la herramienta.
+              Son diez preguntas de una línea y dos más, y es la única
+              parte del estudio que no se puede recoger después.
+            </p>
+            {participantCode && (
+              <p className={s.codigo}>
+                Te va a pedir tu código. Es{" "}
+                <b className="mono">{participantCode}</b>.
+              </p>
+            )}
+            <a
+              className={s.next}
+              href={FORMULARIO}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir el cuestionario
+            </a>
+          </div>
+        )}
+
         <div className={s.actions}>
           {!onExit && (
             <button className={s.back} onClick={onReview}>
@@ -97,7 +134,7 @@ export function Summary({
             </button>
           )}
           {onExit && (
-            <button className={s.next} onClick={onExit}>
+            <button className={s.salir} onClick={onExit}>
               Salir
             </button>
           )}
