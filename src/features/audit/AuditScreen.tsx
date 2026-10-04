@@ -447,6 +447,19 @@ export function Session({
     shownAt.current = Date.now();
   }, [index, stage]);
 
+  /* Los segundos que lleva la alerta en pantalla. Se declara despues del
+     efecto que repone el sello, porque los efectos corren en orden y asi al
+     montar el intervalo el sello ya es el de la alerta nueva. */
+  const [enPantalla, setEnPantalla] = useState(0);
+  useEffect(() => {
+    setEnPantalla(0);
+    const tic = window.setInterval(
+      () => setEnPantalla(Math.floor((Date.now() - shownAt.current) / 1000)),
+      1000,
+    );
+    return () => window.clearInterval(tic);
+  }, [index, stage]);
+
   /* Una tecla responde y avanza. La pulsación involuntaria se cubre por otro
      lado: la corrección queda a la vista, y el registro conserva la respuesta
      anterior marcada como no vigente en vez de sobrescribirla. */
@@ -547,6 +560,14 @@ export function Session({
           </span>
           <span className={s.resolved}>{resolved} respondidas</span>
         </div>
+
+        {/* El tiempo de la alerta en curso. Apagado y de ancho fijo: esta
+            ahi para quien lo busque, sin convertir la revision en una carrera.
+            Oculto a la lectura asistida, porque un numero que cambia cada
+            segundo anunciado en voz alta haria la tarea imposible. */}
+        <span className={s.reloj} aria-hidden="true">
+          {enPantalla}s
+        </span>
 
         <div className={s.controls}>
           <button className={s.chip} onClick={() => setHelp(true)}>
