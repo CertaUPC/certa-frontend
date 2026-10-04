@@ -325,6 +325,20 @@ describe("La lista sobrevive a que los hallazgos se actualicen", () => {
    llegar al resumen, de modo que devolver a las alertas no era solo confuso:
    una decision mas entraba despues del cierre, y eso dejo dos sesiones
    completas marcadas como incompletas. */
+/* El contador de la alerta en curso. Se fija porque es un cambio del
+   instrumento: el tiempo por hallazgo es la variable secundaria de OE4-I2, y
+   tenerlo a la vista influye en lo que se mide. Que este o no debe ser una
+   decision explicita y no un accidente de un refactor. */
+describe("Contador de la alerta en curso", () => {
+  it("arranca en cero y no se anuncia en voz alta", () => {
+    pintar(true);
+    empezar();
+    const reloj = screen.getByText("0s");
+    expect(reloj).toBeTruthy();
+    expect(reloj.getAttribute("aria-hidden")).toBe("true");
+  });
+});
+
 describe("Cierre de la sesion entera", () => {
   function terminar(
     props: { onExit?: () => void; participantCode?: string } = {},

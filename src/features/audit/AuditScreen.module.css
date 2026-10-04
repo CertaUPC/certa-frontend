@@ -402,3 +402,18 @@
   .queueBox[open] > summary { margin-block-end: 10px; }
   .queueBox[open] > summary::after { content: "ocultar"; }
 }
+
+/* ── El contador de la alerta en curso ────────────────────────────── */
+/* Ancho fijo y cifras de ancho tabular para que al pasar de 9 a 10 no empuje
+   a los atajos. Apagado porque el tiempo por hallazgo es lo que se mide: que
+   este a la vista ya influye, y que llame la atencion influiria mas. */
+.reloj {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  opacity: 0.5;
+  font-variant-numeric: tabular-nums;
+  min-inline-size: 30px;
+  text-align: end;
+  white-space: nowrap;
+  flex: none;
+}
