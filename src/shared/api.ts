@@ -400,14 +400,13 @@ export const api = {
 
   projects: () => request<Project[]>("/api/v1/projects"),
 
-  createProject: (name: string, repositoryPath: string, language = "java") =>
+  /* Sin ruta de repositorio: quien abre los archivos es el trabajador, que
+     corre donde el código vive y los resuelve contra su REPOSITORY_ROOT.
+     Pedirla aquí prometía que el sistema iría a buscarla ahí. */
+  createProject: (name: string, language = "java") =>
     request<Project>("/api/v1/projects", {
       method: "POST",
-      body: JSON.stringify({
-        name,
-        repository_path: repositoryPath,
-        language,
-      }),
+      body: JSON.stringify({ name, language }),
     }),
 
   members: (projectId: string) =>

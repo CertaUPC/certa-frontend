@@ -94,6 +94,35 @@ export function ProjectsScreen() {
   );
 }
 
+/* El identificador hay que pasarlo a mano a la consola del trabajador, y es
+   un UUID: teclearlo es pedir una errata. El botón lo copia y lo dice, porque
+   un clic sin respuesta deja a cualquiera dudando de si funcionó. */
+function CopiarId({ id }: { id: string }) {
+  const [copiado, setCopiado] = useState(false);
+
+  async function copiar() {
+    try {
+      await navigator.clipboard.writeText(id);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      /* Sin permiso de portapapeles queda el texto a la vista para
+         seleccionarlo, que es lo que se hacía antes de que existiera. */
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className={s.copiar}
+      onClick={copiar}
+      aria-label={`Copiar el identificador del proyecto ${id}`}
+    >
+      {copiado ? "copiado" : "copiar"}
+    </button>
+  );
+}
+
 function Ficha({
   proyecto,
   abierto,
@@ -110,9 +139,11 @@ function Ficha({
       <div className={s.fichaTop}>
         <div className={s.fichaQue}>
           <h2 className={s.nombre}>{proyecto.name}</h2>
+          {/* El identificador, no la ruta: es lo que hay que darle al
+              trabajador para que tome las ejecuciones de este proyecto. */}
           <p className={s.ruta}>
-            <Glyph figura="carpeta" tam={13} />
-            <span className="mono">{proyecto.repository_path}</span>
+            <span className="mono">{proyecto.id}</span>
+            <CopiarId id={proyecto.id} />
           </p>
           {/* El rótulo solo no dice nada a quien no viene de investigación, y
               la explicación al lado cuesta una línea. */}
@@ -180,7 +211,6 @@ function Nuevo({
   onCreado: () => void;
 }) {
   const [nombre, setNombre] = useState("");
-  const [ruta, setRuta] = useState("");
   // Fijo mientras solo haya un lenguaje con conjuntos de verdad conocida.
   const lenguaje = "java";
   const [error, setError] = useState<string | null>(null);
@@ -194,10 +224,9 @@ function Nuevo({
     setHecho(null);
     setTrabajando(true);
     try {
-      const p = await api.createProject(nombre.trim(), ruta.trim(), lenguaje);
+      const p = await api.createProject(nombre.trim(), lenguaje);
       setHecho(p.name);
       setNombre("");
-      setRuta("");
       /* La barra tiene su propia lista de proyectos, cargada al entrar. Sin
          este aviso, el recién creado no estaba en ella: pedir sus ejecuciones
          caía al primero de la lista y la pantalla enseñaba otro proyecto. */
@@ -232,21 +261,6 @@ function Nuevo({
             maxLength={200}
             required
           />
-        </label>
-
-        <label className={s.campo}>
-          <span>Ruta del repositorio</span>
-          <input
-            className="mono"
-            value={ruta}
-            onChange={(e) => setRuta(e.target.value)}
-            placeholder="/repos/portal"
-            required
-          />
-          <small>
-            La carpeta donde está el código fuente. De ahí se lee el fragmento
-            que acompaña a cada alerta.
-          </small>
         </label>
 
         {/* Un desplegable con una sola opción promete una elección que no

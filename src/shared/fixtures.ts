@@ -9,7 +9,7 @@ import type { Figura } from "./Glyph";
 
 export const PROJECTS: Project[] = [
   {
-    id: "p1",
+    id: "9f4c1e2a-7b03-4d58-9a61-2c8ef5d07b14",
     name: "OWASP Benchmark",
     language: "java",
     repository_path: "/repos/owasp-benchmark",
@@ -18,7 +18,7 @@ export const PROJECTS: Project[] = [
     created_at: "2026-09-01T09:00:00Z",
   },
   {
-    id: "p2",
+    id: "c21a7d60-5e84-4f19-b3d2-6a0f8c47e9b5",
     name: "Juliet Test Suite, CWE-89",
     language: "java",
     repository_path: "/repos/juliet-cwe89",
@@ -32,7 +32,7 @@ export const EXECUTIONS: Execution[] = [
   {
     id: "7f3a2b10",
     label: "Corrida de referencia, reglas 1.95",
-    project_id: "p1",
+    project_id: "9f4c1e2a-7b03-4d58-9a61-2c8ef5d07b14",
     project_name: "OWASP Benchmark",
     tool_name: "semgrep",
     ruleset_version: "1.95.0",
@@ -52,7 +52,7 @@ export const EXECUTIONS: Execution[] = [
   {
     id: "c81d94f2",
     label: "Primer barrido de CWE-89",
-    project_id: "p2",
+    project_id: "c21a7d60-5e84-4f19-b3d2-6a0f8c47e9b5",
     project_name: "Juliet Test Suite, CWE-89",
     tool_name: "semgrep",
     ruleset_version: "1.95.0",
@@ -72,7 +72,7 @@ export const EXECUTIONS: Execution[] = [
   {
     id: "a4e077bc",
     label: "Prueba con presupuesto corto",
-    project_id: "p1",
+    project_id: "9f4c1e2a-7b03-4d58-9a61-2c8ef5d07b14",
     project_name: "OWASP Benchmark",
     tool_name: "semgrep",
     ruleset_version: "1.94.0",

@@ -61,7 +61,6 @@ export function IngestScreen() {
 
   const [otroCwe, setOtroCwe] = useState("");
   const [nuevoNombre, setNuevoNombre] = useState("");
-  const [nuevaRuta, setNuevaRuta] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [nombre, setNombre] = useState("");
   const [severity, setSeverity] = useState("");
@@ -73,10 +72,7 @@ export function IngestScreen() {
 
     let destino = projectId;
     if (destino === NUEVO) {
-      const creado = await api.createProject(
-        nuevoNombre.trim(),
-        nuevaRuta.trim() || nuevoNombre.trim(),
-      );
+      const creado = await api.createProject(nuevoNombre.trim());
       destino = creado.id;
       // Igual que al crearlo desde Proyectos: la barra tiene su lista propia
       // y el recién creado no está en ella hasta que vuelve a preguntar.
@@ -206,27 +202,17 @@ export function IngestScreen() {
                   placeholder="OWASP Benchmark"
                 />
               </label>
-              <label className={s.field}>
-                <span>Ruta del repositorio</span>
-                <input
-                  className={s.input}
-                  value={nuevaRuta}
-                  onChange={(e) => setNuevaRuta(e.target.value)}
-                  placeholder="/repos/owasp-benchmark"
-                />
-              </label>
               <p className={s.note}>
-                La ruta identifica al proyecto. Si repites una, se reusa el
-                proyecto que ya existe en vez de duplicarlo.
+                El nombre identifica al proyecto dentro de tu cuenta. Si
+                repites uno, se reusa el que ya existe en vez de duplicarlo.
               </p>
               <p className={s.note}>
                 <b>Dónde tiene que estar el código.</b> Quien analiza no es
                 esta pantalla sino un proceso aparte, que lee los archivos de
-                su propio disco. Si corres Certa en tu máquina, pon la ruta
-                absoluta de tu copia del repositorio. Si usas el servicio
-                desplegado, tiene que ser una carpeta que ese proceso tenga
-                delante; si no la encuentra, la ejecución vuelve a la cola y lo
-                dice con la ruta exacta que intentó.
+                su propio disco. Esa carpeta se le indica a él al arrancarlo,
+                junto con el identificador del proyecto, que aparece en su
+                ficha. Si no encuentra un archivo, la ejecución lo dice con la
+                ruta exacta que intentó.
               </p>
             </>
           )}
