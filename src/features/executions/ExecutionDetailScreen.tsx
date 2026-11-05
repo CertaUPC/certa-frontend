@@ -261,6 +261,19 @@ export function ExecutionDetailScreen() {
               <span className={s.datoQue}>Cargada</span>
               {cuando(execution.created_at)}
             </span>
+            {/* El total se leía como todo lo que el analizador encontró,
+                cuando puede ser lo que quedó después de acotar. */}
+            {execution.scope_text && execution.scope_text !== "sin acotar" && (
+              <span className={s.dato}>
+                <span className={s.datoQue}>Alcance</span>
+                {execution.scope_text}
+                <Hint termino="el alcance">
+                  Al cargar el archivo se pueden dejar fuera categorías o
+                  severidades. Las cifras de abajo son de lo que entró, no de
+                  todo lo que el analizador encontró.
+                </Hint>
+              </span>
+            )}
           </p>
         </div>
         <div className={s.headActions}>

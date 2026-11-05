@@ -139,6 +139,11 @@ export interface Execution {
   tool_name: string;
   ruleset_version: string;
   status: ExecutionStatus;
+  /* Con qué alcance se cargó. Sin esto el total se lee como si fuera todo lo
+     que el analizador encontró. */
+  scope_cwes: string[];
+  scope_min_severity: string | null;
+  scope_text: string;
   /* El nombre que le puso quien la cargó. Ocho caracteres de un UUID no le
      dicen nada a nadie: sin esto, encontrar una corrida entre varias es
      cuestión de abrirlas una por una. */
@@ -192,6 +197,10 @@ export interface Project {
   repository_path: string;
   is_public_dataset: boolean;
   execution_count: number;
+  /* La última corrida y cuándo entró. La ficha decía cuántas había y no si
+     alguna era de esta semana o de hace tres meses. */
+  last_execution_label: string | null;
+  last_execution_at: string | null;
   created_at: string;
 }
 

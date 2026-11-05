@@ -97,6 +97,14 @@ export function ProjectsScreen() {
 /* El identificador hay que pasarlo a mano a la consola del trabajador, y es
    un UUID: teclearlo es pedir una errata. El botón lo copia y lo dice, porque
    un clic sin respuesta deja a cualquiera dudando de si funcionó. */
+function fechaCorta(iso: string) {
+  return new Date(iso).toLocaleDateString("es-PE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function CopiarId({ id }: { id: string }) {
   const [copiado, setCopiado] = useState(false);
 
@@ -165,6 +173,13 @@ function Ficha({
             <b className="mono">{cuenta}</b>{" "}
             {cuenta === 1 ? "ejecución" : "ejecuciones"}
           </span>
+          {/* Cuántas había no dice si el proyecto sigue vivo. La última y su
+              fecha, sí, y es lo que el criterio pide del listado. */}
+          {proyecto.last_execution_at && (
+            <span className={s.dato} title={proyecto.last_execution_label ?? ""}>
+              última: {fechaCorta(proyecto.last_execution_at)}
+            </span>
+          )}
           {/* El lenguaje con su dibujo: la etiqueta decía «java» en
               minúscula y parecía una extensión de archivo. */}
           <span className={`${s.dato} ${s.lenguaje}`}>
