@@ -844,6 +844,20 @@ export function Session({
                 </div>
               )}
 
+              {/* Cuando el veredicto se resolvió por huella, en lugar de volver
+                  a consultar, viene de otra corrida. Nombrar cuál deja ver que
+                  el juicio no se pagó dos veces y de dónde salió. */}
+              {finding.reusedFrom && (
+                <div className={s.row}>
+                  <span className={s.rowLabel}>Reutilizado</span>
+                  <p className={s.plain}>
+                    Este veredicto se tomó de la corrida{" "}
+                    <b>{finding.reusedFrom}</b>, sin volver a consultar al
+                    modelo.
+                  </p>
+                </div>
+              )}
+
               {/* Sin razón no hay fila. El orden se calcula al recorrer la
                   ejecución entera, y una corrida que solo emitió veredictos
                   deja el campo vacío: la pantalla enseñaba el rótulo con nada

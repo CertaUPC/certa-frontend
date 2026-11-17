@@ -250,6 +250,8 @@ export interface ApiVerdict {
   anchor_verified: boolean;
   attempts: number;
   reused: boolean;
+  reused_from_execution: string | null;
+  reused_from_label: string | null;
   justification: string | null;
   cited_lines: number[];
 }

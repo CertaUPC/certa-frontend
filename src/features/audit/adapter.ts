@@ -107,6 +107,7 @@ export function toFinding(f: ApiFinding, ctx: ApiContext | null): Finding {
     anchored: v?.anchor_verified ?? false,
     attempts: v?.attempts ?? 0,
     citedCount: v?.cited_lines.length ?? 0,
+    reusedFrom: v?.reused ? v.reused_from_label ?? "otra corrida" : null,
     stability: f.stability ?? null,
     priorityReason: f.priority_reason ?? "",
     code: texto ? stripLineNumbers(texto) : "",

@@ -31,6 +31,7 @@ const HALLAZGO: Finding = {
   anchored: true,
   attempts: 1,
   citedCount: 1,
+  reusedFrom: null,
   stability: { agree: 3, runs: 3 },
   priorityReason: "Es lo primero por severidad y anclaje",
   code: "String sql = \"SELECT \" + p;",

@@ -24,6 +24,9 @@ export interface Finding {
   anchored: boolean;
   attempts: number;
   citedCount: number;
+  /* La corrida de la que se reutilizó este veredicto, cuando se resolvió por
+     huella en lugar de volver a consultar. Vacío cuando se juzgó aquí mismo. */
+  reusedFrom: string | null;
   /** Veredicto igual en cuántas de cuántas corridas con parámetros idénticos. */
   /** Nulo cuando el servicio no informó repeticiones: no se inventa un valor. */
   stability: { agree: number; runs: number } | null;
@@ -86,6 +89,7 @@ export const FINDINGS: Finding[] = [
     anchored: true,
     attempts: 1,
     citedCount: 3,
+    reusedFrom: null,
     stability: { agree: 3, runs: 3 },
     priorityReason: "Parece real, el modelo está muy seguro y la regla es de severidad alta",
     code: JAVA_SQLI,
@@ -116,6 +120,7 @@ export const FINDINGS: Finding[] = [
     anchored: false,
     attempts: 2,
     citedCount: 0,
+    reusedFrom: null,
     stability: { agree: 2, runs: 3 },
     priorityReason: "Nadie pudo justificarlo, así que sube por precaución",
     code: JAVA_XML,
@@ -142,6 +147,7 @@ export const FINDINGS: Finding[] = [
     anchored: true,
     attempts: 1,
     citedCount: 2,
+    reusedFrom: null,
     stability: { agree: 3, runs: 3 },
     priorityReason: "El modelo lo descartó con buena confianza, así que baja en la lista",
     code: JAVA_SAFE,

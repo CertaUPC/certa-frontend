@@ -42,6 +42,7 @@ const ANCLADO: Finding = {
   anchored: true,
   attempts: 1,
   citedCount: 3,
+  reusedFrom: null,
   stability: { agree: 3, runs: 3 },
   priorityReason: "Es lo primero por severidad y anclaje",
   code: CODIGO,
