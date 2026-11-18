@@ -48,7 +48,7 @@ export function ForgotPasswordScreen() {
         </div>
 
         {enviado ? (
-          <>
+          <div className={s.body}>
             <h1 className={login.title}>Revisa tu correo</h1>
             <p className={s.ok}>
               Si <b>{email}</b> tiene una cuenta, te enviamos un enlace para
@@ -57,9 +57,9 @@ export function ForgotPasswordScreen() {
             <p className={s.foot}>
               <Link to="/sign-in">Volver a iniciar sesión</Link>
             </p>
-          </>
+          </div>
         ) : (
-          <form onSubmit={submit} noValidate>
+          <form className={s.body} onSubmit={submit} noValidate>
             <h1 className={login.title}>Restablecer contraseña</h1>
             <p className={login.lede}>
               Te enviaremos un enlace a tu correo para crear una nueva.

@@ -54,7 +54,7 @@ export function ResetPasswordScreen() {
         </div>
 
         {!token ? (
-          <>
+          <div className={s.body}>
             <h1 className={login.title}>Enlace inválido</h1>
             <p className={login.lede}>
               Al enlace le falta el token. Pide uno nuevo desde «Olvidé mi
@@ -63,9 +63,9 @@ export function ResetPasswordScreen() {
             <p className={s.foot}>
               <Link to="/olvide">Pedir un enlace nuevo</Link>
             </p>
-          </>
+          </div>
         ) : hecho ? (
-          <>
+          <div className={s.body}>
             <h1 className={login.title}>Listo</h1>
             <p className={s.ok}>
               Tu contraseña quedó cambiada. Ya puedes entrar con la nueva.
@@ -73,9 +73,9 @@ export function ResetPasswordScreen() {
             <p className={s.foot}>
               <Link to="/sign-in">Iniciar sesión</Link>
             </p>
-          </>
+          </div>
         ) : (
-          <form onSubmit={submit} noValidate>
+          <form className={s.body} onSubmit={submit} noValidate>
             <h1 className={login.title}>Nueva contraseña</h1>
             <p className={login.lede}>Elige una contraseña para tu cuenta.</p>
             <label className={login.field}>

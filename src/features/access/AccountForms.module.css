@@ -28,6 +28,13 @@
   font-size: 18px;
 }
 
+/* El espaciado de los campos y textos: los reusa de LoginScreen, que depende
+   de que el contenedor ponga este gap. */
+.body {
+  display: grid;
+  gap: 14px;
+}
+
 .headFin {
   margin-left: auto;
   display: flex;
@@ -57,7 +64,7 @@
 }
 
 .foot {
-  margin-top: 18px;
+  margin: 4px 0 0;
   font-size: 14px;
   color: var(--ink-2);
 }

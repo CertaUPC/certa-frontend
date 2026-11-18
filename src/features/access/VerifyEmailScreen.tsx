@@ -59,22 +59,22 @@ export function VerifyEmailScreen() {
           </div>
         )}
         {estado === "ok" && (
-          <>
+          <div className={s.body}>
             <h1 className={login.title}>Correo verificado</h1>
             <p className={s.ok}>Tu correo quedó confirmado. Gracias.</p>
             <p className={s.foot}>
               <Link to="/sign-in">Iniciar sesión</Link>
             </p>
-          </>
+          </div>
         )}
         {estado === "error" && (
-          <>
+          <div className={s.body}>
             <h1 className={login.title}>No se pudo verificar</h1>
             <p className={login.error}>{error}</p>
             <p className={s.foot}>
               <Link to="/sign-in">Volver a iniciar sesión</Link>
             </p>
-          </>
+          </div>
         )}
       </div>
     </div>
