@@ -22,7 +22,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ApiError,
   USE_FIXTURES,
@@ -417,6 +417,13 @@ export function LoginScreen() {
           </button>
 
           <div className={s.foot}>
+            {camino === "equipo" && modo === "entrar" && (
+              <p className={s.switch}>
+                <Link to="/olvide" className={s.linkish}>
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </p>
+            )}
             {camino === "equipo" && (
               <p className={s.switch}>
                 {modo === "entrar" ? "¿Primera vez aquí?" : "¿Ya tienes cuenta?"}{" "}

@@ -128,6 +128,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/* Igual que request, pero para respuestas sin cuerpo (204). */
+async function requestVoid(path: string, init?: RequestInit): Promise<void> {
+  if (!BASE) {
+    throw new ApiError(
+      0,
+      "Esta compilación no tiene configurada la dirección del servicio. " +
+        "Falta VITE_API_URL en el entorno de construcción.",
+    );
+  }
+  const token = getToken();
+  const res = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...init?.headers,
+    },
+  });
+  if (!res.ok) {
+    let detalle = `El servicio respondió ${res.status}`;
+    try {
+      const cuerpo = await res.json();
+      if (cuerpo?.detail) detalle = String(cuerpo.detail);
+    } catch { /* la respuesta no traía cuerpo interpretable */ }
+    throw new ApiError(res.status, detalle);
+  }
+}
+
 /* ── formas de respuesta, espejo de los esquemas del servicio ───────── */
 
 export type ExecutionStatus = "pendiente" | "en_proceso" | "completada" | "fallida";
@@ -310,6 +338,40 @@ export const api = {
     request<{ id: string; email: string; role: Role }>("/api/v1/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+    }),
+
+  /* Correo de cuenta. El de olvido responde siempre igual, exista la cuenta o
+     no, para no delatar qué correos están registrados. */
+  forgotPassword: (email: string) =>
+    request<{ message: string }>("/api/v1/auth/password/forgot", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (token: string, newPassword: string) =>
+    requestVoid("/api/v1/auth/password/reset", {
+      method: "POST",
+      body: JSON.stringify({ token, new_password: newPassword }),
+    }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    requestVoid("/api/v1/auth/password/change", {
+      method: "POST",
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    }),
+
+  verifyEmail: (token: string) =>
+    requestVoid("/api/v1/auth/verify", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  requestVerification: () =>
+    request<{ message: string }>("/api/v1/auth/verify/request", {
+      method: "POST",
     }),
 
   /* La entrada del participante a su sesión, con el código que quien dirige

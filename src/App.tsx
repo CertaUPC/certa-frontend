@@ -8,6 +8,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuditScreen } from "./features/audit/AuditScreen";
 import { LoginScreen } from "./features/access/LoginScreen";
+import { ForgotPasswordScreen } from "./features/access/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "./features/access/ResetPasswordScreen";
+import { VerifyEmailScreen } from "./features/access/VerifyEmailScreen";
 import { ExecutionsScreen } from "./features/executions/ExecutionsScreen";
 import { CompareScreen } from "./features/executions/CompareScreen";
 import { ExecutionDetailScreen } from "./features/executions/ExecutionDetailScreen";
@@ -37,6 +40,11 @@ export function App() {
   return (
     <Routes>
       <Route path="/sign-in" element={<LoginScreen />} />
+      {/* Enlaces de correo de cuenta. Públicos: el token del enlace es la
+          autorización, y quien llega aquí todavía no tiene sesión. */}
+      <Route path="/olvide" element={<ForgotPasswordScreen />} />
+      <Route path="/restablecer" element={<ResetPasswordScreen />} />
+      <Route path="/verificar" element={<VerifyEmailScreen />} />
 
       {/* Flujo del participante: sin armazón. */}
       <Route path="/session" element={<AuditScreen />} />
